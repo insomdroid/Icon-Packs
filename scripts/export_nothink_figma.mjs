@@ -6,7 +6,7 @@ import { parseFig, nodeId } from "openfig-core";
 
 const input = process.argv[2] ?? "references/kitkat-archives/App & Brand Icons Pack (Community).fig";
 const output = process.argv[3] ?? "build/nothink-figma-export";
-await mkdir(output, { recursive: true });
+await mkdir(output, { recursive: true });\nconsole.log("FIGMA_SOURCE=" + input);
 
 const bytes = new Uint8Array(await readFile(input));
 const parsed = parseFig(bytes);

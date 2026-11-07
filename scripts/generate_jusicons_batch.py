@@ -26,7 +26,6 @@ CATALOG = [
 ("Google","Phone","com.google.android.dialer"),
 ("Google","Messages","com.google.android.apps.messaging"),
 ("Google","Meet","com.google.android.apps.meetings"),
-("Google","Google Meet (Duo)","com.google.android.apps.tachyon"),
 ("Google","Translate","com.google.android.apps.translate"),
 ("Google","Keep","com.google.android.keep"),
 ("Google","Authenticator","com.google.android.apps.authenticator2"),

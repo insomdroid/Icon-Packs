@@ -1,34 +1,106 @@
 package com.insomdroid.iconpacks.nothink2
 
-import android.app.Activity
 import android.os.Bundle
-import android.widget.TextView
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-class PackInfoActivity : Activity() {
+class PackInfoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val content = """
-            Nothink2
+        setContent {
+            MaterialTheme(
+                colorScheme = darkColorScheme(
+                    background = Color(0xFF101010),
+                    surface = Color(0xFF171717),
+                    onBackground = Color(0xFFF5F5F5),
+                    onSurface = Color(0xFFF5F5F5)
+                )
+            ) {
+                Nothink2InfoScreen()
+            }
+        }
+    }
+}
 
-            Lawnicons artwork with a restrained Nothing OS 5.0 dark presentation.
-
-            Apply classic icons:
-            1. Open your launcher settings.
-            2. Open Icon Pack / Icon Style.
-            3. Choose Nothink2.
-
-            Enable Themed Icons in Android and your launcher to use wallpaper-derived colors.
-            Icon shape is controlled by your launcher and follows its selected device shape.
-
-            Artwork source: Lawnicons (Apache-2.0).
-        """.trimIndent()
-        setContentView(TextView(this).apply {
-            text = content
-            textSize = 16f
-            setTextColor(0xFFF5F5F5.toInt())
-            setBackgroundColor(0xFF101010.toInt())
-            setLineSpacing(7f, 1f)
-            setPadding(32, 48, 32, 32)
-        })
+@Composable
+private fun Nothink2InfoScreen() {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFF101010)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 28.dp, vertical = 36.dp),
+            verticalArrangement = Arrangement.Top
+        ) {
+            Text(
+                text = "Nothink2",
+                fontSize = 30.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFFFFFFFF)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Lawnicons artwork with a restrained Nothing OS 5.0 dark presentation.",
+                fontSize = 15.sp,
+                lineHeight = 23.sp,
+                color = Color(0xFFCCCCCC)
+            )
+            Spacer(modifier = Modifier.height(28.dp))
+            Text(
+                text = "APPLY ICONS",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFFFFFFF)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "1. Open your launcher settings.\n2. Open Icon Pack or Icon Style.\n3. Choose Nothink2.",
+                fontSize = 15.sp,
+                lineHeight = 25.sp,
+                color = Color(0xFFCCCCCC)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "THEMED ICONS",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFFFFFFF)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Enable Themed Icons in Android and in a compatible launcher to use wallpaper-derived colors. Icon shape follows the shape selected in your launcher.",
+                fontSize = 15.sp,
+                lineHeight = 23.sp,
+                color = Color(0xFFCCCCCC)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "Artwork source: Lawnicons (Apache-2.0). Nothink2 is an independent, unofficial project.",
+                fontSize = 12.sp,
+                lineHeight = 19.sp,
+                color = Color(0xFF888888)
+            )
+        }
     }
 }

@@ -23,7 +23,7 @@ CANVAS = ICON_SIZE * SCALE
 MIN_MAPPINGS = 3000
 BACKGROUND = (0, 0, 0, 0)
 GLYPH = (255, 255, 255, 255)
-TRANSPARENT = (0, 0, 0, 0)
+TRANSPARENT = (255, 255, 255, 0)
 STROKE = 12 * SCALE
 
 # Semantic families deliberately use pictograms, never generated initials.

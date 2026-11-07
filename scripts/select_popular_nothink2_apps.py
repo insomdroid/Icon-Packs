@@ -1,24 +1,20 @@
 #!/usr/bin/env python3
-"""Select 1,000 Lawnicons-supported apps from Google Play public chart pages."""
+"""Select popular Lawnicons-supported apps using the maintained Google Play scraper CLI."""
 
 import argparse
+import json
 import re
+import subprocess
 import sys
-import time
 import xml.etree.ElementTree as ET
 from collections import defaultdict
-from html import unescape
-from html.parser import HTMLParser
 from pathlib import Path
-from urllib.error import HTTPError, URLError
-from urllib.parse import parse_qs, urlparse
-from urllib.request import Request, urlopen
 
 
 PACKAGE_RE = re.compile(r"^[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+$")
 CHARTS = (
-    ("topselling_free", "Top Free"),
-    ("topgrossing", "Top Grossing"),
+    ("TOP_FREE", "Top Free"),
+    ("GROSSING", "Top Grossing"),
 )
 CATEGORIES = ("APPLICATION", "GAME")
 COUNTRIES = ("id", "us", "in", "gb")
@@ -29,68 +25,52 @@ def package_from_component(component):
     return match.group(1) if match else None
 
 
-class ChartPackageParser(HTMLParser):
-    """Collect package IDs exposed by Google Play chart cards."""
-
-    def __init__(self):
-        super().__init__(convert_charrefs=True)
-        self.packages = []
-        self.seen = set()
-
-    def add(self, value):
-        if not value:
-            return
-        value = unescape(value).strip()
-        if PACKAGE_RE.fullmatch(value) and value not in self.seen:
-            self.seen.add(value)
-            self.packages.append(value)
-
-    def handle_starttag(self, tag, attrs):
-        values = dict(attrs)
-        self.add(values.get("data-docid"))
-        self.add(values.get("data-item-id"))
-
-        href = values.get("href", "")
-        if href:
-            parsed = urlparse(href)
-            for package in parse_qs(parsed.query).get("id", []):
-                self.add(package)
-
-
 def fetch_chart(country, category, collection):
-    url = (
-        "https://play.google.com/store/apps/collection/"
-        f"{collection}?hl=en&gl={country.upper()}&category={category}"
+    command = [
+        "google-play-scraper",
+        "list",
+        "--collection", collection,
+        "--category", category,
+        "--num", "200",
+        "--country", country,
+        "--lang", "en",
+        "--throttle", "1",
+    ]
+    result = subprocess.run(
+        command,
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=180,
     )
-    request = Request(
-        url,
-        headers={
-            "User-Agent": (
-                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-            ),
-            "Accept-Language": "en-US,en;q=0.9",
-        },
-    )
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError as error:
+        raise RuntimeError(
+            f"Scraper returned invalid JSON: {result.stdout[:500]!r}"
+        ) from error
 
-    last_error = None
-    for attempt in range(3):
-        try:
-            with urlopen(request, timeout=30) as response:
-                html = response.read().decode("utf-8", errors="replace")
-            parser = ChartPackageParser()
-            parser.feed(html)
-            if not parser.packages:
-                raise RuntimeError(
-                    "Google Play returned a page but no chart package IDs were found"
-                )
-            return parser.packages
-        except (HTTPError, URLError, TimeoutError, RuntimeError) as error:
-            last_error = error
-            if attempt < 2:
-                time.sleep(2 ** attempt)
+    if not isinstance(payload, list):
+        raise RuntimeError(
+            f"Expected a JSON list, received {type(payload).__name__}"
+        )
 
-    raise RuntimeError(f"Unable to read chart {url}: {last_error}")
+    packages = []
+    seen = set()
+    for item in payload:
+        if not isinstance(item, dict):
+            continue
+        package = item.get("appId") or item.get("app_id")
+        if isinstance(package, str) and PACKAGE_RE.fullmatch(package):
+            if package not in seen:
+                seen.add(package)
+                packages.append(package)
+
+    if not packages:
+        raise RuntimeError(
+            f"Scraper returned {len(payload)} chart rows but no valid app IDs"
+        )
+    return packages
 
 
 def main():

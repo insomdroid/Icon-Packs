@@ -87,8 +87,8 @@ jobs:
           test -s "pack-nothing/src/main/res/drawable/ic_pack_foreground.xml"
           test -s "pack-nothing/src/main/res/drawable/ic_pack_monochrome.xml"
           MAPPINGS="$(grep -c '<item component=' pack-nothing/src/main/res/xml/appfilter.xml)"
-          ARTWORK="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.webp' ! -name 'themed_*' | wc -l)"
-          ARTWORK_BYTES="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.webp' ! -name 'themed_*' -printf '%s\n' | awk '{ total += $1 } END { printf "%d", total }')"
+          ARTWORK="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name 'art_*.webp' | wc -l)"
+          ARTWORK_BYTES="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name 'art_*.webp' -printf '%s\\n' | awk '{ total += $1 } END { printf \"%d\", total }')"ntf '%s\n' | awk '{ total += $1 } END { printf "%d", total }')"
           SAMPLE_DRAWABLE="$(python - <<'PY'
           import hashlib
           import xml.etree.ElementTree as ET

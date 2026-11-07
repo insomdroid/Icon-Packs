@@ -128,9 +128,15 @@ jobs:
               item.attrib["drawable"].removeprefix("@drawable/")
               for item in grayscale_map.findall("icon")
           }
-          missing_grayscale = sorted(mapped - grayscale_drawables)
+          missing_grayscale = sorted(
+              name for name in grayscale_drawables
+              if not (res / "drawable-nodpi" / f"{name}.webp").is_file()
+          )
+          unlisted_grayscale = sorted(grayscale_drawables - indexed)
           if missing_grayscale:
-              raise SystemExit(f"Mapped icons missing from grayscale theme map: {missing_grayscale[:10]}")
+              raise SystemExit(f"Grayscale theme map references missing artwork: {missing_grayscale[:10]}")
+          if unlisted_grayscale:
+              raise SystemExit(f"Grayscale theme map references unindexed artwork: {unlisted_grayscale[:10]}")
           for path in normal:
               image_file = Image.open(path)
               if image_file.format != "WEBP":

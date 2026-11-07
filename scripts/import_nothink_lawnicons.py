@@ -21,9 +21,8 @@ ICON_SIZE = 192
 SCALE = 3
 CANVAS = ICON_SIZE * SCALE
 MIN_MAPPINGS = 3000
-BACKGROUND = (10, 12, 13, 255)
-WHITE = (246, 247, 244, 255)
-RED = (238, 45, 52, 255)
+BACKGROUND = (0, 0, 0, 0)
+WHITE = (255, 255, 255, 255)
 TRANSPARENT = (0, 0, 0, 0)
 STROKE = 12 * SCALE
 
@@ -83,7 +82,55 @@ def q(value: float) -> int:
     return int(round(value * SCALE))
 
 
-def draw_symbol(draw: ImageDraw.ImageDraw, family: str, digest: bytes, include_accents: bool = True) -> None:
+def draw_benchmark(draw: ImageDraw.ImageDraw, drawable: str) -> bool:
+    """Individually authored benchmark marks on the shared conceptual grid."""
+    white = WHITE
+    if drawable == "generic_camera":
+        draw.rounded_rectangle((q(31), q(57), q(161), q(147)), radius=q(17), outline=white, width=q(5))
+        draw.rounded_rectangle((q(53), q(42), q(91), q(62)), radius=q(6), fill=white)
+        draw.ellipse((q(70), q(73), q(122), q(125)), outline=white, width=q(5))
+        draw.ellipse((q(87), q(90), q(105), q(108)), fill=white)
+        return True
+    if drawable == "google_phone":
+        draw.arc((q(37), q(35), q(155), q(160)), 38, 322, fill=white, width=q(11))
+        draw.rounded_rectangle((q(35), q(37), q(69), q(78)), radius=q(10), fill=white)
+        draw.rounded_rectangle((q(123), q(119), q(158), q(158)), radius=q(10), fill=white)
+        return True
+    if drawable == "google_chrome":
+        draw.ellipse((q(32), q(32), q(160), q(160)), outline=white, width=q(7))
+        draw.ellipse((q(75), q(75), q(117), q(117)), outline=white, width=q(7))
+        draw.line((q(96), q(96), q(151), q(96)), fill=white, width=q(7))
+        draw.line((q(96), q(96), q(68), q(48)), fill=white, width=q(7))
+        draw.line((q(96), q(96), q(68), q(144)), fill=white, width=q(7))
+        return True
+    if drawable == "google_calendar":
+        draw.rounded_rectangle((q(35), q(42), q(157), q(153)), radius=q(13), outline=white, width=q(6))
+        draw.line((q(36), q(77), q(156), q(77)), fill=white, width=q(6))
+        draw.line((q(67), q(31), q(67), q(58)), fill=white, width=q(7))
+        draw.line((q(125), q(31), q(125), q(58)), fill=white, width=q(7))
+        draw.rounded_rectangle((q(65), q(94), q(127), q(136)), radius=q(5), fill=white)
+        return True
+    if drawable == "spotify":
+        draw.arc((q(35), q(48), q(157), q(128)), 205, 335, fill=white, width=q(8))
+        draw.arc((q(47), q(75), q(145), q(137)), 205, 335, fill=white, width=q(7))
+        draw.arc((q(59), q(101), q(133), q(150)), 205, 335, fill=white, width=q(6))
+        return True
+    if drawable == "generic_settings":
+        draw.ellipse((q(53), q(53), q(139), q(139)), outline=white, width=q(8))
+        for angle in range(0, 360, 60):
+            import math
+            a = math.radians(angle)
+            x1, y1 = 96 + 44 * math.cos(a), 96 + 44 * math.sin(a)
+            x2, y2 = 96 + 61 * math.cos(a), 96 + 61 * math.sin(a)
+            draw.line((q(x1), q(y1), q(x2), q(y2)), fill=white, width=q(10))
+        draw.ellipse((q(81), q(81), q(111), q(111)), fill=TRANSPARENT, outline=white, width=q(6))
+        return True
+    return False
+
+
+def draw_symbol(draw: ImageDraw.ImageDraw, family: str, digest: bytes, drawable: str) -> None:
+    if draw_benchmark(draw, drawable):
+        return
     """Draw a bold, legible 192dp pictogram on a 3x working canvas."""
     w = STROKE
     white = WHITE
@@ -240,44 +287,13 @@ def draw_symbol(draw: ImageDraw.ImageDraw, family: str, digest: bytes, include_a
             draw.line((q(43),q(143),q(43),q(49),q(149),q(49),q(149),q(143)), fill=white, width=w)
             draw.line((q(64),q(120),q(96),q(76),q(128),q(120)), fill=white, width=w)
 
-    if include_accents:
-        # A restrained red signal mark is used only in the full-colour artwork.
-        # The themed layer remains strictly monochrome so Android can tint it.
-        corner = digest[1] % 4
-        red_dot = q(9)
-        positions = ((q(147),q(45)),(q(45),q(45)),(q(147),q(147)),(q(45),q(147)))
-        cx, cy = positions[corner]
-        draw.ellipse((cx-red_dot,cy-red_dot,cx+red_dot,cy+red_dot), fill=RED)
-
-        # Dot-matrix detail is part of the glyph, and is monochrome in both modes.
-    rows = 2 + digest[2] % 2
-    cols = 3
-    for row in range(rows):
-        for col in range(cols):
-            if (digest[3 + row] >> col) & 1:
-                x = q(68 + col * 12)
-                y = q(169 + row * 7)
-                draw.ellipse((x-q(1.5),y-q(1.5),x+q(1.5),y+q(1.5)), fill=white)
-
-
 def render_icon(label: str, package: str, drawable: str) -> tuple[Image.Image, Image.Image, str]:
-    identity = f"{package}|{drawable}|{label}"
-    digest = hashlib.sha256(identity.encode("utf-8")).digest()
     family = classify(label, package, drawable)
-
-    # Full-colour artwork: transparent symbol over the Nothink dark field.
-    static_layer = Image.new("RGBA", (CANVAS, CANVAS), TRANSPARENT)
-    draw_symbol(ImageDraw.Draw(static_layer), family, digest, include_accents=True)
-    static_layer = static_layer.resize((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
-    static = Image.new("RGBA", (ICON_SIZE, ICON_SIZE), BACKGROUND)
-    static.alpha_composite(static_layer)
-
-    # Themed artwork: no fixed background and no red pixels. Compatible launchers
-    # can tint this single-colour alpha mask using wallpaper/system colours.
-    themed = Image.new("RGBA", (CANVAS, CANVAS), TRANSPARENT)
-    draw_symbol(ImageDraw.Draw(themed), family, digest, include_accents=False)
-    themed = themed.resize((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
-    return static, themed, family
+    layer = Image.new("RGBA", (CANVAS, CANVAS), TRANSPARENT)
+    digest = hashlib.sha256(f"{package}|{drawable}|{label}".encode("utf-8")).digest()
+    draw_symbol(ImageDraw.Draw(layer), family, digest, drawable)
+    layer = layer.resize((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
+    return layer.copy(), layer.copy(), family
 
 
 def save_webp(image: Image.Image, destination: Path) -> None:
@@ -383,7 +399,9 @@ def main() -> int:
 
     print(f"NOTHINK_APP_MAPPINGS={len(component_to_drawable)}")
     print(f"NOTHINK_UNIQUE_PICTOGRAMS={len(drawable_to_data)}")
-    print("NOTHINK_ARTWORK_STYLE=GEOMETRIC_SOLID")
+    print("NOTHINK_ARTWORK_STYLE=MONOCHROME_TRANSPARENT")
+    print("NOTHINK_BENCHMARK_CUSTOM_ARTWORK=6")
+    print("NOTHINK_LEGACY_FAMILY_ARTWORK_REMAINS=1")
     print("NOTHINK_LETTER_INITIALS_USED=0")
     print("NOTHINK_UPSTREAM_ARTWORK_USED=0")
     for family, count in sorted(families.items()):

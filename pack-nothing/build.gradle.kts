@@ -3,17 +3,6 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
-val releaseStoreFile = System.getenv("NOTHINK_RELEASE_STORE_FILE")
-val releaseStorePassword = System.getenv("NOTHINK_RELEASE_STORE_PASSWORD")
-val releaseKeyAlias = System.getenv("NOTHINK_RELEASE_KEY_ALIAS")
-val releaseKeyPassword = System.getenv("NOTHINK_RELEASE_KEY_PASSWORD")
-val hasReleaseSigning = listOf(
-    releaseStoreFile,
-    releaseStorePassword,
-    releaseKeyAlias,
-    releaseKeyPassword
-).all { !it.isNullOrBlank() }
-
 android {
     namespace = "com.insomdroid.iconpacks.nothink"
     compileSdk = 36
@@ -26,17 +15,6 @@ android {
         versionName = "1.0.0"
     }
 
-    signingConfigs {
-        if (hasReleaseSigning) {
-            create("temporaryRelease") {
-                storeFile = file(requireNotNull(releaseStoreFile))
-                storePassword = requireNotNull(releaseStorePassword)
-                keyAlias = requireNotNull(releaseKeyAlias)
-                keyPassword = requireNotNull(releaseKeyPassword)
-            }
-        }
-    }
-
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
@@ -44,9 +22,9 @@ android {
             // cannot see those references and would strip the mapped icon artwork.
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
-            if (hasReleaseSigning) {
-                signingConfig = signingConfigs.getByName("temporaryRelease")
-            }
+            // Build a signed release APK automatically without repository secrets.
+            // GitHub-hosted runners use a fresh debug keystore, so signatures can differ between runs.
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 

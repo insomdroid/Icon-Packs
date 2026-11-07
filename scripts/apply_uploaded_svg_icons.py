@@ -119,6 +119,7 @@ def main() -> int:
             app.get("label", ""),
             app.get("package", ""),
             app.get("drawable", ""),
+            f'{app.get("group", "")} {app.get("label", "")}',
         }
         for candidate in candidates:
             key = normalize_name(candidate)

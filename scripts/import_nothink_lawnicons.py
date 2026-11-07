@@ -83,7 +83,7 @@ def q(value: float) -> int:
     return int(round(value * SCALE))
 
 
-def draw_symbol(draw: ImageDraw.ImageDraw, family: str, digest: bytes) -> None:
+def draw_symbol(draw: ImageDraw.ImageDraw, family: str, digest: bytes, include_accents: bool = True) -> None:
     """Draw a bold, legible 192dp pictogram on a 3x working canvas."""
     w = STROKE
     white = WHITE
@@ -135,7 +135,7 @@ def draw_symbol(draw: ImageDraw.ImageDraw, family: str, digest: bytes) -> None:
     elif family == "maps":
         draw.ellipse((q(54),q(34),q(138),q(118)), outline=white, width=w)
         draw.polygon([(q(56),q(94)),(q(96),q(160)),(q(136),q(94))], fill=white)
-        draw.ellipse((q(82),q(62),q(110),q(90)), fill=BACKGROUND)
+        draw.ellipse((q(82),q(62),q(110),q(90)), fill=TRANSPARENT)
     elif family == "weather":
         draw.ellipse((q(69),q(40),q(125),q(96)), outline=white, width=w)
         for angle in range(0,360,45):
@@ -240,14 +240,16 @@ def draw_symbol(draw: ImageDraw.ImageDraw, family: str, digest: bytes) -> None:
             draw.line((q(43),q(143),q(43),q(49),q(149),q(49),q(149),q(143)), fill=white, width=w)
             draw.line((q(64),q(120),q(96),q(76),q(128),q(120)), fill=white, width=w)
 
-    # A restrained red signal mark is the Nothink signature, not a generic badge.
-    corner = digest[1] % 4
-    red_dot = q(9)
-    positions = ((q(147),q(45)),(q(45),q(45)),(q(147),q(147)),(q(45),q(147)))
-    cx, cy = positions[corner]
-    draw.ellipse((cx-red_dot,cy-red_dot,cx+red_dot,cy+red_dot), fill=RED)
+    if include_accents:
+        # A restrained red signal mark is used only in the full-colour artwork.
+        # The themed layer remains strictly monochrome so Android can tint it.
+        corner = digest[1] % 4
+        red_dot = q(9)
+        positions = ((q(147),q(45)),(q(45),q(45)),(q(147),q(147)),(q(45),q(147)))
+        cx, cy = positions[corner]
+        draw.ellipse((cx-red_dot,cy-red_dot,cx+red_dot,cy+red_dot), fill=RED)
 
-    # Small, consistent dot-matrix detail: an accent, never the whole pictogram.
+        # Dot-matrix detail is part of the glyph, and is monochrome in both modes.
     rows = 2 + digest[2] % 2
     cols = 3
     for row in range(rows):
@@ -262,12 +264,20 @@ def render_icon(label: str, package: str, drawable: str) -> tuple[Image.Image, I
     identity = f"{package}|{drawable}|{label}"
     digest = hashlib.sha256(identity.encode("utf-8")).digest()
     family = classify(label, package, drawable)
-    layer = Image.new("RGBA", (CANVAS, CANVAS), TRANSPARENT)
-    draw_symbol(ImageDraw.Draw(layer), family, digest)
-    layer = layer.resize((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
+
+    # Full-colour artwork: transparent symbol over the Nothink dark field.
+    static_layer = Image.new("RGBA", (CANVAS, CANVAS), TRANSPARENT)
+    draw_symbol(ImageDraw.Draw(static_layer), family, digest, include_accents=True)
+    static_layer = static_layer.resize((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
     static = Image.new("RGBA", (ICON_SIZE, ICON_SIZE), BACKGROUND)
-    static.alpha_composite(layer)
-    return static, layer, family
+    static.alpha_composite(static_layer)
+
+    # Themed artwork: no fixed background and no red pixels. Compatible launchers
+    # can tint this single-colour alpha mask using wallpaper/system colours.
+    themed = Image.new("RGBA", (CANVAS, CANVAS), TRANSPARENT)
+    draw_symbol(ImageDraw.Draw(themed), family, digest, include_accents=False)
+    themed = themed.resize((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
+    return static, themed, family
 
 
 def save_png(image: Image.Image, destination: Path) -> None:

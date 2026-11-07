@@ -1,2 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources><item drawable="ic_pack" name="kitkat_sample" /></resources>
+<resources>
+  <item drawable="phone" name="phone" />
+  <item drawable="contacts" name="contacts" />
+  <item drawable="messages" name="messages" />
+  <item drawable="calendar" name="calendar" />
+  <item drawable="clock" name="clock" />
+  <item drawable="calculator" name="calculator" />
+  <item drawable="camera" name="camera" />
+  <item drawable="gallery" name="gallery" />
+  <item drawable="settings" name="settings" />
+  <item drawable="files" name="files" />
+  <item drawable="downloads" name="downloads" />
+  <item drawable="browser" name="browser" />
+  <item drawable="chrome" name="chrome" />
+  <item drawable="maps" name="maps" />
+  <item drawable="translate" name="translate" />
+  <item drawable="youtube" name="youtube" />
+  <item drawable="mail" name="mail" />
+  <item drawable="telegram" name="telegram" />
+  <item drawable="instagram" name="instagram" />
+  <item drawable="spotify" name="spotify" />
+  <item drawable="messenger" name="messenger" />
+  <item drawable="whatsapp" name="whatsapp" />
+</resources>

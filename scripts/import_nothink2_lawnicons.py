@@ -20,13 +20,13 @@ def safe_name(value):
 def white_svg(source):
     source = re.sub(
         r"""(["'])(?:#000(?:000)?|#111(?:111)?|black)(["'])""",
-        r"\\1#ffffff\\2",
+        r"\1#ffffff\2",
         source,
         flags=re.IGNORECASE,
     )
     source = re.sub(
-        r"""(fill|stroke)=(['"])currentColor\\2""",
-        r'\\1="#ffffff"',
+        r"""(fill|stroke)=(['"])currentColor\2""",
+        r'\1="#ffffff"',
         source,
         flags=re.IGNORECASE,
     )
@@ -79,7 +79,7 @@ def main():
         component, drawable = item.get("component"), item.get("drawable")
         if not component or not drawable:
             continue
-        match = re.search(r"ComponentInfo\\{([^/]+)/", component)
+        match = re.search(r"ComponentInfo\{([^/]+)/", component)
         if not match or match.group(1) not in selected:
             continue
 

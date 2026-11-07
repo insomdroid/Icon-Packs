@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import re
 import sys
 import xml.etree.ElementTree as ET
@@ -115,7 +116,8 @@ def main() -> int:
 
     for item in source_items:
         original_drawable = item.attrib["drawable"].removeprefix("@drawable/")
-        drawable = resource_name(original_drawable)
+        base_drawable = resource_name(original_drawable)
+        drawable = base_drawable
         component = item.attrib["component"].strip()
         label = item.attrib.get("name", original_drawable).strip()
         svg = source_svgs / f"{original_drawable}.svg"
@@ -125,9 +127,16 @@ def main() -> int:
 
         previous_source = drawable_to_source.get(drawable)
         if previous_source and previous_source != original_drawable:
-            raise SystemExit(
-                f"Drawable resource-name collision: {previous_source} and {original_drawable}"
-            )
+            # Different upstream names can normalize to the same Android resource name.
+            # Keep the readable base name and append a stable hash for the collision.
+            suffix = hashlib.sha1(original_drawable.encode("utf-8")).hexdigest()[:8]
+            drawable = f"{base_drawable[:110]}_{suffix}"
+            second_collision = drawable_to_source.get(drawable)
+            if second_collision and second_collision != original_drawable:
+                raise SystemExit(
+                    f"Unresolvable drawable resource-name collision: "
+                    f"{second_collision} and {original_drawable}"
+                )
         drawable_to_source[drawable] = original_drawable
         drawable_to_label.setdefault(drawable, label)
         component_to_drawable[component] = (drawable, label)

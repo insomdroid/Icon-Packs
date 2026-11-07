@@ -153,8 +153,10 @@ def vector_to_image(path):
                 if stroke_raw:
                     stroke, sa=color_value(stroke_raw)
                     attrs+=f' stroke="{stroke}" stroke-opacity="{float(node.attrib.get(ANDROID+"strokeAlpha","1"))*sa}" stroke-width="{node.attrib.get(ANDROID+"strokeWidth","1")}"'
-                    if node.attrib.get(ANDROID+"strokeLineCap"): attrs+=f' stroke-linecap="{node.attrib[ANDROID+"strokeLineCap"]}"'
-                    if node.attrib.get(ANDROID+"strokeLineJoin"): attrs+=f' stroke-linejoin="{node.attrib[ANDROID+"strokeLineJoin"]}"'
+                    cap=node.attrib.get(ANDROID+"strokeLineCap")
+                    join=node.attrib.get(ANDROID+"strokeLineJoin")
+                    if cap: attrs+=f' stroke-linecap="{cap}"'
+                    if join: attrs+=f' stroke-linejoin="{join}"'
                 return "<path"+attrs+"/>"
             return "".join(render(c) for c in node)
         body="".join(render(c) for c in root)

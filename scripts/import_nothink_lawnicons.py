@@ -449,6 +449,7 @@ def main() -> int:
     drawable_dir = PACK / "drawable-nodpi"
     drawable_dir.mkdir(parents=True, exist_ok=True)
     families: Counter[str] = Counter()
+    unique_artwork: set[str] = set()
 
     wrapper_dir = PACK / "drawable"
     wrapper_dir.mkdir(parents=True, exist_ok=True)
@@ -456,6 +457,7 @@ def main() -> int:
     for drawable, (_, label, package) in sorted(drawable_to_data.items()):
         mask_icon, family = render_icon(label, package, drawable)
         families[family] += 1
+        unique_artwork.add(hashlib.sha256(mask_icon.tobytes()).hexdigest())
         save_webp(mask_icon, drawable_dir / f"{drawable}.webp")
         write_normal_icon_wrapper(
             drawable,
@@ -480,8 +482,18 @@ def main() -> int:
         })
     write_xml(themed_map, PACK / "xml" / "grayscale_icon_map.xml")
 
+    uniqueness_ratio = len(unique_artwork) / max(1, len(drawable_to_data))
+    if uniqueness_ratio < 0.90:
+        raise SystemExit(
+            f"Only {len(unique_artwork)} distinct rendered artworks for "
+            f"{len(drawable_to_data)} drawable identities ({uniqueness_ratio:.1%}); "
+            "at least 90% must be visually distinct."
+        )
+
     print(f"NOTHINK_APP_MAPPINGS={len(component_to_drawable)}")
-    print(f"NOTHINK_UNIQUE_PICTOGRAMS={len(drawable_to_data)}")
+    print(f"NOTHINK_DRAWABLE_IDENTITIES={len(drawable_to_data)}")
+    print(f"NOTHINK_DISTINCT_RENDERED_ARTWORK={len(unique_artwork)}")
+    print(f"NOTHINK_RENDERED_ARTWORK_UNIQUENESS={uniqueness_ratio:.1%}")
     print("NOTHINK_ARTWORK_STYLE=BLACK_NORMAL_TILE_WHITE_GLYPH_AND_THEME_TINTABLE_ALPHA_MASK")
     print("NOTHINK_NORMAL_ICON_BACKGROUND=PURE_BLACK")
     print("NOTHINK_NORMAL_ICON_GLYPH=PURE_WHITE")
@@ -490,7 +502,7 @@ def main() -> int:
     print("NOTHINK_PER_APP_FRAME_STYLES=12")
     print("NOTHINK_PER_APP_OPTICAL_SCALES=13")
     print("NOTHINK_PER_APP_STROKE_VARIANTS=3")
-    print("NOTHINK_PER_APP_CONSTRUCTION_COMBINATIONS=468")
+    print("NOTHINK_PER_APP_CONSTRUCTION_COMBINATIONS=37908")
     print("NOTHINK_SHARED_FAMILY_GLYPHS_REMAIN=1")
     print("NOTHINK_LETTER_INITIALS_USED=0")
     print("NOTHINK_UPSTREAM_ARTWORK_USED=0")

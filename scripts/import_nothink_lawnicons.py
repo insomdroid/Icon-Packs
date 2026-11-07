@@ -303,17 +303,12 @@ def save_webp(image: Image.Image, destination: Path) -> None:
     pixel-for-pixel, including transparent themed-icon backgrounds.
     """
     destination.parent.mkdir(parents=True, exist_ok=True)
-    indexed = image.convert("RGBA").quantize(
-        colors=32,
-        method=Image.Quantize.FASTOCTREE,
-        dither=Image.Dither.NONE,
-    )
-    indexed.convert("RGBA").save(
+    image.convert("RGBA").save(
         destination,
         format="WEBP",
         lossless=True,
         quality=100,
-        method=6,
+        method=0,
         exact=True,
     )
 

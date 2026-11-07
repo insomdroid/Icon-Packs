@@ -110,8 +110,8 @@ jobs:
           test -s "pack-nothing/src/main/res/drawable/ic_pack_foreground.xml"
           test -s "pack-nothing/src/main/res/drawable/ic_pack_monochrome.xml"
           MAPPINGS="$(grep -c '<item component=' pack-nothing/src/main/res/xml/appfilter.xml)"
-          ARTWORK="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.png' ! -name 'themed_*' | wc -l)"
-          ARTWORK_BYTES="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.png' -printf '%s\n' | awk '{ total += $1 } END { printf "%d", total }')"
+          ARTWORK="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.webp' ! -name 'themed_*' | wc -l)"
+          ARTWORK_BYTES="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.webp' -printf '%s\n' | awk '{ total += $1 } END { printf "%d", total }')"
           SAMPLE_DRAWABLE="$(python - <<'PY'
           import xml.etree.ElementTree as ET
           root = ET.parse('pack-nothing/src/main/res/xml/appfilter.xml').getroot()
@@ -133,27 +133,27 @@ jobs:
           drawable_index = ET.parse(res / "xml/drawable.xml").getroot()
           mapped = {item.attrib["drawable"] for item in appfilter.findall("item")}
           indexed = {item.attrib["drawable"] for item in drawable_index.findall("item")}
-          missing = sorted(name for name in mapped if not (res / "drawable-nodpi" / f"{name}.png").is_file())
+          missing = sorted(name for name in mapped if not (res / "drawable-nodpi" / f"{name}.webp").is_file())
           unlisted = sorted(mapped - indexed)
           if missing:
-              raise SystemExit(f"Mapped icons missing PNG artwork: {missing[:10]}")
+              raise SystemExit(f"Mapped icons missing WebP artwork: {missing[:10]}")
           if unlisted:
               raise SystemExit(f"Mapped icons missing from drawable.xml: {unlisted[:10]}")
-          themed = sorted((res / "drawable-nodpi").glob("themed_*.png"))
-          themed_names = {item.name.removeprefix("themed_").removesuffix(".png") for item in themed}
+          themed = sorted((res / "drawable-nodpi").glob("themed_*.webp"))
+          themed_names = {item.name.removeprefix("themed_").removesuffix(".webp") for item in themed}
           missing_themed = sorted(mapped - themed_names)
           if missing_themed:
               raise SystemExit(f"Mapped icons missing themed artwork: {missing_themed[:10]}")
           from PIL import Image
-          indexed_sample = Image.open(themed[0])
-          if indexed_sample.mode != "P":
-              raise SystemExit("Artwork PNGs must use optimized indexed colour palettes.")
-          sample = indexed_sample.convert("RGBA")
+          webp_sample = Image.open(themed[0])
+          if webp_sample.format != "WEBP":
+              raise SystemExit("Generated icon artwork must be stored as WebP.")
+          sample = webp_sample.convert("RGBA")
           if sample.getpixel((0, 0))[3] != 0:
               raise SystemExit("Themed icon artwork must have a transparent background.")
           if any(r > 180 and g < 100 and b < 100 and a > 0 for r, g, b, a in sample.getdata()):
               raise SystemExit("Themed icon artwork must be monochrome and contain no fixed red accent.")
-          print(f"Verified {len(mapped)} mapped icons, {len(themed)} transparent monochrome themed assets, and adaptive launcher layers.")
+          print(f"Verified {len(mapped)} mapped icons, {len(themed)} transparent monochrome WebP themed assets, and adaptive launcher layers.")
           PY
           RESOURCE_DUMP="$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump resources "$APK")"
           if ! grep -Fq ":drawable/$SAMPLE_DRAWABLE" <<< "$RESOURCE_DUMP"; then

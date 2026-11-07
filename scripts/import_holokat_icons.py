@@ -387,6 +387,9 @@ EXTRA_COMPONENTS = [
     ("ComponentInfo{com.google.android.apps.kids.familylink/com.google.android.apps.kids.familylink.home.HomeActivityV2}", "Family Link", "familylink"),
     ("ComponentInfo{com.google.android.apps.chromecast.app/com.google.android.apps.chromecast.app.DiscoveryActivity}", "Google Home", "home"),
     ("ComponentInfo{com.google.android.apps.dynamite/com.google.android.apps.dynamite.startup.SplashActivity}", "Google Chat", "chat"),
+    ("ComponentInfo{com.google.android.play.games/com.google.android.apps.play.games.app.atv.features.home.HomeActivity}", "Google Play Games", "playgames"),
+    ("ComponentInfo{com.google.android.apps.plus/com.google.android.apps.plusone.app.HomeScreenActivity}", "Google+", "Google+"),
+    ("ComponentInfo{com.google.android.apps.plus/com.google.android.apps.plus.phone.HomeActivity}", "Google+", "Google+"),
 ]
 
 
@@ -440,10 +443,13 @@ def main() -> None:
 
     artwork_by_label: dict[str, str] = {}
     artwork_by_label_and_path: dict[str, str] = {}
+    artwork_by_original_stem: dict[str, str] = {}
     for resource, (_, original_path) in images.items():
-        label = normalize(Path(original_path).stem)
+        original_stem = Path(original_path).stem
+        label = normalize(original_stem)
         artwork_by_label.setdefault(label, resource)
         artwork_by_label_and_path[label] = resource
+        artwork_by_original_stem[original_stem.casefold()] = resource
 
     old_filter = ROOT / "pack-kitkat/src/main/res/xml/appfilter.xml"
     appfilter = ET.Element("resources")
@@ -481,7 +487,9 @@ def main() -> None:
     for component, label, artwork in EXTRA_COMPONENTS:
         if component in matched_components:
             continue
-        resource = artwork_by_label.get(normalize(artwork))
+        resource = artwork_by_original_stem.get(artwork.casefold())
+        if resource is None:
+            resource = artwork_by_label.get(normalize(artwork))
         if resource is None:
             continue
         ET.SubElement(appfilter, "item", {

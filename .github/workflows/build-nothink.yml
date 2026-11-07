@@ -113,7 +113,7 @@ jobs:
           ARTWORK="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.webp' ! -name 'themed_*' | wc -l)"
           ARTWORK_BYTES="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.webp' -printf '%s\n' | awk '{ total += $1 } END { printf "%d", total }')"
           SAMPLE_DRAWABLE="$(python - <<'PY'
-          import xml.etree.ElementTree as ET
+          import hashlib\n          import xml.etree.ElementTree as ET
           root = ET.parse('pack-nothing/src/main/res/xml/appfilter.xml').getroot()
           print(root.find('item').attrib['drawable'])
           PY
@@ -153,7 +153,25 @@ jobs:
               raise SystemExit("Themed icon artwork must have a transparent background.")
           if any(r > 180 and g < 100 and b < 100 and a > 0 for r, g, b, a in sample.getdata()):
               raise SystemExit("Themed icon artwork must be monochrome and contain no fixed red accent.")
-          print(f"Verified {len(mapped)} mapped icons, {len(themed)} transparent monochrome WebP themed assets, and adaptive launcher layers.")
+          normal = sorted((res / "drawable-nodpi").glob("*.webp"))
+          normal = [item for item in normal if not item.name.startswith("themed_")]
+          for path in normal:
+              image = Image.open(path).convert("RGBA")
+              if image.getpixel((0, 0))[3] != 0:
+                  raise SystemExit(f"Normal artwork must have a transparent background: {path.name}")
+              if any(a > 0 and (r, g, b) != (255, 255, 255) for r, g, b, a in image.getdata()):
+                  raise SystemExit(f"Normal artwork must use pure white only: {path.name}")
+          benchmarks = ["generic_camera", "google_phone", "google_chrome", "google_calendar", "spotify", "generic_settings"]
+          missing_benchmarks = [name for name in benchmarks if not (res / "drawable-nodpi" / f"{name}.webp").is_file()]
+          if missing_benchmarks:
+              raise SystemExit(f"Missing Nothink benchmark artwork: {missing_benchmarks}")
+          benchmark_hashes = {
+              hashlib.sha256((res / "drawable-nodpi" / f"{name}.webp").read_bytes()).hexdigest()
+              for name in benchmarks
+          }
+          if len(benchmark_hashes) != len(benchmarks):
+              raise SystemExit("Benchmark icons must have distinct artwork files.")
+          print(f"Verified {len(mapped)} mappings, transparent pure-white normal assets, monochrome themed assets, and six distinct benchmark assets.")
           PY
           RESOURCE_DUMP="$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump resources "$APK")"
           if ! grep -Fq ":drawable/$SAMPLE_DRAWABLE" <<< "$RESOURCE_DUMP"; then

@@ -1,0 +1,68 @@
+name: Build Icon Packs
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: APK target to build
+        required: true
+        type: choice
+        default: all
+        options: [all, catalog, kitkat, nothing, holo, material]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: icon-packs-${{ github.ref }}-${{ inputs.target }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build ${{ inputs.target }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Gradle 8.13
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Build selected APKs
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${{ inputs.target }}" in
+            catalog) gradle --no-daemon :app:assembleDebug ;;
+            kitkat) gradle --no-daemon :pack-kitkat:assembleDebug ;;
+            nothing) gradle --no-daemon :pack-nothing:assembleDebug ;;
+            holo) gradle --no-daemon :pack-holo:assembleDebug ;;
+            material) gradle --no-daemon :pack-material:assembleDebug ;;
+            all)
+              gradle --no-daemon :app:assembleDebug :pack-kitkat:assembleDebug :pack-nothing:assembleDebug :pack-holo:assembleDebug :pack-material:assembleDebug
+              ;;
+            *) echo "Unsupported target"; exit 2 ;;
+          esac
+      - name: Collect APKs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          [[ ! -f app/build/outputs/apk/debug/app-debug.apk ]] || cp app/build/outputs/apk/debug/app-debug.apk artifacts/Catalog-debug.apk
+          for theme in kitkat nothing holo material; do
+            apk="pack-${theme}/build/outputs/apk/debug/pack-${theme}-debug.apk"
+            [[ ! -f "$apk" ]] || cp "$apk" "artifacts/${theme^}-IconPack-debug.apk"
+          done
+          test -n "$(find artifacts -maxdepth 1 -name '*.apk' -print -quit)"
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: icon-packs-${{ inputs.target }}
+          path: artifacts/*.apk
+          if-no-files-found: error
+          retention-days: 14

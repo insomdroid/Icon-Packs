@@ -4,7 +4,6 @@ This project imports the following original PNG application icons from the Andro
 
 | Pack drawable | AOSP source repository | Source resource |
 |---|---|---|
-| `contacts` | [platform_packages_apps_contacts](https://github.com/aosp-mirror/platform_packages_apps_contacts/tree/android-4.4.4_r2) | `res/mipmap-xxhdpi/ic_launcher_contacts.png` |
 | `messages` | [platform_packages_apps_mms](https://github.com/aosp-mirror/platform_packages_apps_mms/tree/android-4.4.4_r2) | `res/mipmap-xxhdpi/ic_launcher_smsmms.png` |
 | `settings` | [platform_packages_apps_settings](https://github.com/aosp-mirror/platform_packages_apps_settings/tree/android-4.4.4_r2) | `res/mipmap-xxxhdpi/ic_launcher_settings.png` |
 | `camera` | [platform_packages_apps_camera](https://github.com/aosp-mirror/platform_packages_apps_camera/tree/android-4.4.4_r2) | `res/mipmap-xxhdpi/ic_launcher_camera.png` |
@@ -18,4 +17,4 @@ Each listed AOSP module contains the `MODULE_LICENSE_APACHE2` marker and a `NOTI
 
 The build script downloads from the pinned Android 4.4.4 release tag and fails the build if a required PNG cannot be retrieved or does not have a valid PNG signature.
 
-These eight assets cover only the listed AOSP built-in apps. The other icons in the KitKat pack are not claimed to be original Android 4.4.4 artwork until their sources are verified.
+Contacts is deliberately excluded: although the Contacts manifest references `ic_launcher_contacts`, that PNG is absent from the pinned AOSP tag tree. These eight assets cover only the listed AOSP built-in apps. The other icons in the KitKat pack are not claimed to be original Android 4.4.4 artwork until their sources are verified.

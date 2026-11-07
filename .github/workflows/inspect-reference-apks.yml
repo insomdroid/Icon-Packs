@@ -31,7 +31,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install Pillow for image previews
-        run: python3 -m pip install --disable-pip-version-check Pillow
+        run: python3 -m pip install --disable-pip-version-check Pillow ImageHash
 
       - name: Extract and inventory the uploaded Jelly Bean ZIP archives
         run: python3 scripts/inspect_jellybean_icon_archives.py

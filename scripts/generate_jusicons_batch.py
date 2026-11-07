@@ -115,6 +115,9 @@ CATALOG = [
 ("Popular","Perplexity","com.perplexity.ai"),
 ]
 
+# Keep the first 50 curated entries for this extraction trial.
+CATALOG = CATALOG[:50]
+
 def lname(tag): return tag.rsplit("}", 1)[-1]
 
 def color_value(value):

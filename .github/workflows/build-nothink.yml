@@ -113,7 +113,7 @@ jobs:
           ARTWORK="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.webp' ! -name 'themed_*' | wc -l)"
           ARTWORK_BYTES="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.webp' -printf '%s\n' | awk '{ total += $1 } END { printf "%d", total }')"
           SAMPLE_DRAWABLE="$(python - <<'PY'
-          import hashlib\n          import xml.etree.ElementTree as ET
+          import xml.etree.ElementTree as ET
           root = ET.parse('pack-nothing/src/main/res/xml/appfilter.xml').getroot()
           print(root.find('item').attrib['drawable'])
           PY
@@ -171,7 +171,7 @@ jobs:
           }
           if len(benchmark_hashes) != len(benchmarks):
               raise SystemExit("Benchmark icons must have distinct artwork files.")
-          print(f"Verified {len(mapped)} mappings, transparent pure-white normal assets, monochrome themed assets, and six distinct benchmark assets.")
+          print(f"Verified {len(mapped)} mappings, transparent neutral alpha-mask assets for Android theme tinting, and six distinct benchmark assets.")
           PY
           RESOURCE_DUMP="$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump resources "$APK")"
           if ! grep -Fq ":drawable/$SAMPLE_DRAWABLE" <<< "$RESOURCE_DUMP"; then

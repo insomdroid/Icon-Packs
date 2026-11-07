@@ -10,7 +10,7 @@ from io import BytesIO
 from pathlib import Path
 
 import cairosvg
-from PIL import Image, ImageDraw
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 PACK = ROOT / "pack-nothing" / "src" / "main" / "res"
@@ -68,11 +68,8 @@ def render_glyph(svg_path: Path) -> tuple[Image.Image, Image.Image]:
     colored_glyph = Image.composite(white_glyph, transparent_glyph, glyph)
     themed_icon.alpha_composite(colored_glyph, (left, top))
 
-    static_icon = Image.new("RGBA", (ICON_SIZE, ICON_SIZE), (0, 0, 0, 0))
-    ImageDraw.Draw(static_icon).ellipse(
-        (8, 8, ICON_SIZE - 8, ICON_SIZE - 8),
-        fill=BACKGROUND,
-    )
+    # Fill the full canvas so the launcher can apply its own adaptive shape mask.
+    static_icon = Image.new("RGBA", (ICON_SIZE, ICON_SIZE), BACKGROUND)
     static_icon.alpha_composite(themed_icon)
     return static_icon, themed_icon
 

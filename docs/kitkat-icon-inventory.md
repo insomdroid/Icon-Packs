@@ -2,7 +2,7 @@
 
 Status: first implementation batch. KitKat is the only active deliverable; other theme modules are intentionally untouched.
 
-## Original artwork included
+## Original artwork included (32)
 - [x] Phone
 - [x] Contacts
 - [x] Messages
@@ -25,13 +25,23 @@ Status: first implementation batch. KitKat is the only active deliverable; other
 - [x] Spotify
 - [x] Messenger
 - [x] Whatsapp
+- [x] Facebook
+- [x] Soundcloud
+- [x] Snapchat
+- [x] Word
+- [x] Excel
+- [x] Powerpoint
+- [x] Onenote
+- [x] Skype
+- [x] Pinterest
+- [x] Hangouts
 
 ## Launcher mappings included
 | Group | Applications | Mapping status |
 |---|---|---|
-| Android / AOSP | Calendar, Calculator, Camera, Clock, Contacts, Phone/Dialer, Files, Downloads, Email, Gallery, Messaging, Settings | Component/activity pairs based on published icon-pack mappings; legacy variants may not exist on current OEM ROMs. |
-| Google | Chrome, Maps, Translate, Files by Google, YouTube, Photos, Play Books, Gmail | Component/activity pairs based on published launcher mappings. |
-| Third party | Spotify, Instagram, Telegram, Facebook, Messenger, WhatsApp, SoundCloud, Snapchat, Microsoft Word/Excel/PowerPoint/OneNote, Skype, Pinterest, Open Camera | Component/activity pairs based on published launcher mappings. |
+| Android / AOSP | Calendar, Calculator, Camera, Clock, Contacts, Phone/Dialer, Files, Downloads, Email, Gallery, Messaging, Settings, Browser | Published component/activity pairs; legacy variants may not exist on current OEM ROMs. |
+| Google | Chrome, Maps, Translate, Files by Google, Talk/Hangouts, YouTube, Photos, Play Books, Gmail | Published component/activity pairs. |
+| Third party | Instagram, Telegram, Facebook, Messenger, WhatsApp, SoundCloud, Snapchat, Microsoft Word/Excel/PowerPoint/OneNote, Skype, Pinterest, Open Camera | Published component/activity pairs. |
 
 ## Expansion queue
 ### Android / Google

@@ -485,12 +485,12 @@ def process_apk(group,label,package,apk,work,drawable_dir,apktool):
 
 def main():
     parser=argparse.ArgumentParser()
-    parser.add_argument("--minimum",type=int,default=70)
+    parser.add_argument("--minimum",type=int,default=35)
     parser.add_argument("--output",default="pack-nothing/src/main/res")
     parser.add_argument("--work",default="build/jusicons-work")
     parser.add_argument("--apktool",default="tools/apktool_3.0.3.jar")
     args=parser.parse_args()
-    if len(CATALOG)!=100 or len({x[2] for x in CATALOG})!=100: raise SystemExit(f"Catalog must have 100 unique packages; got {len(CATALOG)}")
+    if len(CATALOG)!=50 or len({x[2] for x in CATALOG})!=50: raise SystemExit(f"Catalog must have 50 unique packages; got {len(CATALOG)}")
     res=Path(args.output); drawable_dir=res/"drawable"; xml_dir=res/"xml"
     drawable_dir.mkdir(parents=True,exist_ok=True); xml_dir.mkdir(parents=True,exist_ok=True)
     work=Path(args.work); downloads_dir=work/"downloads"; downloads_dir.mkdir(parents=True,exist_ok=True)
@@ -513,7 +513,7 @@ def main():
         url,apk,error=downloads.get(package,("",None,"download missing"))
         if apk is None:
             results.append({"group":group,"label":label,"package":package,"status":"download_failed","source_url":url,"error":error})
-            print(f"[{index:03d}/100] SKIP {package}: {error}",flush=True); continue
+            print(f"[{index:03d}/050] SKIP {package}: {error}",flush=True); continue
         item=process_apk(group,label,package,apk,work,drawable_dir,args.apktool); item["source_url"]=url; results.append(item)
         print(f"[{index:03d}/100] {item['status'].upper()} {package}: {item.get('drawable',item.get('error',''))}",flush=True)
         apk.unlink(missing_ok=True)
@@ -535,7 +535,7 @@ def main():
     report_dir=Path("build/jusicons-report"); report_dir.mkdir(parents=True,exist_ok=True)
     (report_dir/"report.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
     with (report_dir/"report.md").open("w",encoding="utf-8") as stream:
-        stream.write("# JusIcons 100-app generation report\n\n")
+        stream.write("# JusIcons 50-app generation report\n\n")
         stream.write(f"- Target packages: {len(CATALOG)}\n- Generated unique app icons: {len(generated)}\n- Appfilter mappings: {len(app_items)}\n- Failed packages: {len(CATALOG)-len(generated)}\n\n")
         stream.write("| Group | Application | Package | Result | Source type | Detail |\n|---|---|---|---|---|---|\n")
         for item in results:

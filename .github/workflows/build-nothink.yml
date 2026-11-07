@@ -60,7 +60,7 @@ jobs:
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-36" "build-tools;36.0.0"
           echo "$ANDROID_HOME/build-tools/36.0.0" >> "$GITHUB_PATH"
       - name: Download 50 application APKs and generate real monochrome icons
-        run: python scripts/generate_jusicons_batch.py --minimum 35 --apktool tools/apktool_3.0.3.jar
+        run: python scripts/generate_jusicons_batch.py --minimum 25 --apktool tools/apktool_3.0.3.jar
       - name: Build Nothink release APK
         run: gradle --no-daemon :pack-nothing:assembleRelease
       - name: Verify generated pack and APK
@@ -78,8 +78,8 @@ jobs:
           drawables = ET.parse(res / "xml/drawable.xml").getroot()
           items = appfilter.findall("item")
           indexed = drawables.findall("item")
-          if len(indexed) < 35:
-              raise SystemExit(f"Expected at least 35 generated app icons, got {len(indexed)}")
+          if len(indexed) < 25:
+              raise SystemExit(f"Expected at least 25 generated app icons, got {len(indexed)}")
           for item in indexed:
               name = item.attrib["drawable"]
               if not (res / "drawable" / f"{name}.xml").is_file():

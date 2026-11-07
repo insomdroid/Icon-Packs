@@ -648,6 +648,10 @@ def main() -> int:
             artwork_name,
             wrapper_dir / f"{drawable}.xml",
         )
+        write_normal_icon_wrapper(
+            drawable,
+            wrapper_dir / f"icon_{drawable}.xml",
+        )
 
     appfilter = ET.Element("resources")
     for component, (drawable, _) in sorted(component_to_drawable.items()):

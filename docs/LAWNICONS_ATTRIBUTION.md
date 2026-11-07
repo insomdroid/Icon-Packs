@@ -1,14 +1,13 @@
 # Lawnicons attribution
 
-This project uses application component mappings adapted from the Lawnicons project.
+This repository uses application component mappings from the Lawnicons project.
 
 - Project: https://github.com/LawnchairLauncher/lawnicons
-- Source file: `app/assets/appfilter.xml`
+- Source mapping: `app/assets/appfilter.xml`
 - Source revision: `cd91ff0bd00ff0a6c9d606d1c326b451b6563506`
 - License: Apache License 2.0
+- License text: `third_party/lawnicons/LICENSE`
 
-The upstream `ComponentInfo` package/activity mappings are retained. The upstream drawable identifiers are remapped to original KitKat-inspired vector artwork in this repository. Lawnicons SVG artwork is not copied into the KitKat pack.
+The Holokat pack uses Lawnicons component mappings only; Lawnicons SVG artwork is not included in Holokat. The separate Nothink pack downloads the pinned Lawnicons SVG source during its build and transforms the artwork into monochrome assets. See [Nothink attribution](NOTHINK_ATTRIBUTION.md) for details.
 
-The complete upstream Apache License 2.0 text is included at `third_party/lawnicons/LICENSE`.
-
-Lawnicons is an independent open-source project. This icon pack is not affiliated with or endorsed by Lawnchair or Lawnicons.
+Lawnicons is an independent open-source project. These icon packs are not affiliated with or endorsed by Lawnchair or Lawnicons.

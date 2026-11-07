@@ -28,8 +28,8 @@ These references inform the visual direction; Nothink remains an independent, un
 | Per-icon variation | Controlled; silhouettes may differ when the app identity requires it |
 | Abstraction | Recognizable simplification; preserve the app's recognizable meaning |
 | Normal icon background | Transparent |
-| Normal icon glyph | Pure white |
-| Color palette | Strict monochrome; no red, gray, gradients, shadows, or colored decoration |
+| Normal icon glyph | Neutral transparent alpha mask; launcher tinting supplies theme color where supported |
+| Color palette | No baked-in glyph color for themed assets; no red accents, gradients, shadows, or colored decoration |
 | Dot-matrix | Not used |
 | Canvas composition | Medium / balanced; preserve comfortable transparent space |
 | Silhouette | Complete and recognizable; no accidental or decorative clipping |
@@ -54,7 +54,7 @@ These references inform the visual direction; Nothink remains an independent, un
 ### Normal artwork
 
 - Transparent background.
-- Pure-white glyph only.
+- Use a neutral alpha mask; do not bake white or another fixed glyph color into artwork intended for Android theme tinting.
 - No fixed background color.
 - No gray, red, gradients, shadows, or other color accents.
 - Solid and outline components follow the same medium-weight construction system.
@@ -76,7 +76,7 @@ Every icon must pass through these stages:
 2. **Inspect identity:** review the app's original mark where available and decide whether to retain, simplify, or reinterpret it.
 3. **Design:** create an app-specific symbol using the approved Nothink construction rules.
 4. **Review:** inspect the actual rendered artwork on both light and dark launcher surfaces and at small sizes.
-5. **Validate:** check transparency, pure-white normal glyph, monochrome themed glyph, complete silhouette, optical balance, and consistency with approved benchmark icons.
+5. **Validate:** check transparency, neutral alpha-mask glyphs suitable for Android theme tinting, complete silhouette, optical balance, and consistency with approved benchmark icons.
 
 The generator is a production tool, not a substitute for icon design. It must not silently assign the same generic category glyph to unrelated apps or invent decorations from hashes or random values.
 
@@ -101,7 +101,7 @@ Benchmark artwork must be custom-designed and reviewed before its construction r
 
 An artwork set is not accepted merely because the APK compiles. Review must confirm:
 
-- Normal icons have transparent backgrounds and pure-white visible pixels only.
+- Artwork has transparent backgrounds and neutral alpha-mask pixels; no fixed glyph color is baked into theme-tintable assets.
 - Themed icons have transparent backgrounds and a single monochrome glyph suitable for tinting.
 - No red pixels, gray fills, gradients, shadows, or dot-matrix details are present.
 - No accidental clipping or unexplained decorative marks appear.
@@ -114,7 +114,7 @@ A passing automated check cannot replace visual review.
 
 ## 8. Implementation status
 
-The generator has been migrated away from the former dark background, red accents, and dot-matrix decorations. Normal artwork is now transparent with pure-white glyphs; themed artwork uses the same transparent monochrome silhouette. The six benchmark drawable identifiers have individually authored artwork: `generic_camera`, `google_phone`, `google_chrome`, `google_calendar`, `spotify`, and `generic_settings`.
+The generator has been migrated away from the former dark background, red accents, and dot-matrix decorations. Generated artwork now uses transparent neutral alpha masks intended for launcher theme tinting; no fixed white glyph color is baked into the artwork. The six benchmark drawable identifiers have individually authored artwork: `generic_camera`, `google_phone`, `google_chrome`, `google_calendar`, `spotify`, and `generic_settings`.
 
 **The collection is not yet fully custom-designed.** The remaining mapped apps still use the legacy semantic-family artwork, including a hash-varied abstract fallback. Those assets are not approved as final custom artwork under this guide. A successful APK build or automated color/transparency check does not mean the full collection has passed visual design review. Do not describe the full pack as complete until every mapped identity has been individually reviewed and its artwork replaced or explicitly approved.
 

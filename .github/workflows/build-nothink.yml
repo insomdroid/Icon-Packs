@@ -124,18 +124,21 @@ jobs:
           for wrapper_name in mapped:
               wrapper_path = res / "drawable" / f"{wrapper_name}.xml"
               if not wrapper_path.is_file():
-                  raise SystemExit(f"Missing icon wrapper: {wrapper_name}")
-              wrapper = ET.parse(wrapper_path).getroot()
-              foreground = wrapper.findall("item")[-1]
-              alias_name = foreground.attrib.get("{http://schemas.android.com/apk/res/android}drawable", "").removeprefix("@drawable/")
-              alias_path = res / "drawable" / f"{alias_name}.xml"
-              if not alias_path.is_file():
-                  raise SystemExit(f"Missing artwork alias for {wrapper_name}: {alias_name}")
-              alias = ET.parse(alias_path).getroot()
+                  raise SystemExit(f"Missing themed artwork alias: {wrapper_name}")
+              alias = ET.parse(wrapper_path).getroot()
               art_name = alias.attrib.get("{http://schemas.android.com/apk/res/android}src", "").removeprefix("@drawable/")
               art_path = res / "drawable-nodpi" / f"{art_name}.webp"
               if not art_name.startswith("art_") or not art_path.is_file():
                   raise SystemExit(f"Missing shared artwork file for {wrapper_name}: {art_name}")
+
+              normal_wrapper_path = res / "drawable" / f"icon_{wrapper_name}.xml"
+              if not normal_wrapper_path.is_file():
+                  raise SystemExit(f"Missing normal icon wrapper: icon_{wrapper_name}")
+              normal_wrapper = ET.parse(normal_wrapper_path).getroot()
+              foreground = normal_wrapper.findall("item")[-1]
+              foreground_name = foreground.attrib.get("{http://schemas.android.com/apk/res/android}drawable", "").removeprefix("@drawable/")
+              if foreground_name != wrapper_name:
+                  raise SystemExit(f"Normal icon wrapper points to wrong artwork: icon_{wrapper_name} -> {foreground_name}")
 
           normal = sorted((res / "drawable-nodpi").glob("art_*.webp"))
           if not normal or len(normal) > 80:

@@ -159,8 +159,8 @@ jobs:
               image = Image.open(path).convert("RGBA")
               if image.getpixel((0, 0))[3] != 0:
                   raise SystemExit(f"Normal artwork must have a transparent background: {path.name}")
-              if any(a > 0 and (r, g, b) != (255, 255, 255) for r, g, b, a in image.getdata()):
-                  raise SystemExit(f"Normal artwork must use pure white only: {path.name}")
+              if any(a > 0 and (r, g, b) != (0, 0, 0) for r, g, b, a in image.getdata()):
+                  raise SystemExit(f"Artwork must use neutral alpha-mask pixels for Android theme tinting: {path.name}")
           benchmarks = ["generic_camera", "google_phone", "google_chrome", "google_calendar", "spotify", "generic_settings"]
           missing_benchmarks = [name for name in benchmarks if not (res / "drawable-nodpi" / f"{name}.webp").is_file()]
           if missing_benchmarks:

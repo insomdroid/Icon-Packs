@@ -1,6 +1,6 @@
 # Insomdroid Icon Packs
 
-Independently installable Android icon pack APKs. Development is currently focused on the KitKat theme.
+Independently installable Android icon pack APKs. Development includes independent KitKat and Holokat theme APKs.
 
 ## Active theme
 
@@ -9,16 +9,16 @@ Independently installable Android icon pack APKs. Development is currently focus
 - Minimum SDK: Android 10 (API 29).
 - Compile/Target SDK: 36.
 
-## Automatic build
+## Available themes\n\n- **KitKat** — original Android 4.4-era assets and launcher mappings.\n- **Holokat** — imports unique image assets from the two Jelly Bean archives attributed to HKtorito. The original images are retained without redrawing or recoloring. Initial launcher mappings are limited to reliable matches. See [Holokat artwork attribution](docs/HOLOKAT_ATTRIBUTION.md).\n\n## Automatic build
 
-The **Build KitKat Release APK** workflow runs automatically when build-related files are pushed to `main`.
+The **Build KitKat Release APK** and **Build Holokat Release APK** workflows build their respective standalone theme APKs when relevant files are pushed to `main`.
 
 It skips commits that only change:
 - `README.md` or Markdown documentation.
 - Files under `docs/`.
 - Reference images under `references/`, `reference/`, `reference-images/`, `screenshots/`, `Screenshot/`, or `assets/references/`.
 
-You can also start a build manually from [GitHub Actions](https://github.com/insomdroid/Icon-Packs/actions/workflows/build-icon-packs.yml).
+You can also start builds manually from [GitHub Actions](https://github.com/insomdroid/Icon-Packs/actions). Holokat has its own [build workflow](https://github.com/insomdroid/Icon-Packs/actions/workflows/build-holokat.yml).
 
 The workflow builds the Gradle **release** variant and uploads the signed `kitkat-release-apk` artifact for **1 day**. Artifact compression is disabled to avoid wasting time recompressing an APK.
 
@@ -38,4 +38,4 @@ Mapping coverage depends on the app package and launcher activity installed on t
 
 ## Project structure
 
-The repository retains the planned separate theme modules and catalog foundation. They are not part of the active build while KitKat is being completed.
+Each theme is built as a separate APK module. The catalog foundation remains separate from the installable theme APKs.

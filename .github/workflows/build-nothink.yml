@@ -8,7 +8,6 @@ on:
       - 'pack-nothing/**'
       - 'scripts/import_nothink_lawnicons.py'
       - 'docs/NOTHINK_ATTRIBUTION.md'
-      - 'docs/NOTHINK_ATTRIBUTION.md'
       - 'settings.gradle.kts'
       - 'build.gradle.kts'
       - 'gradle/**'

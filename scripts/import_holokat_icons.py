@@ -314,6 +314,9 @@ EXPLICIT_ALIASES = {
     "itranslate": "translate", "apk signer": "settings",
     "apksigner": "settings", "exteraless": "files",
     "helium": "drive", "hideu": "vault", "network": "cloud",
+    "applockvip": "vault", "brandsnap": "camera", "irlpro": "meet",
+    "instsaver": "instagram", "nocture": "music", "protonvpn": "cloud",
+    "talananext": "tasks", "telfono": "phone",
 }
 
 

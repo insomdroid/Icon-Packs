@@ -21,9 +21,9 @@ It skips commits that only change:
 
 You can also start a build manually from [GitHub Actions](https://github.com/insomdroid/Icon-Packs/actions/workflows/build-icon-packs.yml).
 
-The workflow builds the Gradle **release** variant and uploads the `kitkat-release-unsigned-apk` artifact for 7 days. Artifact compression is disabled to avoid wasting time recompressing an APK.
+The workflow builds the Gradle **release** variant and uploads the signed `kitkat-release-apk` artifact for **1 day**. Artifact compression is disabled to avoid wasting time recompressing an APK.
 
-> **Signing:** the current project has no release keystore configured. The generated release APK is therefore unsigned and cannot be installed directly. Configure a persistent release signing keystore through GitHub Actions secrets before distributing an installable release APK. Do not use a temporary runner-generated debug key for release updates.
+> **Temporary signing:** each workflow run generates a fresh temporary release keystore. The APK is signed and can be installed, but a later build uses a different signing key, so it cannot update an installation signed by an earlier run. This is a temporary development setup, not suitable for publishing updates.
 
 ## Mapping source and attribution
 

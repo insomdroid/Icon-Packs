@@ -227,16 +227,24 @@ def image_for_resource(decoded, ref, public_map, adaptive=False, depth=0):
     return None,adaptive
 
 def find_launcher_components(manifest, package):
+    application = manifest.find("application")
+    if application is None:
+        return []
     found=[]
-    for activity in list(manifest.findall("activity"))+list(manifest.findall("activity-alias")):
+    components = list(application.findall("activity")) + list(application.findall("activity-alias"))
+    for activity in components:
         for intent in activity.findall("intent-filter"):
             actions={x.attrib.get(ANDROID+"name") for x in intent.findall("action")}
             categories={x.attrib.get(ANDROID+"name") for x in intent.findall("category")}
-            if "android.intent.action.MAIN" not in actions or "android.intent.category.LAUNCHER" not in categories: continue
+            if "android.intent.action.MAIN" not in actions or "android.intent.category.LAUNCHER" not in categories:
+                continue
             name=activity.attrib.get(ANDROID+"name","")
-            if not name: continue
-            if name.startswith("."): name=package+name
-            elif "." not in name: name=package+"."+name
+            if not name:
+                continue
+            if name.startswith("."):
+                name=package+name
+            elif "." not in name:
+                name=package+"."+name
             found.append(f"ComponentInfo{{{package}/{name}}}")
             break
     return sorted(set(found))

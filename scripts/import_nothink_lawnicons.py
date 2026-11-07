@@ -280,12 +280,12 @@ def render_icon(label: str, package: str, drawable: str) -> tuple[Image.Image, I
     return static, themed, family
 
 
-def save_png(image: Image.Image, destination: Path) -> None:
-    """Write compact indexed PNGs while preserving transparency and icon dimensions.
+def save_webp(image: Image.Image, destination: Path) -> None:
+    """Write lossless WebP artwork with exact RGBA pixels and transparency.
 
-    These glyphs use a small, flat colour palette. Quantizing to 32 colours keeps
-    antialiased edges visually smooth while avoiding the large RGBA PNG payload
-    produced by saving every 192px icon as a full 32-bit image.
+    Android supports WebP resources on the project's minimum API level. Lossless
+    WebP avoids aapt's PNG crunch expansion while preserving the quantized artwork
+    pixel-for-pixel, including transparent themed-icon backgrounds.
     """
     destination.parent.mkdir(parents=True, exist_ok=True)
     indexed = image.convert("RGBA").quantize(
@@ -293,11 +293,13 @@ def save_png(image: Image.Image, destination: Path) -> None:
         method=Image.Quantize.FASTOCTREE,
         dither=Image.Dither.NONE,
     )
-    indexed.save(
+    indexed.convert("RGBA").save(
         destination,
-        format="PNG",
-        optimize=True,
-        compress_level=9,
+        format="WEBP",
+        lossless=True,
+        quality=100,
+        method=6,
+        exact=True,
     )
 
 
@@ -358,8 +360,8 @@ def main() -> int:
     for drawable, (_, label, package) in sorted(drawable_to_data.items()):
         static_icon, themed_icon, family = render_icon(label, package, drawable)
         families[family] += 1
-        save_png(static_icon, drawable_dir / f"{drawable}.png")
-        save_png(themed_icon, drawable_dir / f"themed_{drawable}.png")
+        save_webp(static_icon, drawable_dir / f"{drawable}.webp")
+        save_webp(themed_icon, drawable_dir / f"themed_{drawable}.webp")
 
     appfilter = ET.Element("resources")
     for component, (drawable, _) in sorted(component_to_drawable.items()):

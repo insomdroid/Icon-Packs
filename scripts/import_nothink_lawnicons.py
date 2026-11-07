@@ -337,17 +337,18 @@ def render_icon(label: str, package: str, drawable: str) -> tuple[Image.Image, s
         raise ValueError(f"Generated empty glyph for {package or drawable}")
 
     # Each app receives a stable construction selected from 12 frame geometries,
-    # 13 optical scales and 9 stroke weights. This yields 1,404 construction
-    # combinations while keeping the semantic pictogram legible and consistent.
+    # 13 optical scales, 3 stroke weights and 81 optical offsets. The result is
+    # thousands of possible compositions without changing the semantic glyph.
     frame_style = digest[0] % 12
     scale_percent = 60 + (digest[1] % 13)
     target = int(ICON_SIZE * scale_percent / 100)
     glyph = glyph.resize((target, target), Image.Resampling.LANCZOS)
 
-    layer = Image.new("RGBA", (ICON_SIZE, ICON_SIZE), TRANSPARENT)
-    frame_draw = ImageDraw.Draw(layer)
+    frame_canvas = Image.new("RGBA", (CANVAS, CANVAS), TRANSPARENT)
+    frame_draw = ImageDraw.Draw(frame_canvas)
     frame_width = q(2 + (digest[2] % 3))
     draw_identity_frame(frame_draw, frame_style, frame_width)
+    layer = frame_canvas.resize((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
 
     offset_x = int((digest[3] % 9) - 4)
     offset_y = int((digest[4] % 9) - 4)

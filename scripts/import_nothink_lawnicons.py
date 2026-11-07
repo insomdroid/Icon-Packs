@@ -323,41 +323,214 @@ def draw_identity_frame(draw: ImageDraw.ImageDraw, style: int, width: int) -> No
         draw.line((q(18), q(174), q(174), q(174)), fill=white, width=width)
 
 
-def render_icon(label: str, package: str, drawable: str) -> tuple[Image.Image, str]:
-    """Compose a semantic glyph with a deterministic per-app geometric frame."""
+
+# Brand-specific marks are authored here; no upstream SVG or glyph artwork is imported.
+BRAND_PACKAGES: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("whatsapp", ("com.whatsapp",)),
+    ("telegram", ("org.telegram",)),
+    ("signal", ("org.thoughtcrime.securesms",)),
+    ("discord", ("com.discord",)),
+    ("instagram", ("com.instagram",)),
+    ("facebook", ("com.facebook.katana", "com.facebook.lite")),
+    ("messenger", ("com.facebook.orca",)),
+    ("reddit", ("com.reddit.frontpage",)),
+    ("x", ("com.twitter.android",)),
+    ("tiktok", ("com.zhiliaoapp.musically",)),
+    ("youtube", ("com.google.android.youtube",)),
+    ("spotify", ("com.spotify.music",)),
+    ("netflix", ("com.netflix.mediaclient",)),
+    ("chrome", ("com.android.chrome",)),
+    ("firefox", ("org.mozilla.firefox",)),
+    ("brave", ("com.brave.browser",)),
+    ("gmail", ("com.google.android.gm",)),
+    ("outlook", ("com.microsoft.office.outlook",)),
+    ("maps", ("com.google.android.apps.maps",)),
+    ("photos", ("com.google.android.apps.photos",)),
+    ("drive", ("com.google.android.apps.docs",)),
+    ("play_store", ("com.android.vending",)),
+    ("amazon", ("com.amazon.mShop.android.shopping",)),
+    ("paypal", ("com.paypal.android.p2pmobile",)),
+    ("snapchat", ("com.snapchat.android",)),
+    ("pinterest", ("com.pinterest",)),
+    ("linkedin", ("com.linkedin.android",)),
+    ("google_phone", ("com.google.android.dialer",)),
+    ("google_calendar", ("com.google.android.calendar",)),
+    ("generic_camera", ("generic_camera",)),
+    ("generic_settings", ("generic_settings",)),
+    ("google_chrome", ("google_chrome",)),
+)
+
+def identify_brand(label: str, package: str, drawable: str) -> str | None:
+    haystack = f"{package} {drawable} {label}".lower()
+    for brand, package_ids in BRAND_PACKAGES:
+        if any(package_id in haystack for package_id in package_ids):
+            return brand
+    return None
+
+
+def draw_brand(draw: ImageDraw.ImageDraw, brand: str) -> None:
+    """Draw compact, original monochrome interpretations of recognizable app marks."""
+    white = GLYPH
+    w = q(7)
+    if brand == "whatsapp":
+        draw.ellipse((q(30),q(25),q(162),q(157)), outline=white, width=w)
+        draw.polygon([(q(43),q(139)),(q(28),q(171)),(q(68),q(158))], fill=white)
+        draw.arc((q(61),q(55),q(137),q(137)), 35, 300, fill=white, width=q(13))
+        draw.line((q(70),q(65),q(87),q(83)), fill=white, width=q(12))
+        draw.line((q(111),q(108),q(130),q(126)), fill=white, width=q(12))
+    elif brand == "telegram":
+        draw.polygon([(q(24),q(91)),(q(166),q(35)),(q(137),q(158)),(q(99),q(125)),(q(77),q(147)),(q(73),q(108))], fill=white)
+        draw.polygon([(q(73),q(108)),(q(143),q(62)),(q(99),q(125))], fill=BACKGROUND)
+    elif brand == "signal":
+        draw.rounded_rectangle((q(26),q(24),q(166),q(151)), radius=q(58), outline=white, width=w)
+        draw.polygon([(q(49),q(137)),(q(37),q(171)),(q(83),q(147))], fill=white)
+        for box in ((q(57),q(51),q(135),q(129)),(q(70),q(64),q(122),q(116))):
+            draw.arc(box, 205, 335, fill=white, width=q(6))
+    elif brand == "discord":
+        draw.rounded_rectangle((q(25),q(42),q(167),q(145)), radius=q(35), outline=white, width=w)
+        draw.arc((q(50),q(31),q(146),q(109)), 190, 350, fill=white, width=q(9))
+        for x in (q(70),q(122)):
+            draw.ellipse((x-q(7),q(84),x+q(7),q(98)), fill=white)
+        draw.arc((q(62),q(91),q(134),q(137)), 15, 165, fill=white, width=q(6))
+    elif brand == "instagram":
+        draw.rounded_rectangle((q(27),q(27),q(165),q(165)), radius=q(39), outline=white, width=q(11))
+        draw.ellipse((q(61),q(61),q(131),q(131)), outline=white, width=q(10))
+        draw.ellipse((q(132),q(48),q(146),q(62)), fill=white)
+    elif brand == "facebook":
+        draw.line((q(112),q(164),q(112),q(76)), fill=white, width=q(25))
+        draw.arc((q(69),q(29),q(134),q(103)), 180, 285, fill=white, width=q(25))
+        draw.line((q(70),q(91),q(145),q(91)), fill=white, width=q(20))
+    elif brand == "messenger":
+        draw.rounded_rectangle((q(23),q(28),q(169),q(153)), radius=q(55), fill=white)
+        draw.polygon([(q(53),q(139)),(q(40),q(173)),(q(87),q(148))], fill=white)
+        draw.polygon([(q(47),q(111)),(q(87),q(72)),(q(112),q(95)),(q(151),q(66)),(q(111),q(120)),(q(86),q(98))], fill=(0,0,0,255))
+    elif brand == "reddit":
+        draw.ellipse((q(30),q(45),q(162),q(158)), outline=white, width=w)
+        draw.line((q(96),q(47),q(111),q(22),q(139),q(30)), fill=white, width=q(7))
+        draw.ellipse((q(131),q(19),q(147),q(35)), fill=white)
+        for x in (q(68),q(124)):
+            draw.ellipse((x-q(7),q(84),x+q(7),q(98)), fill=white)
+        draw.arc((q(65),q(87),q(128),q(137)), 15, 165, fill=white, width=q(6))
+    elif brand == "x":
+        draw.line((q(35),q(29),q(155),q(167)), fill=white, width=q(17))
+        draw.line((q(153),q(29),q(39),q(167)), fill=white, width=q(17))
+    elif brand == "tiktok":
+        draw.line((q(105),q(31),q(105),q(125)), fill=white, width=q(17))
+        draw.line((q(105),q(42),q(146),q(67)), fill=white, width=q(17))
+        draw.ellipse((q(44),q(107),q(96),q(159)), fill=white)
+    elif brand == "youtube":
+        draw.rounded_rectangle((q(22),q(42),q(170),q(150)), radius=q(28), outline=white, width=q(10))
+        draw.polygon([(q(78),q(66)),(q(78),q(126)),(q(132),q(96))], fill=white)
+    elif brand == "spotify":
+        draw.ellipse((q(23),q(23),q(169),q(169)), outline=white, width=q(9))
+        draw.arc((q(47),q(53),q(145),q(113)), 205, 335, fill=white, width=q(10))
+        draw.arc((q(56),q(82),q(137),q(130)), 205, 335, fill=white, width=q(8))
+        draw.arc((q(67),q(108),q(127),q(145)), 205, 335, fill=white, width=q(7))
+    elif brand == "netflix":
+        draw.polygon([(q(40),q(27)),(q(72),q(27)),(q(121),q(132)),(q(121),q(27)),(q(153),q(27)),(q(153),q(165)),(q(119),q(165)),(q(72),q(65)),(q(72),q(165)),(q(40),q(165))], fill=white)
+    elif brand in ("chrome","google_chrome"):
+        draw.ellipse((q(24),q(24),q(168),q(168)), outline=white, width=q(10))
+        draw.ellipse((q(72),q(72),q(120),q(120)), outline=white, width=q(9))
+        draw.line((q(96),q(96),q(157),q(96)), fill=white, width=q(8))
+        draw.line((q(96),q(96),q(66),q(43)), fill=white, width=q(8))
+        draw.line((q(96),q(96),q(66),q(149)), fill=white, width=q(8))
+    elif brand == "firefox":
+        draw.ellipse((q(35),q(39),q(158),q(162)), outline=white, width=q(9))
+        draw.polygon([(q(103),q(25)),(q(145),q(43)),(q(127),q(69)),(q(164),q(79)),(q(143),q(118)),(q(99),q(145)),(q(55),q(119)),(q(39),q(76)),(q(73),q(87))], fill=white)
+        draw.ellipse((q(70),q(73),q(122),q(125)), fill=BACKGROUND)
+    elif brand == "brave":
+        draw.polygon([(q(48),q(25)),(q(144),q(25)),(q(166),q(62)),(q(146),q(145)),(q(96),q(174)),(q(46),q(145)),(q(26),q(62))], outline=white, width=q(10))
+        draw.polygon([(q(59),q(75)),(q(84),q(61)),(q(96),q(83)),(q(108),q(61)),(q(133),q(75)),(q(119),q(122)),(q(96),q(139)),(q(73),q(122))], outline=white, width=q(7))
+    elif brand == "gmail":
+        draw.rounded_rectangle((q(24),q(43),q(168),q(151)), radius=q(14), outline=white, width=q(9))
+        draw.line((q(32),q(54),q(96),q(108),q(160),q(54)), fill=white, width=q(11))
+        draw.line((q(32),q(143),q(32),q(54)), fill=white, width=q(10))
+        draw.line((q(160),q(143),q(160),q(54)), fill=white, width=q(10))
+    elif brand == "outlook":
+        draw.rounded_rectangle((q(53),q(32),q(166),q(160)), radius=q(12), outline=white, width=q(8))
+        draw.line((q(57),q(57),q(110),q(99),q(162),q(57)), fill=white, width=q(8))
+        draw.rounded_rectangle((q(23),q(62),q(99),q(130)), radius=q(12), fill=white)
+        draw.ellipse((q(48),q(78),q(75),q(112)), outline=(0,0,0,255), width=q(6))
+    elif brand == "maps":
+        draw.ellipse((q(44),q(22),q(148),q(126)), outline=white, width=q(10))
+        draw.polygon([(q(47),q(100)),(q(96),q(177)),(q(145),q(100))], fill=white)
+        draw.ellipse((q(80),q(58),q(112),q(90)), fill=(0,0,0,255))
+    elif brand == "photos":
+        for angle in range(0,360,90):
+            draw.pieslice((q(45),q(45),q(147),q(147)), angle, angle+82, fill=white)
+    elif brand in ("drive","play_store"):
+        draw.polygon([(q(71),q(26)),(q(113),q(26)),(q(169),q(127)),(q(148),q(163)),(q(96),q(71)),(q(44),q(163)),(q(23),q(127))], outline=white, width=q(9))
+        if brand == "play_store":
+            draw.polygon([(q(72),q(47)),(q(146),q(96)),(q(72),q(145))], outline=white, width=q(9))
+    elif brand == "amazon":
+        draw.arc((q(30),q(34),q(160),q(140)), 205, 335, fill=white, width=q(10))
+        draw.arc((q(31),q(93),q(162),q(169)), 20, 155, fill=white, width=q(8))
+        draw.polygon([(q(145),q(143)),(q(166),q(146)),(q(151),q(163))], fill=white)
+    elif brand == "paypal":
+        draw.rounded_rectangle((q(57),q(25),q(127),q(163)), radius=q(12), outline=white, width=q(12))
+        draw.polygon([(q(82),q(48)),(q(140),q(48)),(q(128),q(101)),(q(72),q(101))], fill=white)
+        draw.line((q(44),q(164),q(69),q(57)), fill=white, width=q(9))
+    elif brand == "snapchat":
+        draw.polygon([(q(96),q(24)),(q(127),q(39)),(q(137),q(83)),(q(160),q(112)),(q(143),q(126)),(q(152),q(151)),(q(96),q(164)),(q(40),q(151)),(q(49),q(126)),(q(32),q(112)),(q(55),q(83)),(q(65),q(39))], outline=white, width=q(9))
+        for x in (q(76),q(116)):
+            draw.ellipse((x-q(5),q(92),x+q(5),q(102)), fill=white)
+    elif brand == "pinterest":
+        draw.ellipse((q(24),q(24),q(168),q(168)), outline=white, width=q(9))
+        draw.line((q(80),q(159),q(99),q(96),q(116),q(74)), fill=white, width=q(13))
+        draw.arc((q(75),q(52),q(137),q(122)), 170, 350, fill=white, width=q(11))
+    elif brand == "linkedin":
+        draw.rounded_rectangle((q(25),q(25),q(167),q(167)), radius=q(12), outline=white, width=q(9))
+        draw.ellipse((q(48),q(53),q(67),q(72)), fill=white)
+        draw.line((q(57),q(84),q(57),q(142)), fill=white, width=q(12))
+        draw.line((q(91),q(84),q(91),q(142)), fill=white, width=q(12))
+        draw.arc((q(83),q(76),q(144),q(143)), 180, 360, fill=white, width=q(12))
+    elif brand == "google_phone":
+        draw.arc((q(37),q(35),q(155),q(160)), 38, 322, fill=white, width=q(11))
+        draw.rounded_rectangle((q(35),q(37),q(69),q(78)), radius=q(10), fill=white)
+        draw.rounded_rectangle((q(123),q(119),q(158),q(158)), radius=q(10), fill=white)
+    elif brand == "google_calendar":
+        draw.rounded_rectangle((q(35),q(42),q(157),q(153)), radius=q(13), outline=white, width=q(6))
+        draw.line((q(36),q(77),q(156),q(77)), fill=white, width=q(6))
+        draw.line((q(67),q(31),q(67),q(58)), fill=white, width=q(7))
+        draw.line((q(125),q(31),q(125),q(58)), fill=white, width=q(7))
+        draw.rounded_rectangle((q(65),q(94),q(127),q(136)), radius=q(5), fill=white)
+    elif brand == "generic_camera":
+        draw.rounded_rectangle((q(31),q(57),q(161),q(147)), radius=q(17), outline=white, width=q(5))
+        draw.rounded_rectangle((q(53),q(42),q(91),q(62)), radius=q(6), fill=white)
+        draw.ellipse((q(70),q(73),q(122),q(125)), outline=white, width=q(5))
+        draw.ellipse((q(87),q(90),q(105),q(108)), fill=white)
+    elif brand in ("generic_settings",):
+        draw.ellipse((q(53),q(53),q(139),q(139)), outline=white, width=q(8))
+        for angle in range(0,360,60):
+            import math
+            a=math.radians(angle)
+            draw.line((q(96+44*math.cos(a)),q(96+44*math.sin(a)),q(96+61*math.cos(a)),q(96+61*math.sin(a))), fill=white, width=q(10))
+        draw.ellipse((q(81),q(81),q(111),q(111)), fill=BACKGROUND)
+
+def render_icon(label: str, package: str, drawable: str) -> tuple[Image.Image, str, str]:
+    """Render a recognizable brand mark or a shared semantic family pictogram."""
     family = classify(label, package, drawable)
+    brand = identify_brand(label, package, drawable)
+    identity = brand or f"family_{family}"
     digest = hashlib.sha256(f"{package}|{drawable}|{label}".encode("utf-8")).digest()
-
-    glyph = Image.new("RGBA", (CANVAS, CANVAS), TRANSPARENT)
-    draw_symbol(ImageDraw.Draw(glyph), family, digest, drawable)
-    bounds = glyph.getbbox()
-    if bounds:
-        glyph = glyph.crop(bounds)
+    canvas = Image.new("RGBA", (CANVAS, CANVAS), TRANSPARENT)
+    draw = ImageDraw.Draw(canvas)
+    if brand:
+        draw_brand(draw, brand)
     else:
-        raise ValueError(f"Generated empty glyph for {package or drawable}")
+        draw_symbol(draw, family, digest, drawable)
+    image = canvas.resize((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
+    return image, family, identity
 
-    # Each app receives a stable construction selected from 12 frame geometries,
-    # 13 optical scales, 3 stroke weights and 81 optical offsets. The result is
-    # thousands of possible compositions without changing the semantic glyph.
-    frame_style = digest[0] % 12
-    scale_percent = 60 + (digest[1] % 13)
-    target = int(ICON_SIZE * scale_percent / 100)
-    glyph = glyph.resize((target, target), Image.Resampling.LANCZOS)
 
-    frame_canvas = Image.new("RGBA", (CANVAS, CANVAS), TRANSPARENT)
-    frame_draw = ImageDraw.Draw(frame_canvas)
-    frame_width = q(2 + (digest[2] % 3))
-    draw_identity_frame(frame_draw, frame_style, frame_width)
-    layer = frame_canvas.resize((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
-
-    offset_x = int((digest[3] % 9) - 4)
-    offset_y = int((digest[4] % 9) - 4)
-    position = (
-        (ICON_SIZE - target) // 2 + offset_x,
-        (ICON_SIZE - target) // 2 + offset_y,
-    )
-    layer.alpha_composite(glyph, dest=position)
-    return layer, family
+def write_drawable_alias(drawable: str, artwork: str, destination: Path) -> None:
+    """Point each appfilter drawable to a deduplicated shared WebP artwork file."""
+    root = ET.Element("bitmap", {
+        "xmlns:android": "http://schemas.android.com/apk/res/android",
+        "android:src": f"@drawable/{artwork}",
+        "android:gravity": "center",
+    })
+    write_xml(root, destination)
 
 
 def write_normal_icon_wrapper(drawable: str, destination: Path) -> None:
@@ -449,19 +622,31 @@ def main() -> int:
     drawable_dir = PACK / "drawable-nodpi"
     drawable_dir.mkdir(parents=True, exist_ok=True)
     families: Counter[str] = Counter()
-    unique_artwork: set[str] = set()
-
     wrapper_dir = PACK / "drawable"
     wrapper_dir.mkdir(parents=True, exist_ok=True)
 
+    artwork_names: dict[str, str] = {}
+    artwork_by_identity: dict[str, str] = {}
+    unique_artwork: set[str] = set()
+    brand_identities: set[str] = set()
+
     for drawable, (_, label, package) in sorted(drawable_to_data.items()):
-        mask_icon, family = render_icon(label, package, drawable)
+        image, family, identity = render_icon(label, package, drawable)
         families[family] += 1
-        unique_artwork.add(hashlib.sha256(mask_icon.tobytes()).hexdigest())
-        save_webp(mask_icon, drawable_dir / f"{drawable}.webp")
-        write_normal_icon_wrapper(
+        if identity not in artwork_by_identity:
+            artwork_hash = hashlib.sha256(image.tobytes()).hexdigest()[:16]
+            artwork_name = f"art_{artwork_hash}"
+            artwork_by_identity[identity] = artwork_name
+            save_webp(image, drawable_dir / f"{artwork_name}.webp")
+            unique_artwork.add(artwork_hash)
+        artwork_name = artwork_by_identity[identity]
+        artwork_names[drawable] = artwork_name
+        if identity in {name for name, _ in BRAND_PACKAGES}:
+            brand_identities.add(identity)
+        write_drawable_alias(
             drawable,
-            wrapper_dir / f"icon_{drawable}.xml",
+            artwork_name,
+            wrapper_dir / f"{drawable}.xml",
         )
 
     appfilter = ET.Element("resources")
@@ -482,28 +667,18 @@ def main() -> int:
         })
     write_xml(themed_map, PACK / "xml" / "grayscale_icon_map.xml")
 
-    uniqueness_ratio = len(unique_artwork) / max(1, len(drawable_to_data))
-    if uniqueness_ratio < 0.90:
-        raise SystemExit(
-            f"Only {len(unique_artwork)} distinct rendered artworks for "
-            f"{len(drawable_to_data)} drawable identities ({uniqueness_ratio:.1%}); "
-            "at least 90% must be visually distinct."
-        )
-
     print(f"NOTHINK_APP_MAPPINGS={len(component_to_drawable)}")
     print(f"NOTHINK_DRAWABLE_IDENTITIES={len(drawable_to_data)}")
     print(f"NOTHINK_DISTINCT_RENDERED_ARTWORK={len(unique_artwork)}")
-    print(f"NOTHINK_RENDERED_ARTWORK_UNIQUENESS={uniqueness_ratio:.1%}")
+    print(f"NOTHINK_BRAND_SPECIFIC_ARTWORK={len(brand_identities)}")
+    print(f"NOTHINK_SHARED_SEMANTIC_FAMILIES={len({f for f in families})}")
     print("NOTHINK_ARTWORK_STYLE=BLACK_NORMAL_TILE_WHITE_GLYPH_AND_THEME_TINTABLE_ALPHA_MASK")
     print("NOTHINK_NORMAL_ICON_BACKGROUND=PURE_BLACK")
     print("NOTHINK_NORMAL_ICON_GLYPH=PURE_WHITE")
     print("NOTHINK_THEMED_ICON_BACKGROUND=TRANSPARENT_SYSTEM_TINTED")
     print("NOTHINK_BENCHMARK_CUSTOM_ARTWORK=6")
-    print("NOTHINK_PER_APP_FRAME_STYLES=12")
-    print("NOTHINK_PER_APP_OPTICAL_SCALES=13")
-    print("NOTHINK_PER_APP_STROKE_VARIANTS=3")
-    print("NOTHINK_PER_APP_CONSTRUCTION_COMBINATIONS=37908")
-    print("NOTHINK_SHARED_FAMILY_GLYPHS_REMAIN=1")
+    print("NOTHINK_RANDOM_IDENTITY_FRAMES=0")
+    print("NOTHINK_SHARED_FAMILY_ARTWORK=1")
     print("NOTHINK_LETTER_INITIALS_USED=0")
     print("NOTHINK_UPSTREAM_ARTWORK_USED=0")
     for family, count in sorted(families.items()):

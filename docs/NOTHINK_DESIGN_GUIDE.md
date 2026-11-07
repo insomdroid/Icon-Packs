@@ -27,8 +27,8 @@ These references inform the visual direction; Nothink remains an independent, un
 | Collection consistency | One coherent visual family |
 | Per-icon variation | Controlled; silhouettes may differ when the app identity requires it |
 | Abstraction | Recognizable simplification; preserve the app's recognizable meaning |
-| Normal icon background | Transparent |
-| Normal icon glyph | Neutral transparent alpha mask; launcher tinting supplies theme color where supported |
+| Normal icon background | Pure black, full-bleed tile; launcher applies its icon shape mask |
+| Normal icon glyph | Pure white, ensuring contrast in light and dark launcher surfaces |
 | Color palette | No baked-in glyph color for themed assets; no red accents, gradients, shadows, or colored decoration |
 | Dot-matrix | Not used |
 | Canvas composition | Medium / balanced; preserve comfortable transparent space |
@@ -53,11 +53,11 @@ These references inform the visual direction; Nothink remains an independent, un
 
 ### Normal artwork
 
-- Transparent background.
-- Use a neutral alpha mask; do not bake white or another fixed glyph color into artwork intended for Android theme tinting.
-- No fixed background color.
-- No gray, red, gradients, shadows, or other color accents.
+- Use a pure-black full-bleed tile background with a pure-white glyph. This gives classic icon-pack launchers such as Nova reliable contrast in both light and dark modes.
+- The launcher may clip the square tile to its configured icon shape.
+- Keep the foreground symbol itself monochrome, with no gray, red, gradients, shadows, or colored decoration.
 - Solid and outline components follow the same medium-weight construction system.
+- The generated Android layer-list wrapper combines the black background and white-tinted transparent glyph mask; the glyph mask is stored once and reused by themed icons.
 
 ### Themed artwork
 
@@ -66,7 +66,7 @@ These references inform the visual direction; Nothink remains an independent, un
 - No baked-in color, fixed background, red accent, or decorative dot-matrix.
 - Themed artwork must preserve the identity and silhouette of its corresponding normal icon.
 
-The app's own adaptive launcher icon is separate from the app icons in the pack. Its foreground, background, and monochrome layers must be reviewed independently and must not be confused with the transparent app-icon artwork rule.
+The app's own adaptive launcher icon is separate from the app icons in the pack. Its foreground, background, and monochrome layers must be reviewed independently. The appfilter's normal icon wrapper is also separate from the transparent monochrome mask used for Android themed icons.
 
 ## 5. Custom artwork workflow
 
@@ -101,8 +101,8 @@ Benchmark artwork must be custom-designed and reviewed before its construction r
 
 An artwork set is not accepted merely because the APK compiles. Review must confirm:
 
-- Artwork has transparent backgrounds and neutral alpha-mask pixels; no fixed glyph color is baked into theme-tintable assets.
-- Themed icons have transparent backgrounds and a single monochrome glyph suitable for tinting.
+- Normal appfilter icons render as a pure-black tile with a pure-white glyph, retaining contrast in dark mode.
+- Themed icons use transparent neutral alpha-mask pixels and a single monochrome glyph suitable for system/launcher tinting.
 - No red pixels, gray fills, gradients, shadows, or dot-matrix details are present.
 - No accidental clipping or unexplained decorative marks appear.
 - The symbol is recognizable at launcher size.
@@ -114,7 +114,7 @@ A passing automated check cannot replace visual review.
 
 ## 8. Implementation status
 
-The generator has been migrated away from the former dark background, red accents, and dot-matrix decorations. Generated artwork now uses transparent neutral alpha masks intended for launcher theme tinting; no fixed white glyph color is baked into the artwork. The six benchmark drawable identifiers have individually authored artwork: `generic_camera`, `google_phone`, `google_chrome`, `google_calendar`, `spotify`, and `generic_settings`.
+The generator stores one transparent neutral alpha-mask WebP per pictogram. Standard appfilter entries use generated layer-list wrappers that place the mask as a white glyph on a pure-black tile, so icons remain visible in dark mode even in launchers that do not tint classic icon-pack artwork. Android themed-icon mappings point directly to the transparent mask and remain system-tintable. The six benchmark drawable identifiers have individually authored artwork: `generic_camera`, `google_phone`, `google_chrome`, `google_calendar`, `spotify`, and `generic_settings`.
 
 **The collection is not yet fully custom-designed.** The remaining mapped apps still use the legacy semantic-family artwork, including a hash-varied abstract fallback. Those assets are not approved as final custom artwork under this guide. A successful APK build or automated color/transparency check does not mean the full collection has passed visual design review. Do not describe the full pack as complete until every mapped identity has been individually reviewed and its artwork replaced or explicitly approved.
 

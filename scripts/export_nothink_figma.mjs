@@ -22,7 +22,7 @@ try {
     const name = typeof node.name === "string" ? node.name.trim() : "";
     const width = Number(node.size?.x ?? 0);
     const height = Number(node.size?.y ?? 0);
-    if (!id || !name || !width || !height || width > 1024 || height > 1024) continue;
+    const kind = node.type;\n    const renderableContainer = kind === "FRAME" || kind === "COMPONENT" || kind === "INSTANCE" || kind === "GROUP" || kind === 3 || kind === 4 || kind === 15 || kind === 16;\n    if (!id || !name || !renderableContainer || width < 12 || height < 12 || width > 1024 || height > 1024) continue;
     const key = id;
     if (seen.has(key)) continue;
     seen.add(key);

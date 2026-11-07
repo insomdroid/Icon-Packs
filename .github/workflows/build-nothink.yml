@@ -45,9 +45,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --location \\
-            "https://raw.githubusercontent.com/LawnchairLauncher/lawnicons/$LAWNICONS_REF/app/assets/appfilter.xml" \\
-            --output "$RUNNER_TEMP/lawnicons-appfilter.xml"
+          curl --fail --silent --show-error --location "https://raw.githubusercontent.com/LawnchairLauncher/lawnicons/$LAWNICONS_REF/app/assets/appfilter.xml" --output "$RUNNER_TEMP/lawnicons-appfilter.xml"
           test -s "$RUNNER_TEMP/lawnicons-appfilter.xml"
 
       - name: Draw original Nothink artwork for all mapped apps

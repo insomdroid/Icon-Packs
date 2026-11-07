@@ -1,18 +1,29 @@
-name: Build KitKat Icon Pack
+name: Build KitKat Release APK
 
 on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+      - '**/*.md'
+      - 'docs/**'
+      - 'references/**'
+      - 'reference/**'
+      - 'reference-images/**'
+      - 'docs/references/**'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: kitkat-icon-pack-${{ github.ref }}
+  group: kitkat-release-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    name: Build KitKat APK
+    name: Build KitKat Release APK
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,13 +40,14 @@ jobs:
         with:
           gradle-version: '8.13'
 
-      - name: Build KitKat APK
-        run: gradle --no-daemon :pack-kitkat:assembleDebug
+      - name: Build release variant
+        run: gradle --no-daemon :pack-kitkat:assembleRelease
 
-      - name: Upload KitKat APK
+      - name: Upload release APK
         uses: actions/upload-artifact@v4
         with:
-          name: kitkat-icon-pack
-          path: pack-kitkat/build/outputs/apk/debug/pack-kitkat-debug.apk
+          name: kitkat-release-apk
+          path: pack-kitkat/build/outputs/apk/release/pack-kitkat-release-unsigned.apk
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 7
+          compression-level: 0

@@ -204,14 +204,14 @@ def main() -> int:
     appfilter = ET.Element("resources")
     for component, (drawable, label) in sorted(component_to_drawable.items()):
         ET.SubElement(appfilter, "item", {
-            "component": component, "drawable": drawable, "name": label
+            "component": component, "drawable": drawable
         })
     write_xml(appfilter, PACK / "xml" / "appfilter.xml")
     write_xml(appfilter, ROOT / "pack-nothing" / "src" / "main" / "assets" / "appfilter.xml")
 
     drawable_index = ET.Element("resources")
     for drawable, (_, label, _) in sorted(drawable_to_data.items()):
-        ET.SubElement(drawable_index, "item", {"drawable": drawable, "name": label})
+        ET.SubElement(drawable_index, "item", {"drawable": drawable})
     write_xml(drawable_index, PACK / "xml" / "drawable.xml")
 
     themed_map = ET.Element("icons")

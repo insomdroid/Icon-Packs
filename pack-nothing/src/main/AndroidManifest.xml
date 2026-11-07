@@ -9,6 +9,7 @@
         <meta-data android:name="com.anddoes.launcher.THEME" android:resource="@xml/appfilter" />
         <meta-data android:name="com.teslacoilsw.launcher.THEME" android:resource="@xml/appfilter" />
         <meta-data android:name="com.actionlauncher.THEME" android:resource="@xml/appfilter" />
+        <meta-data android:name="com.novalauncher.THEME" android:resource="@xml/appfilter" />
         <meta-data android:name="app.lawnchair.THEME" android:resource="@xml/appfilter" />
         <activity android:name=".PackInfoActivity" android:exported="true">
             <intent-filter>

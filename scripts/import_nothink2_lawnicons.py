@@ -46,13 +46,15 @@ def main():
         if not component or not drawable:
             continue
         name = safe_name(drawable)
-        svg = svgs / (drawable + ".svg")
-        if not svg.is_file():
-            continue
-        cairosvg.svg2png(bytestring=white_svg(svg.read_text(encoding="utf-8")),
-                         write_to=str(glyphs / (name + "_glyph.png")),
-                         output_width=256, output_height=256)
         if name not in done:
+            svg = svgs / (drawable + ".svg")
+            if not svg.is_file():
+                continue
+            cairosvg.svg2png(
+                bytestring=white_svg(svg.read_text(encoding="utf-8")),
+                write_to=str(glyphs / (name + "_glyph.png")),
+                output_width=192, output_height=192
+            )
             layer = ET.Element("layer-list")
             bg_item = ET.SubElement(layer, "item")
             bg_shape = ET.SubElement(bg_item, "shape", {ANDROID + "shape": "rectangle"})
@@ -63,10 +65,12 @@ def main():
             ET.SubElement(fg_item, "bitmap", {
                 ANDROID + "src": "@drawable/" + name + "_glyph",
                 ANDROID + "gravity": "center", ANDROID + "filter": "true"})
-            ET.ElementTree(layer).write(wrappers / (name + ".xml"),
-                                        encoding="utf-8", xml_declaration=True)
+            ET.ElementTree(layer).write(
+                wrappers / (name + ".xml"), encoding="utf-8", xml_declaration=True
+            )
             ET.SubElement(drawable_list, "item", {"drawable": name})
             done.add(name)
+
         ET.SubElement(appfilter, "item", {"component": component, "drawable": name})
         match = re.search(r"ComponentInfo\{([^/]+)/", component)
         if match and match.group(1) not in packages:

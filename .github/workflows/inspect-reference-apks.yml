@@ -30,6 +30,12 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install Pillow for image previews
+        run: python3 -m pip install --disable-pip-version-check Pillow
+
+      - name: Extract and inventory the uploaded Jelly Bean ZIP archives
+        run: python3 scripts/inspect_jellybean_icon_archives.py
+
       - name: Install Android build tools
         shell: bash
         run: |
@@ -39,6 +45,14 @@ jobs:
 
       - name: Inspect uploaded APKs without installing them
         run: python3 scripts/inspect_uploaded_icon_apks.py
+
+      - name: Upload Jelly Bean extracted images, CSV inventory and contact sheets
+        uses: actions/upload-artifact@v4
+        with:
+          name: jellybean-icon-archive-inspection
+          path: build/jellybean-archive-inspection/
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Upload inspection report and extracted launcher icons
         uses: actions/upload-artifact@v4

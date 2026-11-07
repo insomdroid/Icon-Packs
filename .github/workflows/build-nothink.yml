@@ -151,8 +151,8 @@ jobs:
           sample = webp_sample.convert("RGBA")
           if sample.getpixel((0, 0))[3] != 0:
               raise SystemExit("Themed icon artwork must have a transparent background.")
-          if any(r > 180 and g < 100 and b < 100 and a > 0 for r, g, b, a in sample.getdata()):
-              raise SystemExit("Themed icon artwork must be monochrome and contain no fixed red accent.")
+          if any(a > 0 and (r, g, b) != (0, 0, 0) for r, g, b, a in sample.getdata()):
+              raise SystemExit("Themed artwork must be a neutral alpha mask; launcher supplies theme color.")
           normal = sorted((res / "drawable-nodpi").glob("*.webp"))
           normal = [item for item in normal if not item.name.startswith("themed_")]
           for path in normal:

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_pack"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.Material.NoActionBar">
+        <meta-data android:name="com.anddoes.launcher.THEME" android:resource="@xml/appfilter" />
+        <meta-data android:name="com.teslacoilsw.launcher.THEME" android:resource="@xml/appfilter" />
+        <meta-data android:name="com.actionlauncher.THEME" android:resource="@xml/appfilter" />
+        <meta-data android:name="com.novalauncher.THEME" android:resource="@xml/appfilter" />
+        <meta-data android:name="app.lawnchair.THEME" android:resource="@xml/appfilter" />
+        <activity android:name=".PackInfoActivity" android:exported="true" android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.adw.launcher.THEMES" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="org.icontheme.CHANGES_WITH_MATERIAL_YOU_COLORS" />
+                <category android:name="org.icontheme.CHANGES_WITH_DARK_MODE" />
+                <category android:name="org.icontheme.FALLBACK_TO_THEMED_ICON" />
+            </intent-filter>
+            <intent-filter><action android:name="org.adw.ActivityStarter.THEMES" /></intent-filter>
+            <intent-filter><action android:name="com.novalauncher.THEME" /></intent-filter>
+            <intent-filter><action android:name="com.anddoes.launcher.THEME" /></intent-filter>
+            <intent-filter><action android:name="com.teslacoilsw.launcher.THEME" /></intent-filter>
+            <intent-filter><action android:name="com.actionlauncher.THEME" /></intent-filter>
+            <intent-filter>
+                <action android:name="app.lawnchair.icons.THEMED_ICON" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

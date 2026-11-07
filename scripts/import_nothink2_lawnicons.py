@@ -46,7 +46,7 @@ def main():
         if not component or not drawable:
             continue
         name = safe_name(drawable)
-        svg = svgs / (name + ".svg")
+        svg = svgs / (drawable + ".svg")
         if not svg.is_file():
             continue
         cairosvg.svg2png(bytestring=white_svg(svg.read_text(encoding="utf-8")),

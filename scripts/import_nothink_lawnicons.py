@@ -125,7 +125,7 @@ def draw_icon(label: str, package: str, drawable: str) -> tuple[Image.Image, Ima
     tick_count = 2 + digest[6] % 4
     for index in range(tick_count):
         x = (62 + index * 13) * SCALE
-        y = (CANVAS - 61) * SCALE
+        y = (ICON_SIZE - 61) * SCALE
         length = (7 + digest[7 + index] % 8) * SCALE
         draw.line((x, y, x, y - length), fill=WHITE, width=2 * SCALE)
 

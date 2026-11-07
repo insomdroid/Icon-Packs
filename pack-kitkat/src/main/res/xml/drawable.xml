@@ -22,4 +22,14 @@
   <item drawable="spotify" name="spotify" />
   <item drawable="messenger" name="messenger" />
   <item drawable="whatsapp" name="whatsapp" />
+  <item drawable="facebook" name="facebook" />
+  <item drawable="soundcloud" name="soundcloud" />
+  <item drawable="snapchat" name="snapchat" />
+  <item drawable="word" name="word" />
+  <item drawable="excel" name="excel" />
+  <item drawable="powerpoint" name="powerpoint" />
+  <item drawable="onenote" name="onenote" />
+  <item drawable="skype" name="skype" />
+  <item drawable="pinterest" name="pinterest" />
+  <item drawable="hangouts" name="hangouts" />
 </resources>

@@ -124,7 +124,7 @@ def main() -> int:
         xml_write(alias, wrapper_dir / f"{package_drawable}.xml")
         layer = ET.Element("layer-list")
         bg_item = ET.SubElement(layer, "item")
-        shape = ET.SubElement(bg_item, "shape", {"android:shape": "rectangle"})
+        shape = ET.SubElement(bg_item, "shape", {ANDROID + "shape": "rectangle"})
         ET.SubElement(shape, "solid", {ANDROID + "color": "#FF000000"})
         ET.SubElement(layer, "item", {ANDROID + "drawable": f"@drawable/{package_drawable}"})
         xml_write(layer, wrapper_dir / f"icon_{package_drawable}.xml")

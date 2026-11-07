@@ -2,18 +2,18 @@
 
 ## Current implementation
 
-KitKat remains the only active deliverable. The CI importer now downloads nine verified Android 4.4.4 AOSP launcher icons from the `android-4.4.4_r2` source tag and places them in density-specific resource folders. The default XML artwork remains as fallback for all other mapped apps.
+KitKat remains the only active deliverable. The CI importer now downloads eight verified Android 4.4.4 AOSP launcher icons from the `android-4.4.4_r2` source tag and places them in density-specific resource folders. The default XML artwork remains as fallback for all other mapped apps.
 
 - **App mappings:** 2,073 unique component mappings adapted from Lawnicons.
 - **Mapping source:** `LawnchairLauncher/lawnicons`, `app/assets/appfilter.xml`, branch `develop`, commit `cd91ff0bd00ff0a6c9d606d1c326b451b6563506`.
 - **Build:** `gradle --no-daemon :pack-kitkat:assembleRelease`.
-- **Verified artwork:** Contacts, Messages, Settings, Camera, Calendar, Calculator, Mail, Browser, and Downloads are sourced from AOSP Android 4.4.4. See `third_party/aosp-android-4.4.4/README.md`.
+- **Verified artwork:** Messages, Settings, Camera, Calendar, Calculator, Mail, Browser, and Downloads are sourced from AOSP Android 4.4.4. See `third_party/aosp-android-4.4.4/README.md`.
 - **Remaining artwork:** other icons are temporary; third-party icons still need historical, app-specific sources. Do not label community artwork as official Android artwork.
 
 ## Artwork coverage checklist
 
 - [ ] phone
-- [x] contacts — original AOSP Android 4.4.4 icon
+- [ ] contacts — icon asset is not present in the pinned AOSP source tree
 - [x] messages — original AOSP Android 4.4.4 icon
 - [x] calendar — original AOSP Android 4.4.4 icon
 - [ ] clock

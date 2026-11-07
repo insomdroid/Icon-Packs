@@ -70,31 +70,7 @@ jobs:
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-36" "build-tools;36.0.0"
           echo "$ANDROID_HOME/build-tools/36.0.0" >> "$GITHUB_PATH"
 
-      - name: Configure persistent release signing key
-        shell: bash
-        env:
-          KEYSTORE_BASE64: ${{ secrets.NOTHINK_RELEASE_KEYSTORE_BASE64 }}
-          STORE_PASSWORD: ${{ secrets.NOTHINK_RELEASE_STORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.NOTHINK_RELEASE_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.NOTHINK_RELEASE_KEY_PASSWORD }}
-        run: |
-          set -euo pipefail
-          if [[ -z "$KEYSTORE_BASE64" || -z "$STORE_PASSWORD" || -z "$KEY_ALIAS" || -z "$KEY_PASSWORD" ]]; then
-            echo "::error::Configure the four persistent Nothink release-signing repository secrets before building an installable release."
-            exit 1
-          fi
-          KEYSTORE_PATH="$RUNNER_TEMP/nothink-release.jks"
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
-          test -s "$KEYSTORE_PATH"
-          keytool -list -keystore "$KEYSTORE_PATH" -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" >/dev/null
-          {
-            echo "NOTHINK_RELEASE_STORE_FILE=$KEYSTORE_PATH"
-            echo "NOTHINK_RELEASE_STORE_PASSWORD=$STORE_PASSWORD"
-            echo "NOTHINK_RELEASE_KEY_ALIAS=$KEY_ALIAS"
-            echo "NOTHINK_RELEASE_KEY_PASSWORD=$KEY_PASSWORD"
-          } >> "$GITHUB_ENV"
-
-      - name: Build optimized Nothink release APK
+      - name: Build optimized and automatically signed Nothink release APK
         run: gradle --no-daemon :pack-nothing:assembleRelease
 
       - name: Verify APK and generated artwork
@@ -103,6 +79,7 @@ jobs:
           set -euo pipefail
           APK="pack-nothing/build/outputs/apk/release/pack-nothing-release.apk"
           test -s "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
           test -s "pack-nothing/src/main/res/xml/appfilter.xml"
           test -s "pack-nothing/src/main/res/xml/drawable.xml"
           test -s "pack-nothing/src/main/res/xml/grayscale_icon_map.xml"

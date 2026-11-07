@@ -64,6 +64,11 @@ ASSETS = {
         "res/mipmap-xxhdpi/ic_launcher_browser.png",
         "drawable-xxhdpi",
     ),
+    "downloads": (
+        "platform_packages_providers_downloadprovider",
+        "res/mipmap-xxxhdpi/ic_launcher_download.png",
+        "drawable-xxxhdpi",
+    ),
 }
 
 

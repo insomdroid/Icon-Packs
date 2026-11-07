@@ -6,6 +6,7 @@ import hashlib
 import re
 import xml.etree.ElementTree as ET
 import zipfile
+import urllib.request
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -525,6 +526,50 @@ def main() -> None:
         matched_components.add(component)
         matched_artwork[resource] += 1
         matched_labels[resource].add(label)
+
+    # Extend mappings using the current Lawnicons app-only component catalogue.
+    # Only components with an exact/semantic match to an existing Jelly Bean
+    # archive filename are added; no generic or guessed artwork is assigned.
+    upstream_url = (
+        "https://raw.githubusercontent.com/LawnchairLauncher/lawnicons/"
+        "develop/app/assets/appfilter.xml"
+    )
+    try:
+        request = urllib.request.Request(
+            upstream_url,
+            headers={"User-Agent": "Insomdroid-Icon-Pack-Builder"},
+        )
+        with urllib.request.urlopen(request, timeout=45) as response:
+            upstream_root = ET.fromstring(response.read())
+        upstream_added = 0
+        existing_components = {
+            item.attrib.get("component") for item in appfilter.findall("item")
+        }
+        for item in upstream_root.findall("item"):
+            component = item.attrib.get("component", "").strip()
+            if not component or component in existing_components:
+                continue
+            label = item.attrib.get("name", "").strip()
+            if not label:
+                label = item.attrib.get("drawable", "").strip()
+            resource = artwork_by_label.get(normalize(label))
+            if resource is None:
+                resource = semantic_artwork(label, artwork_by_label)
+            if resource is None:
+                continue
+            ET.SubElement(appfilter, "item", {
+                "component": component,
+                "drawable": resource,
+                "name": label or Path(component.split("/", 1)[0]).name,
+            })
+            existing_components.add(component)
+            matched_components.add(component)
+            matched_artwork[resource] += 1
+            matched_labels[resource].add(label or component.split("/", 1)[0])
+            upstream_added += 1
+        print(f"Added {upstream_added} verified app components from Lawnicons catalogue.")
+    except Exception as exc:
+        raise SystemExit(f"Unable to update app mappings from Lawnicons catalogue: {exc}")
 
     ET.indent(appfilter, space="    ")
     APPFILTER_XML.write_text(

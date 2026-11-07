@@ -121,7 +121,10 @@ jobs:
               raise SystemExit(f"Only {len(mapped)} app mappings were generated.")
           if mapped - indexed:
               raise SystemExit(f"Mappings missing from drawable.xml: {sorted(mapped-indexed)[:10]}")
-          for wrapper_name in mapped:
+          for mapped_name in mapped:
+              if not mapped_name.startswith("icon_"):
+                  raise SystemExit(f"Unexpected appfilter drawable name: {mapped_name}")
+              wrapper_name = mapped_name.removeprefix("icon_")
               wrapper_path = res / "drawable" / f"{wrapper_name}.xml"
               if not wrapper_path.is_file():
                   raise SystemExit(f"Missing themed artwork alias: {wrapper_name}")

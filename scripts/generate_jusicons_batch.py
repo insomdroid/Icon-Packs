@@ -178,9 +178,35 @@ def public_resource_map(decoded):
         except Exception: pass
     return result
 
+def resolve_resource_alias(decoded, ref):
+    """Resolve values-based resource aliases such as <item type="mipmap">."""
+    match=re.fullmatch(r"@(?:[A-Za-z0-9_.]+:)?([A-Za-z0-9_]+)/([A-Za-z0-9_.]+)",ref)
+    if not match:
+        return ref
+    wanted_type,wanted_name=match.groups()
+    for values_file in (decoded/"res").glob("values*/*.xml"):
+        try:
+            root=ET.parse(values_file).getroot()
+        except Exception:
+            continue
+        for item in root.iter():
+            item_type=item.attrib.get("type") if lname(item.tag)=="item" else lname(item.tag)
+            if item_type==wanted_type and item.attrib.get("name")==wanted_name:
+                value=(item.text or "").strip()
+                if value.startswith("@"):
+                    return value
+    return ref
+
 def find_resource(decoded, ref, public_map):
-    if not ref: return None
-    ref=public_map.get(ref.strip(),ref.strip())
+    if not ref or ref=="@null": return None
+    ref=public_map.get(ref.strip().lower(),ref.strip())
+    seen=set()
+    for _ in range(8):
+        if ref in seen: break
+        seen.add(ref)
+        resolved=resolve_resource_alias(decoded,ref)
+        if resolved==ref: break
+        ref=public_map.get(resolved.strip().lower(),resolved.strip())
     match=re.fullmatch(r"@(?:[A-Za-z0-9_.]+:)?([A-Za-z0-9_]+)/([A-Za-z0-9_.]+)",ref)
     if not match: return None
     name=match.group(2); candidates=[]
@@ -376,6 +402,7 @@ def process_apk(group,label,package,apk,work,drawable_dir,apktool):
     key=hashlib.sha1(package.encode()).hexdigest()[:12]
     result={"group":group,"label":label,"package":package,"status":"failed"}
     errors=[]
+    base_info=None
     try:
         for candidate_index,base in enumerate(apk_candidates(apk,work,package)):
             decoded=work/(key+f"_decoded_{candidate_index}")
@@ -396,21 +423,37 @@ def process_apk(group,label,package,apk,work,drawable_dir,apktool):
                 if actual!=package:
                     errors.append(f"package mismatch: expected {package}, got {actual or 'unknown'}")
                     continue
-                components=find_launcher_components(manifest,actual)
-                if not components:
-                    errors.append("decoded split has no MAIN/LAUNCHER activity")
+
+                # The base APK owns the launcher component and app icon reference.
+                # Resource files can live in configuration splits, so inspect every
+                # decoded split using the base APK's icon reference.
+                if base_info is None:
+                    components=find_launcher_components(manifest,actual)
+                    if components:
+                        application=manifest.find("application")
+                        icon_ref=""
+                        if application is not None:
+                            icon_ref=application.attrib.get(ANDROID+"icon","")
+                            if not icon_ref or icon_ref=="@null":
+                                icon_ref=application.attrib.get(ANDROID+"roundIcon","")
+                        if icon_ref and icon_ref!="@null":
+                            base_info={"icon_ref":icon_ref,"components":components,
+                                       "public_map":public_resource_map(decoded),
+                                       "base_sha256":hashlib.sha256(base.read_bytes()).hexdigest()}
+                        else:
+                            errors.append("launcher APK has no usable icon or roundIcon reference")
+
+                if base_info is None:
+                    errors.append("decoded APK has no usable MAIN/LAUNCHER manifest")
                     continue
-                application=manifest.find("application")
-                icon_ref=""
-                if application is not None:
-                    icon_ref=application.attrib.get(ANDROID+"icon","") or application.attrib.get(ANDROID+"roundIcon","")
-                if not icon_ref:
-                    errors.append("application manifest has no icon or roundIcon reference")
-                    continue
-                image,adaptive=image_for_resource(decoded,icon_ref,public_resource_map(decoded))
+
+                merged_map=dict(base_info["public_map"])
+                merged_map.update(public_resource_map(decoded))
+                image,adaptive=image_for_resource(decoded,base_info["icon_ref"],merged_map)
                 if image is None:
-                    errors.append(f"could not render launcher icon resource {icon_ref}")
+                    errors.append(f"icon resource {base_info['icon_ref']} not present in split {base.name}")
                     continue
+
                 mono=mono_process(normalize(image,adaptive))
                 if mono is None:
                     errors.append("MonoProcessor returned empty artwork")
@@ -420,21 +463,22 @@ def process_apk(group,label,package,apk,work,drawable_dir,apktool):
                     errors.append("vector output is empty")
                     continue
                 name=drawable_name(package)
-                xml=('<?xml version="1.0" encoding="utf-8"?>\n'
-                     '<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">\n'
-                     '    <path android:fillColor="#FF121212" android:pathData="M24,2 A22,22 0 1,0 24,46 A22,22 0 1,0 24,2 Z" />\n'
-                     f'    <path android:fillColor="#FFFFFFFF" android:pathData="{path_data}" />\n</vector>\n')
+                xml=('<?xml version="1.0" encoding="utf-8"?>\\n'
+                     '<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">\\n'
+                     '    <path android:fillColor="#FF121212" android:pathData="M24,2 A22,22 0 1,0 24,46 A22,22 0 1,0 24,2 Z" />\\n'
+                     f'    <path android:fillColor="#FFFFFFFF" android:pathData="{path_data}" />\\n</vector>\\n')
                 (drawable_dir/f"{name}.xml").write_text(xml,encoding="utf-8")
-                result.update({"status":"generated","drawable":name,"components":components,"component_count":len(components),
+                result.update({"status":"generated","drawable":name,"components":base_info["components"],
+                               "component_count":len(base_info["components"]),
                                "icon_source":"adaptive_foreground" if adaptive else "application_icon",
-                               "apk_sha256":hashlib.sha256(base.read_bytes()).hexdigest(),
+                               "apk_sha256":base_info["base_sha256"],
                                "vector_path_characters":len(path_data),"selected_split":base.name})
                 return result
             except Exception as exc:
                 errors.append(f"split {candidate_index}: {exc}")
             finally:
                 shutil.rmtree(decoded,ignore_errors=True)
-        result["error"]=" | ".join(errors[-5:]) or "no usable APK split found"
+        result["error"]=" | ".join(errors[-8:]) or "no usable APK split or launcher icon found"
     except Exception as exc:
         result["error"]=str(exc)
     return result

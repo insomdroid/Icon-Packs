@@ -286,13 +286,32 @@ def draw_symbol(draw: ImageDraw.ImageDraw, family: str, digest: bytes, drawable:
             draw.line((q(43),q(143),q(43),q(49),q(149),q(49),q(149),q(143)), fill=white, width=w)
             draw.line((q(64),q(120),q(96),q(76),q(128),q(120)), fill=white, width=w)
 
-def render_icon(label: str, package: str, drawable: str) -> tuple[Image.Image, Image.Image, str]:
+def render_icon(label: str, package: str, drawable: str) -> tuple[Image.Image, str]:
     family = classify(label, package, drawable)
     layer = Image.new("RGBA", (CANVAS, CANVAS), TRANSPARENT)
     digest = hashlib.sha256(f"{package}|{drawable}|{label}".encode("utf-8")).digest()
     draw_symbol(ImageDraw.Draw(layer), family, digest, drawable)
     layer = layer.resize((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
-    return layer.copy(), layer.copy(), family
+    return layer, family
+
+
+def write_normal_icon_wrapper(drawable: str, destination: Path) -> None:
+    """Create a high-contrast normal icon: black tile with a white glyph.
+
+    The shared WebP remains a transparent neutral alpha mask. This wrapper
+    provides reliable contrast in classic icon-pack launchers such as Nova,
+    which do not necessarily tint standard appfilter artwork for dark mode.
+    Android themed icons continue to use the transparent mask directly.
+    """
+    root = ET.Element("layer-list", {"xmlns:android": "http://schemas.android.com/apk/res/android"})
+    background = ET.SubElement(root, "item")
+    shape = ET.SubElement(background, "shape", {"android:shape": "rectangle"})
+    ET.SubElement(shape, "solid", {"android:color": "#FF000000"})
+    ET.SubElement(root, "item", {
+        "android:drawable": f"@drawable/{drawable}",
+        "android:tint": "#FFFFFFFF",
+    })
+    write_xml(root, destination)
 
 
 def save_webp(image: Image.Image, destination: Path) -> None:
@@ -367,20 +386,27 @@ def main() -> int:
     drawable_dir.mkdir(parents=True, exist_ok=True)
     families: Counter[str] = Counter()
 
+    wrapper_dir = PACK / "drawable"
+    wrapper_dir.mkdir(parents=True, exist_ok=True)
+
     for drawable, (_, label, package) in sorted(drawable_to_data.items()):
-        static_icon, _, family = render_icon(label, package, drawable)
+        mask_icon, family = render_icon(label, package, drawable)
         families[family] += 1
-        save_webp(static_icon, drawable_dir / f"{drawable}.webp")
+        save_webp(mask_icon, drawable_dir / f"{drawable}.webp")
+        write_normal_icon_wrapper(
+            drawable,
+            wrapper_dir / f"icon_{drawable}.xml",
+        )
 
     appfilter = ET.Element("resources")
     for component, (drawable, _) in sorted(component_to_drawable.items()):
-        ET.SubElement(appfilter, "item", {"component": component, "drawable": drawable})
+        ET.SubElement(appfilter, "item", {"component": component, "drawable": f"icon_{drawable}"})
     write_xml(appfilter, PACK / "xml" / "appfilter.xml")
     write_xml(appfilter, ROOT / "pack-nothing" / "src" / "main" / "assets" / "appfilter.xml")
 
     drawable_index = ET.Element("resources")
     for drawable in sorted(drawable_to_data):
-        ET.SubElement(drawable_index, "item", {"drawable": drawable})
+        ET.SubElement(drawable_index, "item", {"drawable": f"icon_{drawable}"})
     write_xml(drawable_index, PACK / "xml" / "drawable.xml")
 
     themed_map = ET.Element("icons")
@@ -392,7 +418,10 @@ def main() -> int:
 
     print(f"NOTHINK_APP_MAPPINGS={len(component_to_drawable)}")
     print(f"NOTHINK_UNIQUE_PICTOGRAMS={len(drawable_to_data)}")
-    print("NOTHINK_ARTWORK_STYLE=THEME_TINTABLE_ALPHA_MASK")
+    print("NOTHINK_ARTWORK_STYLE=BLACK_NORMAL_TILE_WHITE_GLYPH_AND_THEME_TINTABLE_ALPHA_MASK")
+    print("NOTHINK_NORMAL_ICON_BACKGROUND=PURE_BLACK")
+    print("NOTHINK_NORMAL_ICON_GLYPH=PURE_WHITE")
+    print("NOTHINK_THEMED_ICON_BACKGROUND=TRANSPARENT_SYSTEM_TINTED")
     print("NOTHINK_BENCHMARK_CUSTOM_ARTWORK=6")
     print("NOTHINK_LEGACY_FAMILY_ARTWORK_REMAINS=1")
     print("NOTHINK_LETTER_INITIALS_USED=0")

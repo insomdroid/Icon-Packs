@@ -304,26 +304,37 @@ def drawable_name(package):
     return "jus_"+safe[:78]+"_"+hashlib.sha1(package.encode()).hexdigest()[:6]
 
 def download_apk(package, folder):
-    url=f"https://d.apkpure.com/b/APK/{package}?version=latest"
     target=folder/(hashlib.sha1(package.encode()).hexdigest()[:12]+".apk")
-    headers={"User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36"}
-    for attempt in range(3):
-        try:
-            with requests.get(url,headers=headers,stream=True,timeout=(25,180),allow_redirects=True) as response:
-                response.raise_for_status(); total=0
-                with target.open("wb") as out:
-                    for chunk in response.iter_content(1024*1024):
-                        if not chunk: continue
-                        total+=len(chunk)
-                        if total>350*1024*1024: raise RuntimeError("APK/XAPK exceeds 350 MB")
-                        out.write(chunk)
-            if not zipfile.is_zipfile(target): raise RuntimeError("response is not an APK/XAPK archive")
-            return response.url,target,""
-        except Exception as exc:
-            target.unlink(missing_ok=True)
-            if attempt==2: return url,None,str(exc)
-            time.sleep(2**attempt)
-    return url,None,"download failed"
+    headers={
+        "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
+        "Referer":"https://apkpure.com/",
+        "Accept":"*/*",
+    }
+    last_error="no APK variant found"
+    for file_type in ("APK","XAPK"):
+        url=f"https://d.apkpure.com/b/{file_type}/{package}?version=latest"
+        for attempt in range(2):
+            try:
+                with requests.get(url,headers=headers,stream=True,timeout=(15,60),allow_redirects=True) as response:
+                    response.raise_for_status()
+                    total=0
+                    with target.open("wb") as out:
+                        for chunk in response.iter_content(1024*1024):
+                            if not chunk:
+                                continue
+                            total+=len(chunk)
+                            if total>350*1024*1024:
+                                raise RuntimeError("APK/XAPK exceeds 350 MB")
+                            out.write(chunk)
+                if not zipfile.is_zipfile(target):
+                    raise RuntimeError("response is not an APK/XAPK archive")
+                return response.url,target,""
+            except Exception as exc:
+                last_error=str(exc)
+                target.unlink(missing_ok=True)
+                if attempt==0:
+                    time.sleep(1)
+    return url,None,last_error
 
 def extract_base_apk(downloaded,destination):
     with zipfile.ZipFile(downloaded) as archive:
@@ -380,12 +391,19 @@ def main():
     drawable_dir.mkdir(parents=True,exist_ok=True); xml_dir.mkdir(parents=True,exist_ok=True)
     work=Path(args.work); downloads_dir=work/"downloads"; downloads_dir.mkdir(parents=True,exist_ok=True)
     downloads={}
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
         futures={pool.submit(download_apk,row[2],downloads_dir):row[2] for row in CATALOG}
         for future in concurrent.futures.as_completed(futures):
             package=futures[future]
-            try: downloads[package]=future.result()
-            except Exception as exc: downloads[package]=("",None,str(exc))
+            try:
+                downloads[package]=future.result()
+                if downloads[package][1] is not None:
+                    print(f"DOWNLOAD_OK {package}",flush=True)
+                else:
+                    print(f"DOWNLOAD_FAIL {package}: {downloads[package][2]}",flush=True)
+            except Exception as exc:
+                downloads[package]=("",None,str(exc))
+                print(f"DOWNLOAD_FAIL {package}: {exc}",flush=True)
     results=[]
     for index,(group,label,package) in enumerate(CATALOG,1):
         url,apk,error=downloads.get(package,("",None,"download missing"))

@@ -4,13 +4,13 @@ This project imports the following original PNG application icons from the Andro
 
 | Pack drawable | AOSP source repository | Source resource |
 |---|---|---|
-| `contacts` | [platform_packages_apps_mms](https://github.com/aosp-mirror/platform_packages_apps_mms/tree/android-4.4.4_r2) | `res/mipmap-xxhdpi/ic_launcher_contacts.png` |
+| `contacts` | [platform_packages_apps_contacts](https://github.com/aosp-mirror/platform_packages_apps_contacts/tree/android-4.4.4_r2) | `res/mipmap-xxhdpi/ic_launcher_contacts.png` |
 | `messages` | [platform_packages_apps_mms](https://github.com/aosp-mirror/platform_packages_apps_mms/tree/android-4.4.4_r2) | `res/mipmap-xxhdpi/ic_launcher_smsmms.png` |
 | `settings` | [platform_packages_apps_settings](https://github.com/aosp-mirror/platform_packages_apps_settings/tree/android-4.4.4_r2) | `res/mipmap-xxxhdpi/ic_launcher_settings.png` |
 | `camera` | [platform_packages_apps_camera](https://github.com/aosp-mirror/platform_packages_apps_camera/tree/android-4.4.4_r2) | `res/mipmap-xxhdpi/ic_launcher_camera.png` |
 | `calendar` | [platform_packages_apps_calendar](https://github.com/aosp-mirror/platform_packages_apps_calendar/tree/android-4.4.4_r2) | `res/mipmap-xxhdpi/ic_launcher_calendar.png` |
 | `calculator` | [platform_packages_apps_calculator](https://github.com/aosp-mirror/platform_packages_apps_calculator/tree/android-4.4.4_r2) | `res/mipmap-xxxhdpi/ic_launcher_calculator.png` |
-| `mail` | [platform_packages_apps_email](https://github.com/aosp-mirror/platform_packages_apps_email/tree/android-4.4.4_r2) | `res/mipmap-xxhdpi/ic_launcher_email.png` |
+| `mail` | [platform_packages_apps_email](https://github.com/aosp-mirror/platform_packages_apps_email/tree/android-4.4.4_r2) | `res/mipmap-xxhdpi/ic_launcher_mail.png` |
 | `browser` | [platform_packages_apps_browser](https://github.com/aosp-mirror/platform_packages_apps_browser/tree/android-4.4.4_r2) | `res/mipmap-xxhdpi/ic_launcher_browser.png` |
 | `downloads` | [platform_packages_providers_downloadprovider](https://github.com/aosp-mirror/platform_packages_providers_downloadprovider/tree/android-4.4.4_r2) | `res/mipmap-xxxhdpi/ic_launcher_download.png` |
 

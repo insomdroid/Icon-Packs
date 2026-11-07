@@ -22,7 +22,7 @@ SCALE = 3
 CANVAS = ICON_SIZE * SCALE
 MIN_MAPPINGS = 3000
 BACKGROUND = (0, 0, 0, 0)
-WHITE = (255, 255, 255, 255)
+GLYPH = (0, 0, 0, 255)
 TRANSPARENT = (0, 0, 0, 0)
 STROKE = 12 * SCALE
 
@@ -84,7 +84,7 @@ def q(value: float) -> int:
 
 def draw_benchmark(draw: ImageDraw.ImageDraw, drawable: str) -> bool:
     """Individually authored benchmark marks on the shared conceptual grid."""
-    white = WHITE
+    white = GLYPH
     if drawable == "generic_camera":
         draw.rounded_rectangle((q(31), q(57), q(161), q(147)), radius=q(17), outline=white, width=q(5))
         draw.rounded_rectangle((q(53), q(42), q(91), q(62)), radius=q(6), fill=white)
@@ -131,9 +131,8 @@ def draw_benchmark(draw: ImageDraw.ImageDraw, drawable: str) -> bool:
 def draw_symbol(draw: ImageDraw.ImageDraw, family: str, digest: bytes, drawable: str) -> None:
     if draw_benchmark(draw, drawable):
         return
-    """Draw a bold, legible 192dp pictogram on a 3x working canvas."""
     w = STROKE
-    white = WHITE
+    white = GLYPH
     # All geometry stays inside a common optical box and uses a shared stroke.
     if family == "phone":
         draw.arc((q(43), q(40), q(149), q(151)), 35, 325, fill=white, width=w)
@@ -399,7 +398,7 @@ def main() -> int:
 
     print(f"NOTHINK_APP_MAPPINGS={len(component_to_drawable)}")
     print(f"NOTHINK_UNIQUE_PICTOGRAMS={len(drawable_to_data)}")
-    print("NOTHINK_ARTWORK_STYLE=MONOCHROME_TRANSPARENT")
+    print("NOTHINK_ARTWORK_STYLE=THEME_TINTABLE_ALPHA_MASK")
     print("NOTHINK_BENCHMARK_CUSTOM_ARTWORK=6")
     print("NOTHINK_LEGACY_FAMILY_ARTWORK_REMAINS=1")
     print("NOTHINK_LETTER_INITIALS_USED=0")

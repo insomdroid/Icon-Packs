@@ -1,4 +1,4 @@
-name: Build Nothink 100-App JusIcons Trial
+name: Build Nothink 50-App JusIcons Trial
 
 on:
   push:
@@ -20,12 +20,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: nothink-100-app-trial-v2-${{ github.ref }}
+  group: nothink-50-app-trial-v1-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    name: Extract 100 APK icons, generate monochrome artwork and build pack
+    name: Extract 50 APK icons, generate monochrome artwork and build pack
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
@@ -59,8 +59,8 @@ jobs:
           set -euo pipefail
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-36" "build-tools;36.0.0"
           echo "$ANDROID_HOME/build-tools/36.0.0" >> "$GITHUB_PATH"
-      - name: Download 100 application APKs and generate real monochrome icons
-        run: python scripts/generate_jusicons_batch.py --minimum 70 --apktool tools/apktool_3.0.3.jar
+      - name: Download 50 application APKs and generate real monochrome icons
+        run: python scripts/generate_jusicons_batch.py --minimum 35 --apktool tools/apktool_3.0.3.jar
       - name: Build Nothink release APK
         run: gradle --no-daemon :pack-nothing:assembleRelease
       - name: Verify generated pack and APK
@@ -78,8 +78,8 @@ jobs:
           drawables = ET.parse(res / "xml/drawable.xml").getroot()
           items = appfilter.findall("item")
           indexed = drawables.findall("item")
-          if len(indexed) < 70:
-              raise SystemExit(f"Expected at least 70 generated app icons, got {len(indexed)}")
+          if len(indexed) < 35:
+              raise SystemExit(f"Expected at least 35 generated app icons, got {len(indexed)}")
           for item in indexed:
               name = item.attrib["drawable"]
               if not (res / "drawable" / f"{name}.xml").is_file():
@@ -95,7 +95,7 @@ jobs:
       - name: Upload Nothink release APK
         uses: actions/upload-artifact@v4
         with:
-          name: nothink-jusicons-100-app-trial
+          name: nothink-jusicons-50-app-trial
           path: pack-nothing/build/outputs/apk/release/pack-nothing-release.apk
           if-no-files-found: error
           retention-days: 7
@@ -104,7 +104,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nothink-jusicons-100-app-report
+          name: nothink-jusicons-50-app-report
           path: build/jusicons-report/
           if-no-files-found: warn
           retention-days: 7

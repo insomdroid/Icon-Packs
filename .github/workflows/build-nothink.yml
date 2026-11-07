@@ -46,13 +46,21 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
+      - name: Install Apktool 3.0.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tools
+          curl -fsSL "https://github.com/iBotPeaches/Apktool/releases/download/v3.0.3/apktool_3.0.3.jar" -o tools/apktool_3.0.3.jar
+          echo "dbf930b076c6b9be08d57c449cacefc3bdd6b71ebd59b3066fc0e1f5b14f9423  tools/apktool_3.0.3.jar" | sha256sum --check
+          java -jar tools/apktool_3.0.3.jar --version
       - name: Install Android SDK 36
         run: |
           set -euo pipefail
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-36" "build-tools;36.0.0"
           echo "$ANDROID_HOME/build-tools/36.0.0" >> "$GITHUB_PATH"
       - name: Download 100 application APKs and generate real monochrome icons
-        run: python scripts/generate_jusicons_batch.py --minimum 70 --aapt "$ANDROID_HOME/build-tools/36.0.0/aapt"
+        run: python scripts/generate_jusicons_batch.py --minimum 70 --apktool tools/apktool_3.0.3.jar
       - name: Build Nothink release APK
         run: gradle --no-daemon :pack-nothing:assembleRelease
       - name: Verify generated pack and APK

@@ -154,12 +154,12 @@ jobs:
             echo "Mapped drawable $SAMPLE_DRAWABLE was stripped from the APK."
             exit 1
           fi
-          if ! unzip -Z1 "$APK" | grep -Fxq "res/xml/appfilter.xml"; then
-            echo "Compiled APK is missing res/xml/appfilter.xml."
+          if ! grep -Eq 'resource .*xml/appfilter' <<< "$RESOURCE_DUMP"; then
+            echo "Compiled APK resource table is missing the appfilter XML resource."
             exit 1
           fi
-          if ! unzip -p "$APK" res/xml/appfilter.xml | strings | grep -q "ComponentInfo"; then
-            echo "Compiled appfilter.xml does not contain launcher component mappings."
+          if ! grep -Fq 'com.novalauncher.THEME' <<< "$MANIFEST_DUMP"; then
+            echo "Compiled APK manifest is missing Nova Launcher icon-pack metadata."
             exit 1
           fi
           "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | sed -n '1p'

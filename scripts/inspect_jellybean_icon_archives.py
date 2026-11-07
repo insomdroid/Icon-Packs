@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract and inventory Jelly Bean icon archives for visual comparison."""
+"""Extract Jelly Bean archives and compare their icons with archived KitKat assets."""
 from __future__ import annotations
 
 import csv
@@ -10,6 +10,7 @@ import zipfile
 from collections import defaultdict
 from pathlib import Path, PurePosixPath
 
+import imagehash
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,6 +18,10 @@ SOURCE = ROOT / "references" / "kitkat-archives"
 OUT = ROOT / "build" / "jellybean-archive-inspection"
 ARCHIVES = ["Icons jb 1.zip", "icons jb2.zip"]
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".gif"}
+KITKAT_DIRS = [
+    SOURCE / "drawable-xxxhdpi",
+    SOURCE / "drawable-xxhdpi",
+]
 
 
 def safe_extract(zf: zipfile.ZipFile, destination: Path) -> None:
@@ -34,6 +39,18 @@ def safe_extract(zf: zipfile.ZipFile, destination: Path) -> None:
         with zf.open(info) as src, target.open("wb") as dst:
             while chunk := src.read(1024 * 1024):
                 dst.write(chunk)
+
+
+def read_hash(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def perceptual_hash(path: Path):
+    with Image.open(path) as image:
+        image = image.convert("RGBA")
+        background = Image.new("RGBA", image.size, (255, 255, 255, 255))
+        background.alpha_composite(image)
+        return imagehash.phash(background.convert("RGB"))
 
 
 def make_contact_sheets(rows: list[dict], out_dir: Path, prefix: str) -> None:
@@ -86,7 +103,7 @@ def main() -> None:
         for path in sorted(destination.rglob("*")):
             if not path.is_file() or path.suffix.lower() not in IMAGE_EXTS:
                 continue
-            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            digest = read_hash(path)
             width = height = 0
             mode = "unreadable"
             try:
@@ -126,7 +143,56 @@ def main() -> None:
             writer.writeheader()
             writer.writerows(all_rows)
 
-    duplicates = [
+    # Only use known KitKat application bitmap assets as comparison references.
+    kitkat_rows = []
+    for directory in KITKAT_DIRS:
+        if not directory.is_dir():
+            continue
+        for path in sorted(directory.iterdir()):
+            if path.is_file() and path.suffix.lower() in IMAGE_EXTS:
+                try:
+                    kitkat_rows.append({
+                        "kitkat_path": path.relative_to(ROOT).as_posix(),
+                        "extracted_path": str(path),
+                        "sha256": read_hash(path),
+                        "phash": str(perceptual_hash(path)),
+                    })
+                except Exception as exc:
+                    print(f"Skipping unreadable KitKat image {path}: {exc}")
+
+    unique_jb = {}
+    for row in all_rows:
+        unique_jb.setdefault(row["sha256"], row)
+
+    matches = []
+    for ref in kitkat_rows:
+        ref_hash = ref["phash"]
+        ranked = []
+        for jb in unique_jb.values():
+            try:
+                distance = perceptual_hash(Path(jb["extracted_path"])) - imagehash.hex_to_hash(ref_hash)
+            except Exception:
+                continue
+            ranked.append((distance, jb))
+        ranked.sort(key=lambda item: item[0])
+        for distance, jb in ranked[:5]:
+            matches.append({
+                "kitkat_path": ref["kitkat_path"],
+                "jellybean_archive": jb["archive"],
+                "jellybean_icon": jb["archive_path"],
+                "phash_distance": distance,
+                "exact_sha256_match": ref["sha256"] == jb["sha256"],
+                "jellybean_sha256": jb["sha256"],
+            })
+
+    matches.sort(key=lambda x: (x["kitkat_path"], x["phash_distance"]))
+    with (OUT / "kitkat-jellybean-nearest-matches.csv").open("w", newline="", encoding="utf-8") as f:
+        fields = ["kitkat_path", "jellybean_archive", "jellybean_icon", "phash_distance", "exact_sha256_match", "jellybean_sha256"]
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(matches)
+
+    duplicate_groups = [
         {"sha256": digest, "count": len(items), "files": [f'{x["archive"]}:{x["archive_path"]}' for x in items]}
         for digest, items in sorted(by_hash.items()) if len(items) > 1
     ]
@@ -134,16 +200,32 @@ def main() -> None:
         "archives": ARCHIVES,
         "image_file_count_including_duplicates": len(all_rows),
         "unique_image_hash_count": len(by_hash),
-        "duplicate_groups": duplicates,
+        "duplicate_groups_count": len(duplicate_groups),
+        "kitkat_reference_image_count": len(kitkat_rows),
+        "kitkat_jellybean_nearest_match_rows": len(matches),
+        "exact_cross_version_matches": sum(1 for x in matches if x["exact_sha256_match"]),
+        "best_perceptual_matches_distance_0_to_8": sum(1 for x in matches if x["phash_distance"] <= 8),
         "counts_by_archive": {
             name: {
                 "image_files": sum(1 for row in all_rows if row["archive"] == name),
                 "unique_hashes": len({row["sha256"] for row in all_rows if row["archive"] == name}),
             } for name in ARCHIVES
         },
-        "extracted_directories": [str(OUT / re.sub(r"[^a-z0-9]+", "-", Path(n).stem.lower()).strip("-")) for n in ARCHIVES],
+        "kitkat_reference_assets": [x["kitkat_path"] for x in kitkat_rows],
     }
     (OUT / "summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+    report = [
+        "# Jelly Bean / KitKat icon comparison",
+        "",
+        f'- Images extracted: **{len(all_rows)}**',
+        f'- Unique image files by SHA-256: **{len(by_hash)}**',
+        f'- KitKat bitmap references compared: **{len(kitkat_rows)}**',
+        f'- Exact cross-version matches: **{summary["exact_cross_version_matches"]}**',
+        f'- Perceptual candidates with pHash distance ≤ 8: **{summary["best_perceptual_matches_distance_0_to_8"]}** (review visually; not automatically accepted)',
+        "",
+        "The CSV lists the five closest Jelly Bean candidates for each KitKat bitmap. A low perceptual distance is only a candidate, not proof that the artwork is identical.",
+    ]
+    (OUT / "REPORT.md").write_text("\n".join(report) + "\n", encoding="utf-8")
     print(json.dumps(summary, indent=2, ensure_ascii=False))
 
 

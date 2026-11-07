@@ -2,14 +2,15 @@
 
 ## Current implementation
 
-KitKat remains the only active deliverable. The experimental CI importer for AOSP Android 4.4.4 icons was removed after it repeatedly failed before Gradle setup. The workflow now builds the existing module directly. Current drawable files are not yet a verified complete set of original KitKat assets.
+KitKat remains the only active deliverable. The CI importer now downloads eight verified Android 4.4.4 AOSP launcher icons from the `android-4.4.4_r2` source tag and places them in density-specific resource folders. The default XML artwork remains as fallback for all other mapped apps.
 
 - **App mappings:** 2,073 unique component mappings adapted from Lawnicons.
 - **Mapping source:** `LawnchairLauncher/lawnicons`, `app/assets/appfilter.xml`, branch `develop`, commit `cd91ff0bd00ff0a6c9d606d1c326b451b6563506`.
 - **Build:** `gradle --no-daemon :pack-kitkat:assembleRelease`.
-- **Artwork source plan:** use verified Android 4.4.4 system APK resources for built-in apps, then verified period-correct/community sources for third-party apps. Do not claim community artwork is official Android artwork.
+- **Verified artwork:** Contacts, Messages, Settings, Camera, Calendar, Calculator, Mail, and Browser are sourced from AOSP Android 4.4.4. See `third_party/aosp-android-4.4.4/README.md`.
+- **Remaining artwork:** other icons are temporary; third-party icons still need historical, app-specific sources. Do not label community artwork as official Android artwork.
 
-## Artwork coverage checklist (not yet verified as authentic KitKat assets)
+## Artwork coverage checklist
 
 - [ ] phone (standalone AOSP Phone source not available at this tag; awaiting verified source)
 - [x] contacts (AOSP Contacts)
@@ -80,7 +81,7 @@ KitKat remains the only active deliverable. The experimental CI importer for AOS
 
 ## Asset licensing and provenance
 
-No successful AOSP icon import has been verified in the APK. The Android 4.4.4 stock APK archive is a candidate source for extracting built-in application icons, but each asset and its redistribution terms must be checked. AOSP identifies Apache 2.0 as its preferred license, but not every Android component uses it. Community artwork must be clearly distinguished from official Android assets.
+The eight imported PNGs come from AOSP repositories that mark the corresponding modules `MODULE_LICENSE_APACHE2`; their source repository names, resource paths, and attribution are listed in `third_party/aosp-android-4.4.4/README.md`. The shared Apache License 2.0 text is included at `third_party/lawnicons/LICENSE`. Remaining community artwork must be clearly distinguished from official Android assets.
 
 ## Mapping adaptation notes
 

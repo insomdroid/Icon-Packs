@@ -12,38 +12,38 @@ KitKat remains the only active deliverable. The CI importer now downloads eight 
 
 ## Artwork coverage checklist
 
-- [ ] phone (standalone AOSP Phone source not available at this tag; awaiting verified source)
-- [x] contacts (AOSP Contacts)
-- [x] messages (AOSP Mms)
-- [x] calendar (AOSP Calendar)
-- [x] clock (AOSP DeskClock)
-- [x] calculator (AOSP Calculator)
-- [x] camera (AOSP Camera)
-- [x] gallery (AOSP Gallery)
-- [x] settings (AOSP Settings)
-- [x] files (AOSP DocumentsUI)
-- [x] downloads
-- [x] browser (AOSP Browser)
-- [x] chrome
-- [x] maps
-- [x] translate
-- [x] youtube
-- [x] mail (AOSP Email)
-- [x] telegram
-- [x] instagram
-- [x] spotify
-- [x] messenger
-- [x] whatsapp
-- [x] facebook
-- [x] soundcloud
-- [x] snapchat
-- [x] word
-- [x] excel
-- [x] powerpoint
-- [x] onenote
-- [x] skype
-- [x] pinterest
-- [x] hangouts
+- [ ] phone
+- [x] contacts — original AOSP Android 4.4.4 icon
+- [x] messages — original AOSP Android 4.4.4 icon
+- [ ] calendar — existing artwork remains temporary until the importer replaces it in the APK
+- [ ] clock
+- [x] calculator — original AOSP Android 4.4.4 icon
+- [x] camera — original AOSP Android 4.4.4 icon
+- [ ] gallery
+- [x] settings — original AOSP Android 4.4.4 icon
+- [ ] files
+- [ ] downloads
+- [x] browser — original AOSP Android 4.4.4 icon
+- [ ] chrome
+- [ ] maps
+- [ ] translate
+- [ ] youtube
+- [x] mail — original AOSP Android 4.4.4 icon
+- [ ] telegram
+- [ ] instagram
+- [ ] spotify
+- [ ] messenger
+- [ ] whatsapp
+- [ ] facebook
+- [ ] soundcloud
+- [ ] snapchat
+- [ ] word
+- [ ] excel
+- [ ] powerpoint
+- [ ] onenote
+- [ ] skype
+- [ ] pinterest
+- [ ] hangouts
 
 ## Mappings by KitKat artwork
 

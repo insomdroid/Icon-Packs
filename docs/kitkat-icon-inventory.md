@@ -2,33 +2,35 @@
 
 ## Current implementation
 
-KitKat is the only active deliverable. Its 32 original vector assets are retained; application component mappings now come from the Lawnicons master appfilter.
+KitKat is the only active deliverable. The build now replaces 12 legacy placeholder vectors with original launcher PNGs imported from the pinned AOSP Android 4.4.4 source tag. Remaining vectors are legacy artwork and must not be described as authentic KitKat assets. Application component mappings still come from the pinned Lawnicons appfilter.
 
-- **Icon artwork:** 32 KitKat-inspired vector drawables in `pack-kitkat/src/main/res/drawable/`.
+- **Authentic AOSP artwork imported during CI:** Phone, Contacts, Messaging, Calendar, DeskClock, Calculator, Camera, Gallery, Settings, DocumentsUI, Browser, and Email.
+- **Import source:** `android-4.4.4_r2` tag in `platform/packages/apps/` on `android.googlesource.com`.
+- **Import script:** `scripts/import_aosp_kitkat_icons.py`; it copies original PNG bytes into `drawable-nodpi` and removes the matching legacy XML drawable in the CI workspace.
 - **App mappings:** 2,073 unique component mappings imported/adapted from Lawnicons.
 - **Source:** `LawnchairLauncher/lawnicons`, `app/assets/appfilter.xml`, branch `develop`, commit `cd91ff0bd00ff0a6c9d606d1c326b451b6563506`.
 - **Mapping format:** ADW/Nova-compatible `ComponentInfo{package/activity}` entries.
 - **Attribution and license:** see `docs/LAWNICONS_ATTRIBUTION.md` and `third_party/lawnicons/LICENSE`.
 
-## KitKat artwork targets
+## Imported original AOSP artwork targets
 
-- [x] phone
-- [x] contacts
-- [x] messages
-- [x] calendar
-- [x] clock
-- [x] calculator
-- [x] camera
-- [x] gallery
-- [x] settings
-- [x] files
+- [x] phone (AOSP Phone)
+- [x] contacts (AOSP Contacts)
+- [x] messages (AOSP Mms)
+- [x] calendar (AOSP Calendar)
+- [x] clock (AOSP DeskClock)
+- [x] calculator (AOSP Calculator)
+- [x] camera (AOSP Camera)
+- [x] gallery (AOSP Gallery)
+- [x] settings (AOSP Settings)
+- [x] files (AOSP DocumentsUI)
 - [x] downloads
-- [x] browser
+- [x] browser (AOSP Browser)
 - [x] chrome
 - [x] maps
 - [x] translate
 - [x] youtube
-- [x] mail
+- [x] mail (AOSP Email)
 - [x] telegram
 - [x] instagram
 - [x] spotify
@@ -78,6 +80,10 @@ KitKat is the only active deliverable. Its 32 original vector assets are retaine
 - `powerpoint`: 2 components
 - `word`: 2 components
 - `skype`: 1 components
+
+## Asset licensing and provenance
+
+The imported system icons come from AOSP application repositories pinned to `android-4.4.4_r2`. AOSP identifies Apache 2.0 as its preferred license and states that most, but not all, Android software is Apache 2.0. The importer deliberately excludes proprietary Google Apps and community icon artwork. Before adding assets from other projects, inspect the exact source file and its applicable license; being included in an icon pack does not itself remove copyright or redistribution requirements.
 
 ## Mapping adaptation notes
 

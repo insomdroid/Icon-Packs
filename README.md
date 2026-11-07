@@ -1,22 +1,29 @@
 # Insomdroid Icon Packs
 
-Two separately installable Android icon pack APKs are maintained in this repository.
+Separately installable Android icon pack APKs are maintained in this repository.
 
 ## Holokat
 
-The original Android 4.4 KitKat and supplied Jelly Bean artwork combined in one APK. See the existing [combined icon pack workflow](https://github.com/insomdroid/Icon-Packs/actions/workflows/build-icon-packs.yml) and [Jelly Bean artwork attribution](docs/HOLOKAT_ATTRIBUTION.md).
+The original Android 4.4 KitKat and supplied Jelly Bean artwork combined in one APK. See the [combined icon pack workflow](https://github.com/insomdroid/Icon-Packs/actions/workflows/build-icon-packs.yml) and [Jelly Bean artwork attribution](docs/HOLOKAT_ATTRIBUTION.md).
 
 ## Nothink
 
-Nothink is an independent icon pack inspired by the visual discipline of Nothing OS 2.0/3.0 and Nothing OS 5.0. Its approved design direction is modern, monochrome, and built from custom recognizable symbols using a consistent hybrid of solid shapes and outline strokes.
+Nothink is an independent icon pack inspired by Nothing OS 2.0/3.0 and Nothing OS 5.0. Its design guide and implementation status are documented in [Nothink Design Guide](docs/NOTHINK_DESIGN_GUIDE.md).
 
-**The approved design specification is recorded in [Nothink Design Guide](docs/NOTHINK_DESIGN_GUIDE.md).** Treat that document as the source of truth before changing the artwork, generator, mappings, or validation. The generator now produces transparent pure-white normal artwork and monochrome themed artwork, with six individually authored benchmark symbols. The remaining mapped icons still need individual custom artwork and visual review; see the implementation status in the design guide.
+## Nothink2
 
-- Name: Nothink
-- Application ID: `com.insomdroid.iconpacks.nothink`
-- Mapping: Lawnicons Android component mappings, pinned to a fixed source revision; mapping data only, not upstream artwork
-- Approved artwork: custom per-app symbols; transparent backgrounds; pure-white normal glyphs; transparent monochrome themed glyphs
-- Build: [Build Nothink Icon Pack Release APK](https://github.com/insomdroid/Icon-Packs/actions/workflows/build-nothink.yml)
-- Artifact: `nothink-icon-pack-release` (one-day retention)
+Nothink2 is a separate Lawnicons-based icon pack with a Nothing OS 5.0 dark presentation.
 
-See [Nothink artwork and mapping attribution](docs/NOTHINK_ATTRIBUTION.md). Nothink is an unofficial independent project and is not affiliated with Nothing Technology Limited.
+- App name: **Nothink2**
+- Application ID: `com.insomdroid.iconpacks.nothink2`
+- Base artwork and mappings: pinned Lawnicons SVGs and component mappings (Apache-2.0)
+- Classic icons: near-black tile, centered white Lawnicons glyph, intentionally reduced glyph scale
+- Themed icons: transparent monochrome masks for wallpaper-derived colors on compatible launchers
+- Icon shape: follows the shape selected in the launcher/device; it is not baked into the artwork
+- Android target: API 33 (Android 13)
+- Build: [Build Nothink2 APK](https://github.com/insomdroid/Icon-Packs/actions/workflows/build-nothink2.yml)
+- Artifact: `nothink2-release-apk`
+
+Enable themed icons in Android and in a compatible launcher to use wallpaper-derived icon colors. Classic icon-pack and themed-icon support varies by launcher.
+
+See [Nothink2 artwork attribution](docs/NOTHINK2_ATTRIBUTION.md). Nothink2 is unofficial and is not affiliated with Lawnchair, Lawnicons, or Nothing Technology Limited.

@@ -24,11 +24,6 @@ PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 # drawable name -> (AOSP repository, exact source path, destination density)
 # These paths were checked against the Android 4.4.4_r2 AOSP source trees.
 ASSETS = {
-    "contacts": (
-        "platform_packages_apps_contacts",
-        "res/mipmap-xxhdpi/ic_launcher_contacts.png",
-        "drawable-xxhdpi",
-    ),
     "messages": (
         "platform_packages_apps_mms",
         "res/mipmap-xxhdpi/ic_launcher_smsmms.png",

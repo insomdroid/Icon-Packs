@@ -4,4 +4,4 @@ dependencyResolutionManagement {
     repositories { google(); mavenCentral() }
 }
 rootProject.name = "InsomdroidIconPacks"
-include(":app", ":core", ":pack-kitkat", ":pack-nothing", ":pack-holo", ":pack-material")
+include(":app", ":core", ":pack-kitkat", ":pack-nothing", ":pack-holo", ":pack-material", ":pack-nothink2")

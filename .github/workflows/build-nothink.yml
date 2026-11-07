@@ -131,8 +131,10 @@ jobs:
           if unlisted:
               raise SystemExit(f"Mapped icons missing from drawable.xml: {unlisted[:10]}")
           themed = sorted((res / "drawable-nodpi").glob("themed_*.png"))
-          if len(themed) < len(mapped):
-              raise SystemExit(f"Expected themed artwork for mapped apps; found {len(themed)} themed files.")
+          themed_names = {item.name.removeprefix("themed_").removesuffix(".png") for item in themed}
+          missing_themed = sorted(mapped - themed_names)
+          if missing_themed:
+              raise SystemExit(f"Mapped icons missing themed artwork: {missing_themed[:10]}")
           from PIL import Image
           sample = Image.open(themed[0]).convert("RGBA")
           if sample.getpixel((0, 0))[3] != 0:

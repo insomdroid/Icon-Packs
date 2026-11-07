@@ -5,7 +5,7 @@ Independently installable Android icon pack APKs. Development is currently focus
 ## Active theme
 
 - **KitKat** — original Android 4.4 AOSP launcher artwork for supported system apps.
-- 12 system launcher icons are imported as original PNG assets from the pinned AOSP `android-4.4.4_r2` sources during CI builds. Remaining artwork is still legacy placeholder/community-style artwork and is not yet considered final.
+- 11 system launcher icons are imported as original PNG assets from the pinned AOSP `android-4.4.4_r2` sources during CI builds. Remaining artwork is still legacy placeholder/community-style artwork and is not yet considered final.
 - 2,073 unique launcher component mappings adapted from Lawnicons' upstream `appfilter.xml`.
 - Minimum SDK: Android 10 (API 29).
 - Compile/Target SDK: 36.
@@ -27,7 +27,7 @@ The workflow builds the Gradle **release** variant and uploads the signed `kitka
 
 ## Original KitKat icon assets
 
-The build imports launcher PNGs directly from the Android Open Source Project `android-4.4.4_r2` tag for Phone, Contacts, Messaging, Calendar, DeskClock, Calculator, Camera, Gallery, Settings, DocumentsUI, Browser, and Email. The importer preserves the upstream PNG bytes and replaces the corresponding temporary vector assets only in the CI working tree. Source repositories are fetched at the pinned tag during each build; no proprietary Google Apps artwork is included by this step.
+The build imports launcher PNGs directly from the Android Open Source Project `android-4.4.4_r2` tag for Contacts, Messaging, Calendar, DeskClock, Calculator, Camera, Gallery, Settings, DocumentsUI, Browser, and Email. The importer preserves the upstream PNG bytes and replaces the corresponding temporary vector assets only in the CI working tree. Source repositories are fetched at the pinned tag during each build; no proprietary Google Apps artwork is included by this step.
 
 AOSP states that Apache License 2.0 is its preferred license and that the majority of Android software uses it, but exceptions exist. Each upstream source file and project license must be checked before expanding redistribution to additional assets. See [AOSP licensing](https://source.android.com/license).
 

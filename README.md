@@ -8,15 +8,13 @@ The original Android 4.4 KitKat and supplied Jelly Bean artwork combined in one 
 
 ## Nothink
 
-A separate monochrome geometric icon pack inspired by Nothing OS. Lawnicons supplies only the Android component mapping; every Nothink illustration is drawn by the original generator in this repository. No Lawnicons SVG artwork is used.
+A separate monochrome geometric icon pack inspired by Nothing OS. Its visual direction is **Geometric Solid**: bold, simple pictograms with consistent geometry, white artwork on a near-black field, restrained red accents, and subtle dot-matrix details. Lawnicons supplies only Android component mappings; Nothink illustrations are drawn by the generator in this repository. No upstream icon artwork or SVG is used.
 
 - Name: Nothink
 - Application ID: `com.insomdroid.iconpacks.nothink`
-- Target: at least 3,000 app component mappings from Lawnicons
-- Artwork: original Nothink geometric illustrations are generated for mapped drawables during the build; no upstream SVG artwork is downloaded or used
+- Mapping: Lawnicons component mappings, pinned to a fixed source revision
+- Artwork: original semantic pictograms and abstract geometric marks, generated for every unique mapped drawable
 - Build: [Build Nothink Icon Pack Release APK](https://github.com/insomdroid/Icon-Packs/actions/workflows/build-nothink.yml)
 - Artifact: `nothink-icon-pack-release` (one-day retention)
-
-The workflow verifies the 3,000-mapping minimum and generates original artwork for each unique mapped drawable.
 
 See [Nothink artwork and mapping attribution](docs/NOTHINK_ATTRIBUTION.md). Nothink is an unofficial independent project and is not affiliated with Nothing Technology Limited.

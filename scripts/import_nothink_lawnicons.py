@@ -368,10 +368,9 @@ def main() -> int:
     families: Counter[str] = Counter()
 
     for drawable, (_, label, package) in sorted(drawable_to_data.items()):
-        static_icon, themed_icon, family = render_icon(label, package, drawable)
+        static_icon, _, family = render_icon(label, package, drawable)
         families[family] += 1
         save_webp(static_icon, drawable_dir / f"{drawable}.webp")
-        save_webp(themed_icon, drawable_dir / f"themed_{drawable}.webp")
 
     appfilter = ET.Element("resources")
     for component, (drawable, _) in sorted(component_to_drawable.items()):
@@ -387,7 +386,7 @@ def main() -> int:
     themed_map = ET.Element("icons")
     for package, drawable in sorted(package_to_drawable.items()):
         ET.SubElement(themed_map, "icon", {
-            "package": package, "drawable": f"@drawable/themed_{drawable}"
+            "package": package, "drawable": f"@drawable/{drawable}"
         })
     write_xml(themed_map, PACK / "xml" / "grayscale_icon_map.xml")
 

@@ -463,10 +463,10 @@ def process_apk(group,label,package,apk,work,drawable_dir,apktool):
                     errors.append("vector output is empty")
                     continue
                 name=drawable_name(package)
-                xml=('<?xml version="1.0" encoding="utf-8"?>\\n'
-                     '<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">\\n'
-                     '    <path android:fillColor="#FF121212" android:pathData="M24,2 A22,22 0 1,0 24,46 A22,22 0 1,0 24,2 Z" />\\n'
-                     f'    <path android:fillColor="#FFFFFFFF" android:pathData="{path_data}" />\\n</vector>\\n')
+                xml=('<?xml version="1.0" encoding="utf-8"?>\n'
+                     '<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">\n'
+                     '    <path android:fillColor="#FF121212" android:pathData="M24,2 A22,22 0 1,0 24,46 A22,22 0 1,0 24,2 Z" />\n'
+                     f'    <path android:fillColor="#FFFFFFFF" android:pathData="{path_data}" />\n</vector>\n')
                 (drawable_dir/f"{name}.xml").write_text(xml,encoding="utf-8")
                 result.update({"status":"generated","drawable":name,"components":base_info["components"],
                                "component_count":len(base_info["components"]),

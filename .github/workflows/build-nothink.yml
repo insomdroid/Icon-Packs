@@ -101,78 +101,79 @@ jobs:
           echo "Nothink artwork payload: $ARTWORK_BYTES bytes"
           test "$MAPPINGS" -ge 3000
           test "$ARTWORK" -gt 0
-          test "$ARTWORK_BYTES" -lt 40000000
+          test "$ARTWORK" -le 80
+          test "$ARTWORK_BYTES" -lt 2000000
+          APK_BYTES="$(stat -c %s "$APK")"
+          echo "Nothink APK size: $APK_BYTES bytes"
+          test "$APK_BYTES" -lt 12000000
           python - <<'PY'
           import hashlib
           import xml.etree.ElementTree as ET
           from pathlib import Path
+          from PIL import Image
 
           res = Path("pack-nothing/src/main/res")
           appfilter = ET.parse(res / "xml/appfilter.xml").getroot()
           drawable_index = ET.parse(res / "xml/drawable.xml").getroot()
           mapped = {item.attrib["drawable"] for item in appfilter.findall("item")}
           indexed = {item.attrib["drawable"] for item in drawable_index.findall("item")}
-          missing = sorted(
-              name for name in mapped
-              if not (res / "drawable" / f"{name}.xml").is_file()
-          )
-          unlisted = sorted(mapped - indexed)
-          if missing:
-              raise SystemExit(f"Mapped normal icon wrappers missing: {missing[:10]}")
-          if unlisted:
-              raise SystemExit(f"Mapped icons missing from drawable.xml: {unlisted[:10]}")
+          if len(mapped) < 3000:
+              raise SystemExit(f"Only {len(mapped)} app mappings were generated.")
+          if mapped - indexed:
+              raise SystemExit(f"Mappings missing from drawable.xml: {sorted(mapped-indexed)[:10]}")
           for wrapper_name in mapped:
-              wrapper = ET.parse(res / "drawable" / f"{wrapper_name}.xml").getroot()
+              wrapper_path = res / "drawable" / f"{wrapper_name}.xml"
+              if not wrapper_path.is_file():
+                  raise SystemExit(f"Missing icon wrapper: {wrapper_name}")
+              wrapper = ET.parse(wrapper_path).getroot()
               foreground = wrapper.findall("item")[-1]
-              glyph_ref = foreground.attrib.get("{http://schemas.android.com/apk/res/android}drawable", "")
-              glyph_name = glyph_ref.removeprefix("@drawable/")
-              if not glyph_name or not (res / "drawable-nodpi" / f"{glyph_name}.webp").is_file():
-                  raise SystemExit(f"Normal icon wrapper has no matching glyph mask: {wrapper_name}")
-              if foreground.attrib.get("{http://schemas.android.com/apk/res/android}drawable") != f"@drawable/{glyph_name}":
-                  raise SystemExit(f"Normal icon wrapper has an invalid foreground reference: {wrapper_name}")
-          from PIL import Image
-          normal = sorted((res / "drawable-nodpi").glob("*.webp"))
-          normal = [item for item in normal if not item.name.startswith("themed_")]
-          if not normal:
-              raise SystemExit("No generated WebP artwork was found.")
-          grayscale_map = ET.parse(res / "xml/grayscale_icon_map.xml").getroot()
-          grayscale_drawables = {
-              item.attrib["drawable"].removeprefix("@drawable/")
-              for item in grayscale_map.findall("icon")
-          }
-          missing_grayscale = sorted(
-              name for name in grayscale_drawables
-              if not (res / "drawable-nodpi" / f"{name}.webp").is_file()
-          )
-          unlisted_grayscale = sorted(
-              f"icon_{name}" for name in grayscale_drawables
-              if f"icon_{name}" not in indexed
-          )
-          if missing_grayscale:
-              raise SystemExit(f"Grayscale theme map references missing artwork: {missing_grayscale[:10]}")
-          if unlisted_grayscale:
-              raise SystemExit(f"Grayscale theme map references unindexed artwork: {unlisted_grayscale[:10]}")
+              alias_name = foreground.attrib.get("{http://schemas.android.com/apk/res/android}drawable", "").removeprefix("@drawable/")
+              alias_path = res / "drawable" / f"{alias_name}.xml"
+              if not alias_path.is_file():
+                  raise SystemExit(f"Missing artwork alias for {wrapper_name}: {alias_name}")
+              alias = ET.parse(alias_path).getroot()
+              art_name = alias.attrib.get("{http://schemas.android.com/apk/res/android}src", "").removeprefix("@drawable/")
+              art_path = res / "drawable-nodpi" / f"{art_name}.webp"
+              if not art_name.startswith("art_") or not art_path.is_file():
+                  raise SystemExit(f"Missing shared artwork file for {wrapper_name}: {art_name}")
+
+          normal = sorted((res / "drawable-nodpi").glob("art_*.webp"))
+          if not normal or len(normal) > 80:
+              raise SystemExit(f"Expected 1-80 deduplicated WebP files, found {len(normal)}.")
           for path in normal:
-              image_file = Image.open(path)
-              if image_file.format != "WEBP":
-                  raise SystemExit(f"Generated icon artwork must be stored as WebP: {path.name}")
-              image = image_file.convert("RGBA")
-              if image.getpixel((0, 0))[3] != 0:
-                  raise SystemExit(f"Artwork must have a transparent background: {path.name}")
-              colors = image.getcolors(maxcolors=256)
-              if colors is None or any(a > 0 and (r, g, b) != (255, 255, 255) for count, (r, g, b, a) in colors):
-                  raise SystemExit(f"Artwork must use pure-white glyph pixels on transparent background for dark-mode contrast and Android alpha-mask tinting: {path.name}")
+              with Image.open(path) as image_file:
+                  if image_file.format != "WEBP":
+                      raise SystemExit(f"Artwork is not WebP: {path.name}")
+                  image = image_file.convert("RGBA")
+                  if image.size != (192, 192):
+                      raise SystemExit(f"Artwork must be 192x192: {path.name} ({image.size})")
+                  if image.getpixel((0, 0))[3] != 0:
+                      raise SystemExit(f"Artwork background is not transparent: {path.name}")
+                  colors = image.getcolors(maxcolors=256)
+                  if colors is None or any(a > 0 and (r, g, b) != (255, 255, 255) for _, (r, g, b, a) in colors):
+                      raise SystemExit(f"Artwork must contain only white alpha-mask pixels: {path.name}")
+
+          grayscale_map = ET.parse(res / "xml/grayscale_icon_map.xml").getroot()
+          for item in grayscale_map.findall("icon"):
+              name = item.attrib["drawable"].removeprefix("@drawable/")
+              if not (res / "drawable" / f"{name}.xml").is_file():
+                  raise SystemExit(f"Missing themed-icon drawable alias: {name}")
+
           benchmarks = ["generic_camera", "google_phone", "google_chrome", "google_calendar", "spotify", "generic_settings"]
-          missing_benchmarks = [name for name in benchmarks if not (res / "drawable-nodpi" / f"{name}.webp").is_file()]
-          if missing_benchmarks:
-              raise SystemExit(f"Missing Nothink benchmark artwork: {missing_benchmarks}")
-          benchmark_hashes = {
-              hashlib.sha256((res / "drawable-nodpi" / f"{name}.webp").read_bytes()).hexdigest()
-              for name in benchmarks
-          }
+          benchmark_hashes = set()
+          for name in benchmarks:
+              alias_path = res / "drawable" / f"{name}.xml"
+              if not alias_path.is_file():
+                  raise SystemExit(f"Missing benchmark artwork alias: {name}")
+              alias = ET.parse(alias_path).getroot()
+              art_name = alias.attrib.get("{http://schemas.android.com/apk/res/android}src", "").removeprefix("@drawable/")
+              art_path = res / "drawable-nodpi" / f"{art_name}.webp"
+              if not art_path.is_file():
+                  raise SystemExit(f"Missing benchmark WebP: {name}")
+              benchmark_hashes.add(hashlib.sha256(art_path.read_bytes()).hexdigest())
           if len(benchmark_hashes) != len(benchmarks):
-              raise SystemExit("Benchmark icons must have distinct artwork files.")
-          print(f"Verified {len(mapped)} mappings, shared transparent neutral alpha-mask assets for Android theme tinting, and six distinct benchmark assets.")
+              raise SystemExit("Benchmark artwork must remain six distinct marks.")
+          print(f"Verified {len(mapped)} mappings, {len(normal)} deduplicated WebP artworks, six benchmark marks, and transparent themed-icon aliases.")
           PY
           RESOURCE_DUMP="$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump resources "$APK")"
           if ! grep -Fq ":drawable/$SAMPLE_DRAWABLE" <<< "$RESOURCE_DUMP"; then

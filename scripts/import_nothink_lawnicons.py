@@ -281,8 +281,24 @@ def render_icon(label: str, package: str, drawable: str) -> tuple[Image.Image, I
 
 
 def save_png(image: Image.Image, destination: Path) -> None:
+    """Write compact indexed PNGs while preserving transparency and icon dimensions.
+
+    These glyphs use a small, flat colour palette. Quantizing to 32 colours keeps
+    antialiased edges visually smooth while avoiding the large RGBA PNG payload
+    produced by saving every 192px icon as a full 32-bit image.
+    """
     destination.parent.mkdir(parents=True, exist_ok=True)
-    image.save(destination, format="PNG", optimize=True, compress_level=9)
+    indexed = image.convert("RGBA").quantize(
+        colors=32,
+        method=Image.Quantize.FASTOCTREE,
+        dither=Image.Dither.NONE,
+    )
+    indexed.save(
+        destination,
+        format="PNG",
+        optimize=True,
+        compress_level=9,
+    )
 
 
 def write_xml(root: ET.Element, destination: Path) -> None:

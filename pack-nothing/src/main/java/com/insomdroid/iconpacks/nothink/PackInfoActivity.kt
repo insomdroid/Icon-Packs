@@ -8,16 +8,16 @@ class PackInfoActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val message = """
-            Nothink Icon Pack — 100 App Trial
+            Nothink Icon Pack
 
-            This test build uses real launcher artwork extracted from application APKs and processed with the JusIcons monochrome pipeline.
+            Monochrome app artwork exported from the Nothink Figma source.
 
             Apply the pack:
             1. Open Nova Launcher or Lawnchair settings.
             2. Find the Icon style or Icon pack option.
             3. Select Nothink Icon Pack.
 
-            This trial targets 100 Google and popular applications. Actual coverage depends on the launcher activities and APK versions available during the build.
+            The available icons depend on the Figma artwork successfully matched to installed app components.
         """.trimIndent()
         setContentView(TextView(this).apply {
             text = message

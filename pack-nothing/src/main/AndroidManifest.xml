@@ -8,21 +8,11 @@
         android:usesCleartextTraffic="false"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
-        <meta-data
-            android:name="com.novalauncher.THEME"
-            android:resource="@xml/appfilter" />
-        <meta-data
-            android:name="com.anddoes.launcher.THEME"
-            android:resource="@xml/appfilter" />
-        <meta-data
-            android:name="com.teslacoilsw.launcher.THEME"
-            android:resource="@xml/appfilter" />
-        <meta-data
-            android:name="com.actionlauncher.THEME"
-            android:resource="@xml/appfilter" />
-        <meta-data
-            android:name="app.lawnchair.THEME"
-            android:resource="@xml/appfilter" />
+        <meta-data android:name="com.novalauncher.THEME" android:resource="@xml/appfilter" />
+        <meta-data android:name="com.anddoes.launcher.THEME" android:resource="@xml/appfilter" />
+        <meta-data android:name="com.teslacoilsw.launcher.THEME" android:resource="@xml/appfilter" />
+        <meta-data android:name="com.actionlauncher.THEME" android:resource="@xml/appfilter" />
+        <meta-data android:name="app.lawnchair.THEME" android:resource="@xml/appfilter" />
 
         <activity
             android:name=".PackInfoActivity"
@@ -33,18 +23,31 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="org.adw.ActivityStarter.THEMES" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.adw.launcher.THEMES" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="com.novalauncher.THEME" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="com.anddoes.launcher.THEME" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="com.teslacoilsw.launcher.THEME" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="com.actionlauncher.THEME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="app.lawnchair.icons.THEMED_ICON" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>

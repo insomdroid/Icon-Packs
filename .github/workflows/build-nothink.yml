@@ -8,6 +8,7 @@ on:
       - 'pack-nothing/**'
       - 'scripts/import_nothink_lawnicons.py'
       - 'docs/NOTHINK_ATTRIBUTION.md'
+      - 'docs/NOTHINK_ATTRIBUTION.md'
       - 'settings.gradle.kts'
       - 'build.gradle.kts'
       - 'gradle/**'
@@ -38,26 +39,21 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install artwork generator system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libcairo2-dev libffi-dev pkg-config
-
       - name: Install artwork generator Python dependencies
-        run: python -m pip install --upgrade pip cairosvg pillow
+        run: python -m pip install --upgrade pip pillow
 
-      - name: Download pinned Lawnicons mappings and SVG artwork
+      - name: Download Lawnicons app mappings only
         shell: bash
         run: |
           set -euo pipefail
-          git clone --filter=blob:none --no-checkout https://github.com/LawnchairLauncher/lawnicons.git "$RUNNER_TEMP/lawnicons"
-          git -C "$RUNNER_TEMP/lawnicons" checkout --detach "$LAWNICONS_REF"
-          test -s "$RUNNER_TEMP/lawnicons/app/assets/appfilter.xml"
-          test -d "$RUNNER_TEMP/lawnicons/svgs"
+          curl --fail --silent --show-error --location \\
+            "https://raw.githubusercontent.com/LawnchairLauncher/lawnicons/$LAWNICONS_REF/app/assets/appfilter.xml" \\
+            --output "$RUNNER_TEMP/lawnicons-appfilter.xml"
+          test -s "$RUNNER_TEMP/lawnicons-appfilter.xml"
 
-      - name: Generate the complete Nothink icon collection
+      - name: Draw original Nothink artwork for all mapped apps
         run: |
-          python scripts/import_nothink_lawnicons.py --lawnicons-root "$RUNNER_TEMP/lawnicons"
+          python scripts/import_nothink_lawnicons.py --mapping-xml "$RUNNER_TEMP/lawnicons-appfilter.xml"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4

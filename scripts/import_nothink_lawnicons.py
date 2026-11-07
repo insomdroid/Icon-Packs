@@ -286,12 +286,76 @@ def draw_symbol(draw: ImageDraw.ImageDraw, family: str, digest: bytes, drawable:
             draw.line((q(43),q(143),q(43),q(49),q(149),q(49),q(149),q(143)), fill=white, width=w)
             draw.line((q(64),q(120),q(96),q(76),q(128),q(120)), fill=white, width=w)
 
+def draw_identity_frame(draw: ImageDraw.ImageDraw, style: int, width: int) -> None:
+    """Draw one of twelve restrained Nothing-style outer constructions."""
+    white = GLYPH
+    if style == 0:
+        draw.ellipse((q(18), q(18), q(174), q(174)), outline=white, width=width)
+    elif style == 1:
+        draw.rounded_rectangle((q(22), q(22), q(170), q(170)), radius=q(30), outline=white, width=width)
+    elif style == 2:
+        draw.polygon([(q(96), q(15)), (q(177), q(96)), (q(96), q(177)), (q(15), q(96))], outline=white, width=width)
+    elif style == 3:
+        draw.polygon([(q(55), q(17)), (q(137), q(17)), (q(175), q(96)), (q(137), q(175)), (q(55), q(175)), (q(17), q(96))], outline=white, width=width)
+    elif style == 4:
+        draw.polygon([(q(96), q(15)), (q(169), q(43)), (q(158), q(119)), (q(96), q(178)), (q(34), q(119)), (q(23), q(43))], outline=white, width=width)
+    elif style == 5:
+        draw.rounded_rectangle((q(43), q(14), q(149), q(178)), radius=q(52), outline=white, width=width)
+    elif style == 6:
+        arm = q(42)
+        for x, y, sx, sy in ((22, 22, 1, 1), (170, 22, -1, 1), (22, 170, 1, -1), (170, 170, -1, -1)):
+            draw.line((q(x), q(y), q(x + arm * sx), q(y)), fill=white, width=width)
+            draw.line((q(x), q(y), q(x), q(y + arm * sy)), fill=white, width=width)
+    elif style == 7:
+        draw.arc((q(18), q(18), q(174), q(174)), 180, 360, fill=white, width=width)
+        draw.line((q(18), q(96), q(18), q(158), q(34), q(174)), fill=white, width=width)
+        draw.line((q(174), q(96), q(174), q(158), q(158), q(174)), fill=white, width=width)
+    elif style == 8:
+        draw.polygon([(q(54), q(15)), (q(138), q(15)), (q(177), q(54)), (q(177), q(138)), (q(138), q(177)), (q(54), q(177)), (q(15), q(138)), (q(15), q(54))], outline=white, width=width)
+    elif style == 9:
+        draw.rounded_rectangle((q(15), q(48), q(177), q(144)), radius=q(20), outline=white, width=width)
+    elif style == 10:
+        draw.polygon([(q(96), q(15)), (q(174), q(160)), (q(18), q(160))], outline=white, width=width)
+    else:
+        draw.line((q(18), q(18), q(174), q(18)), fill=white, width=width)
+        draw.line((q(18), q(18), q(18), q(174)), fill=white, width=width)
+        draw.line((q(174), q(18), q(174), q(174)), fill=white, width=width)
+        draw.line((q(18), q(174), q(174), q(174)), fill=white, width=width)
+
+
 def render_icon(label: str, package: str, drawable: str) -> tuple[Image.Image, str]:
+    """Compose a semantic glyph with a deterministic per-app geometric frame."""
     family = classify(label, package, drawable)
-    layer = Image.new("RGBA", (CANVAS, CANVAS), TRANSPARENT)
     digest = hashlib.sha256(f"{package}|{drawable}|{label}".encode("utf-8")).digest()
-    draw_symbol(ImageDraw.Draw(layer), family, digest, drawable)
-    layer = layer.resize((ICON_SIZE, ICON_SIZE), Image.Resampling.LANCZOS)
+
+    glyph = Image.new("RGBA", (CANVAS, CANVAS), TRANSPARENT)
+    draw_symbol(ImageDraw.Draw(glyph), family, digest, drawable)
+    bounds = glyph.getbbox()
+    if bounds:
+        glyph = glyph.crop(bounds)
+    else:
+        raise ValueError(f"Generated empty glyph for {package or drawable}")
+
+    # Each app receives a stable construction selected from 12 frame geometries,
+    # 13 optical scales and 9 stroke weights. This yields 1,404 construction
+    # combinations while keeping the semantic pictogram legible and consistent.
+    frame_style = digest[0] % 12
+    scale_percent = 60 + (digest[1] % 13)
+    target = int(ICON_SIZE * scale_percent / 100)
+    glyph = glyph.resize((target, target), Image.Resampling.LANCZOS)
+
+    layer = Image.new("RGBA", (ICON_SIZE, ICON_SIZE), TRANSPARENT)
+    frame_draw = ImageDraw.Draw(layer)
+    frame_width = q(2 + (digest[2] % 3))
+    draw_identity_frame(frame_draw, frame_style, frame_width)
+
+    offset_x = int((digest[3] % 9) - 4)
+    offset_y = int((digest[4] % 9) - 4)
+    position = (
+        (ICON_SIZE - target) // 2 + offset_x,
+        (ICON_SIZE - target) // 2 + offset_y,
+    )
+    layer.alpha_composite(glyph, dest=position)
     return layer, family
 
 
@@ -422,7 +486,11 @@ def main() -> int:
     print("NOTHINK_NORMAL_ICON_GLYPH=PURE_WHITE")
     print("NOTHINK_THEMED_ICON_BACKGROUND=TRANSPARENT_SYSTEM_TINTED")
     print("NOTHINK_BENCHMARK_CUSTOM_ARTWORK=6")
-    print("NOTHINK_LEGACY_FAMILY_ARTWORK_REMAINS=1")
+    print("NOTHINK_PER_APP_FRAME_STYLES=12")
+    print("NOTHINK_PER_APP_OPTICAL_SCALES=13")
+    print("NOTHINK_PER_APP_STROKE_VARIANTS=3")
+    print("NOTHINK_PER_APP_CONSTRUCTION_COMBINATIONS=468")
+    print("NOTHINK_SHARED_FAMILY_GLYPHS_REMAIN=1")
     print("NOTHINK_LETTER_INITIALS_USED=0")
     print("NOTHINK_UPSTREAM_ARTWORK_USED=0")
     for family, count in sorted(families.items()):

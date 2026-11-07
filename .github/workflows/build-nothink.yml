@@ -128,8 +128,8 @@ jobs:
               glyph_name = glyph_ref.removeprefix("@drawable/")
               if not glyph_name or not (res / "drawable-nodpi" / f"{glyph_name}.webp").is_file():
                   raise SystemExit(f"Normal icon wrapper has no matching glyph mask: {wrapper_name}")
-              if foreground.attrib.get("{http://schemas.android.com/apk/res/android}tint") != "#FFFFFFFF":
-                  raise SystemExit(f"Normal icon glyph must be white for dark-theme contrast: {wrapper_name}")
+              if foreground.attrib.get("{http://schemas.android.com/apk/res/android}drawable") != f"@drawable/{glyph_name}":
+                  raise SystemExit(f"Normal icon wrapper has an invalid foreground reference: {wrapper_name}")
           from PIL import Image
           normal = sorted((res / "drawable-nodpi").glob("*.webp"))
           normal = [item for item in normal if not item.name.startswith("themed_")]
@@ -160,8 +160,8 @@ jobs:
               if image.getpixel((0, 0))[3] != 0:
                   raise SystemExit(f"Artwork must have a transparent background: {path.name}")
               colors = image.getcolors(maxcolors=256)
-              if colors is None or any(a > 0 and (r, g, b) != (0, 0, 0) for count, (r, g, b, a) in colors):
-                  raise SystemExit(f"Artwork must use neutral alpha-mask pixels for Android theme tinting: {path.name}")
+              if colors is None or any(a > 0 and (r, g, b) != (255, 255, 255) for count, (r, g, b, a) in colors):
+                  raise SystemExit(f"Artwork must use pure-white glyph pixels on transparent background for dark-mode contrast and Android alpha-mask tinting: {path.name}")
           benchmarks = ["generic_camera", "google_phone", "google_chrome", "google_calendar", "spotify", "generic_settings"]
           missing_benchmarks = [name for name in benchmarks if not (res / "drawable-nodpi" / f"{name}.webp").is_file()]
           if missing_benchmarks:

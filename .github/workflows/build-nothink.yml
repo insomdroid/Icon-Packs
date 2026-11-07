@@ -112,8 +112,25 @@ jobs:
           echo "Nothink unique artwork: $ARTWORK"
           test "$MAPPINGS" -ge 3000
           test "$ARTWORK" -gt 0
-          ls -lh "$APK"
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          res = Path("pack-nothing/src/main/res")
+          appfilter = ET.parse(res / "xml/appfilter.xml").getroot()
+          drawable_index = ET.parse(res / "xml/drawable.xml").getroot()
+          mapped = {item.attrib["drawable"] for item in appfilter.findall("item")}
+          indexed = {item.attrib["drawable"] for item in drawable_index.findall("item")}
+          missing = sorted(name for name in mapped if not (res / "drawable-nodpi" / f"{name}.png").is_file())
+          unlisted = sorted(mapped - indexed)
+          if missing:
+              raise SystemExit(f"Mapped icons missing PNG artwork: {missing[:10]}")
+          if unlisted:
+              raise SystemExit(f"Mapped icons missing from drawable.xml: {unlisted[:10]}")
+          print(f"Verified {len(mapped)} mapped icons have artwork and picker entries.")
+          PY
           "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | head -n 1
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump xmltree "$APK" AndroidManifest.xml | grep -E "org.adw.ActivityStarter.THEMES|org.adw.launcher.THEMES|com.novalauncher.THEME|app.lawnchair.icons.THEMED_ICON"
 
       - name: Upload Nothink release APK
         uses: actions/upload-artifact@v4

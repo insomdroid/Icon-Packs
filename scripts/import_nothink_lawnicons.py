@@ -1,18 +1,12 @@
 #!/usr/bin/env python3
-"""Build the Nothink monochrome icon artwork and Lawnicons app mappings.
-
-Lawnicons SVGs are rasterized to transparent monochrome glyph layers. The
-standard icon-pack layer adds a restrained near-black circular field; the
-themed-icon layer contains only the glyph alpha so compatible launchers can
-tint it from the current wallpaper. Every mapped drawable is generated before
-Gradle starts, so no first-launch download or on-device generation is needed.
-"""
+"""Generate the complete Nothink monochrome icon pack from pinned Lawnicons data."""
 from __future__ import annotations
 
 import argparse
 import re
 import sys
 import xml.etree.ElementTree as ET
+from io import BytesIO
 from pathlib import Path
 
 import cairosvg
@@ -36,7 +30,7 @@ def resource_name(value: str) -> str:
 
 
 def component_package(component: str) -> str | None:
-    match = re.fullmatch(r"ComponentInfo\\{([^/]+)/[^}]+\\}", component.strip())
+    match = re.fullmatch(r"ComponentInfo\{([^/]+)/[^}]+\}", component.strip())
     return match.group(1) if match else None
 
 
@@ -46,43 +40,41 @@ def render_glyph(svg_path: Path) -> tuple[Image.Image, Image.Image]:
         output_width=ICON_SIZE,
         output_height=ICON_SIZE,
     )
-    from io import BytesIO
-
     source = Image.open(BytesIO(rendered)).convert("RGBA")
     alpha = source.getchannel("A")
     luminance = source.convert("L")
-    # Lawnicons source artwork is black on transparent. This also removes a
-    # possible white canvas while retaining antialiased dark strokes.
     darkness = Image.eval(luminance, lambda value: 255 - value)
-    mask = Image.new("L", (ICON_SIZE, ICON_SIZE))
-    source_alpha = alpha.load()
+
+    alpha_pixels = alpha.load()
     darkness_pixels = darkness.load()
+    mask = Image.new("L", (ICON_SIZE, ICON_SIZE))
     mask_pixels = mask.load()
     for y in range(ICON_SIZE):
         for x in range(ICON_SIZE):
-            mask_pixels[x, y] = source_alpha[x, y] * darkness_pixels[x, y] // 255
+            mask_pixels[x, y] = alpha_pixels[x, y] * darkness_pixels[x, y] // 255
 
     bounds = mask.getbbox()
     if bounds is None:
         raise ValueError(f"SVG has no visible dark artwork: {svg_path.name}")
+
     glyph = mask.crop(bounds)
     glyph.thumbnail((132, 132), Image.Resampling.LANCZOS)
-
-    glyph_layer = Image.new("RGBA", (ICON_SIZE, ICON_SIZE), (0, 0, 0, 0))
-    white_glyph = Image.new("RGBA", glyph.size, FOREGROUND)
-    glyph_layer.alpha_composite(
-        Image.composite(white_glyph, Image.new("RGBA", glyph.size), glyph)
-    )
     left = (ICON_SIZE - glyph.width) // 2
     top = (ICON_SIZE - glyph.height) // 2
-    placed_glyph = Image.new("RGBA", (ICON_SIZE, ICON_SIZE), (0, 0, 0, 0))
-    placed_glyph.alpha_composite(glyph_layer, (left, top))
+
+    themed_icon = Image.new("RGBA", (ICON_SIZE, ICON_SIZE), (0, 0, 0, 0))
+    white_glyph = Image.new("RGBA", glyph.size, FOREGROUND)
+    transparent_glyph = Image.new("RGBA", glyph.size, (0, 0, 0, 0))
+    colored_glyph = Image.composite(white_glyph, transparent_glyph, glyph)
+    themed_icon.alpha_composite(colored_glyph, (left, top))
 
     static_icon = Image.new("RGBA", (ICON_SIZE, ICON_SIZE), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(static_icon)
-    draw.ellipse((8, 8, ICON_SIZE - 8, ICON_SIZE - 8), fill=BACKGROUND)
-    static_icon.alpha_composite(placed_glyph)
-    return static_icon, placed_glyph
+    ImageDraw.Draw(static_icon).ellipse(
+        (8, 8, ICON_SIZE - 8, ICON_SIZE - 8),
+        fill=BACKGROUND,
+    )
+    static_icon.alpha_composite(themed_icon)
+    return static_icon, themed_icon
 
 
 def save_png(image: Image.Image, destination: Path) -> None:
@@ -105,16 +97,20 @@ def main() -> int:
     source_filter = upstream / "app" / "assets" / "appfilter.xml"
     source_svgs = upstream / "svgs"
     if not source_filter.is_file() or not source_svgs.is_dir():
-        raise SystemExit("The pinned Lawnicons checkout is missing app/assets/appfilter.xml or svgs/.")
+        raise SystemExit("Pinned Lawnicons checkout is missing app/assets/appfilter.xml or svgs/.")
 
     source_root = ET.parse(source_filter).getroot()
-    source_items = [item for item in source_root.iter("item") if item.get("component") and item.get("drawable")]
+    source_items = [
+        item for item in source_root.iter("item")
+        if item.get("component") and item.get("drawable")
+    ]
     if len(source_items) < MIN_MAPPINGS:
         raise SystemExit(
             f"Lawnicons mapping has only {len(source_items)} app entries; "
             f"at least {MIN_MAPPINGS} are required."
         )
 
+    drawable_to_source: dict[str, str] = {}
     drawable_to_label: dict[str, str] = {}
     component_to_drawable: dict[str, tuple[str, str]] = {}
     package_to_drawable: dict[str, str] = {}
@@ -129,17 +125,25 @@ def main() -> int:
         if not svg.is_file():
             missing.append(f"{component} -> {original_drawable}.svg")
             continue
+
+        previous_source = drawable_to_source.get(drawable)
+        if previous_source and previous_source != original_drawable:
+            raise SystemExit(
+                f"Drawable resource-name collision: {previous_source} and {original_drawable}"
+            )
+        drawable_to_source[drawable] = original_drawable
         drawable_to_label.setdefault(drawable, label)
         component_to_drawable[component] = (drawable, label)
+
         package = component_package(component)
         if package:
             package_to_drawable.setdefault(package, drawable)
 
     if missing:
-        preview = "\\n".join(missing[:25])
+        preview = "\n".join(missing[:25])
         raise SystemExit(
-            f"{len(missing)} Lawnicons mappings reference SVGs that are absent. "
-            f"Refusing to create an incomplete pack. First missing entries:\\n{preview}"
+            f"{len(missing)} Lawnicons mappings reference missing SVG artwork. "
+            f"Refusing to create an incomplete pack. First missing entries:\n{preview}"
         )
     if len(component_to_drawable) < MIN_MAPPINGS:
         raise SystemExit(
@@ -147,18 +151,12 @@ def main() -> int:
         )
 
     drawable_dir = PACK / "drawable-nodpi"
-    themed_dir = PACK / "drawable-nodpi"
     drawable_dir.mkdir(parents=True, exist_ok=True)
 
-    for drawable in sorted(drawable_to_label):
-        original_name = next(
-            item.attrib["drawable"].removeprefix("@drawable/")
-            for item in source_items
-            if resource_name(item.attrib["drawable"].removeprefix("@drawable/")) == drawable
-        )
+    for drawable, original_name in sorted(drawable_to_source.items()):
         static_icon, themed_icon = render_glyph(source_svgs / f"{original_name}.svg")
         save_png(static_icon, drawable_dir / f"{drawable}.png")
-        save_png(themed_icon, themed_dir / f"themed_{drawable}.png")
+        save_png(themed_icon, drawable_dir / f"themed_{drawable}.png")
 
     appfilter = ET.Element("resources")
     for component, (drawable, label) in sorted(component_to_drawable.items()):
@@ -168,9 +166,7 @@ def main() -> int:
             {"component": component, "drawable": drawable, "name": label},
         )
     write_xml(appfilter, PACK / "xml" / "appfilter.xml")
-
-    assets_filter = ROOT / "pack-nothing" / "src" / "main" / "assets" / "appfilter.xml"
-    write_xml(appfilter, assets_filter)
+    write_xml(appfilter, ROOT / "pack-nothing" / "src" / "main" / "assets" / "appfilter.xml")
 
     drawable_index = ET.Element("resources")
     for drawable, label in sorted(drawable_to_label.items()):
@@ -187,7 +183,7 @@ def main() -> int:
     write_xml(themed_map, PACK / "xml" / "grayscale_icon_map.xml")
 
     print(f"NOTHINK_APP_MAPPINGS={len(component_to_drawable)}")
-    print(f"NOTHINK_UNIQUE_ARTWORK={len(drawable_to_label)}")
+    print(f"NOTHINK_UNIQUE_ARTWORK={len(drawable_to_source)}")
     print(f"NOTHINK_THEMED_PACKAGES={len(package_to_drawable)}")
     print("NOTHINK_MISSING_ARTWORK=0")
     return 0

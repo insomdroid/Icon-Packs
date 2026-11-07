@@ -44,11 +44,12 @@ jobs:
         with:
           gradle-version: '8.13'
 
-      - name: Set up Android SDK build tools
-        uses: android-actions/setup-android@v3
-
       - name: Install Android build tools
-        run: sdkmanager "build-tools;35.0.0"
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "$ANDROID_HOME/build-tools/35.0.0" >> "$GITHUB_PATH"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "build-tools;35.0.0"
 
       - name: Import original Android 4.4.4 AOSP icons
         run: python3 scripts/import_kitkat_aosp_icons.py

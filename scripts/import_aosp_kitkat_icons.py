@@ -20,7 +20,6 @@ ANDROID = "{http://schemas.android.com/apk/res/android}"
 
 # Pack drawable name -> AOSP repository path under platform/packages/apps.
 SOURCES = {
-    "phone": "Phone",
     "contacts": "Contacts",
     "messages": "Mms",
     "calendar": "Calendar",

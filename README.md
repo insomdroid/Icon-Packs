@@ -4,7 +4,7 @@ Independently installable Android icon pack APKs. Development is currently focus
 
 ## Active theme
 
-- **KitKat** — the active theme module. Its current artwork is still a temporary set and is not yet a verified collection of original Android 4.4 icons.
+- **KitKat** — the active theme module. Eight built-in app icons are now imported from original AOSP Android 4.4.4 resources; other artwork remains temporary until period-correct sources are verified.
 - 2,073 unique launcher component mappings adapted from Lawnicons' upstream `appfilter.xml`.
 - Minimum SDK: Android 10 (API 29).
 - Compile/Target SDK: 36.
@@ -26,7 +26,7 @@ The workflow builds the Gradle **release** variant and uploads the signed `kitka
 
 ## KitKat artwork status
 
-An experimental AOSP asset importer was removed because it failed before Gradle setup and prevented APK builds. The release workflow now builds the existing KitKat module directly. Authentic KitKat artwork expansion will be handled separately after source assets and extraction are verified; current artwork must not be represented as a complete original KitKat icon collection.
+The release workflow imports eight original Android 4.4.4 AOSP app icons (Contacts, Messaging, Settings, Camera, Calendar, Calculator, Email, and Browser) from the pinned `android-4.4.4_r2` source tag before building. The remaining icons are still temporary artwork; this is a partial authentic set, not yet a complete KitKat-era collection. See `third_party/aosp-android-4.4.4/README.md` for source and license details.
 
 ## Mapping source and attribution
 

@@ -54,12 +54,8 @@ jobs:
       - name: Import original Android 4.4.4 AOSP icons
         run: python3 scripts/import_kitkat_aosp_icons.py
 
-      - name: Import 500 unique original Android 4.x app icons from 2014 Google Play archive
-        env:
-          KITKAT_MIN_ARCHIVE_ICONS: "500"
-          KITKAT_MAX_ARCHIVE_CANDIDATES: "6000"
-          KITKAT_DOWNLOAD_WORKERS: "12"
-        run: python3 scripts/import_kitkat_era_playdrone_icons.py
+      - name: Import archived KitKat application bitmap icons
+        run: python3 scripts/import_kitkat_archive_icons.py
 
       - name: Generate temporary release signing key
         shell: bash

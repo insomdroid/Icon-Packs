@@ -1,0 +1,48 @@
+name: Cleanup Workflow History
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cleanup:
+    name: Keep Three Newest Completed Runs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete older completed workflow runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t RUN_IDS < <(
+            gh api --paginate --slurp \
+              "repos/$GH_REPO/actions/runs?per_page=100" \
+              | jq -r '
+                  [ .[][]?
+                    | select(.status == "completed")
+                  ]
+                  | sort_by(.created_at)
+                  | reverse
+                  | .[3:]
+                  | .[].id
+                '
+          )
+
+          if [ "${#RUN_IDS[@]}" -eq 0 ]; then
+            echo "There are no completed runs older than the three runs to retain."
+            exit 0
+          fi
+
+          echo "Deleting ${#RUN_IDS[@]} older completed workflow runs."
+          for run_id in "${RUN_IDS[@]}"; do
+            echo "Deleting workflow run $run_id"
+            gh api --method DELETE "repos/$GH_REPO/actions/runs/$run_id"
+          done
+
+          echo "Cleanup completed. Three newest completed runs were retained."

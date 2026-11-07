@@ -1,0 +1,65 @@
+name: Build Nothink2 Icon Pack APK
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pack-nothink2/**'
+      - 'scripts/import_nothink2_lawnicons.py'
+      - '.github/workflows/build-nothink2.yml'
+      - 'settings.gradle.kts'
+      - 'build.gradle.kts'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: nothink2-apk-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download pinned Lawnicons artwork and mappings
+        env:
+          LAWNICONS_REVISION: cd91ff0bd00ff0a6c9d606d1c326b451b6563506
+        run: |
+          set -euo pipefail
+          mkdir -p build/lawnicons-source
+          curl -fsSL "https://codeload.github.com/LawnchairLauncher/lawnicons/tar.gz/${LAWNICONS_REVISION}" |
+            tar -xz --strip-components=1 -C build/lawnicons-source
+          test -d build/lawnicons-source/svgs
+          test -s build/lawnicons-source/app/assets/appfilter.xml
+      - name: Install SVG renderer
+        run: python -m pip install --disable-pip-version-check cairosvg
+      - name: Generate icon and themed mappings
+        run: python scripts/import_nothink2_lawnicons.py --upstream build/lawnicons-source --module pack-nothink2 --minimum 100
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Install Android SDK 36
+        run: |
+          set -euo pipefail
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-36" "build-tools;36.0.0"
+          echo "$ANDROID_HOME/build-tools/36.0.0" >> "$GITHUB_PATH"
+      - name: Build release APK
+        run: gradle --no-daemon :pack-nothink2:assembleRelease
+      - name: Verify APK
+        run: |
+          set -euo pipefail
+          APK=pack-nothink2/build/outputs/apk/release/pack-nothink2-release.apk
+          test -s "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | head -n 1
+          echo "APK size: $(du -h "$APK" | cut -f1)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nothink2-release-apk
+          path: pack-nothink2/build/outputs/apk/release/pack-nothink2-release.apk
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0

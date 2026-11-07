@@ -112,12 +112,24 @@ jobs:
           drawable_index = ET.parse(res / "xml/drawable.xml").getroot()
           mapped = {item.attrib["drawable"] for item in appfilter.findall("item")}
           indexed = {item.attrib["drawable"] for item in drawable_index.findall("item")}
-          missing = sorted(name for name in mapped if not (res / "drawable-nodpi" / f"{name}.webp").is_file())
+          missing = sorted(
+              name for name in mapped
+              if not (res / "drawable" / f"{name}.xml").is_file()
+          )
           unlisted = sorted(mapped - indexed)
           if missing:
-              raise SystemExit(f"Mapped icons missing WebP artwork: {missing[:10]}")
+              raise SystemExit(f"Mapped normal icon wrappers missing: {missing[:10]}")
           if unlisted:
               raise SystemExit(f"Mapped icons missing from drawable.xml: {unlisted[:10]}")
+          for wrapper_name in mapped:
+              wrapper = ET.parse(res / "drawable" / f"{wrapper_name}.xml").getroot()
+              foreground = wrapper.findall("item")[-1]
+              glyph_ref = foreground.attrib.get("{http://schemas.android.com/apk/res/android}drawable", "")
+              glyph_name = glyph_ref.removeprefix("@drawable/")
+              if not glyph_name or not (res / "drawable-nodpi" / f"{glyph_name}.webp").is_file():
+                  raise SystemExit(f"Normal icon wrapper has no matching glyph mask: {wrapper_name}")
+              if foreground.attrib.get("{http://schemas.android.com/apk/res/android}tint") != "#FFFFFFFF":
+                  raise SystemExit(f"Normal icon glyph must be white for dark-theme contrast: {wrapper_name}")
           from PIL import Image
           normal = sorted((res / "drawable-nodpi").glob("*.webp"))
           normal = [item for item in normal if not item.name.startswith("themed_")]
@@ -132,7 +144,10 @@ jobs:
               name for name in grayscale_drawables
               if not (res / "drawable-nodpi" / f"{name}.webp").is_file()
           )
-          unlisted_grayscale = sorted(grayscale_drawables - indexed)
+          unlisted_grayscale = sorted(
+              f"icon_{name}" for name in grayscale_drawables
+              if f"icon_{name}" not in indexed
+          )
           if missing_grayscale:
               raise SystemExit(f"Grayscale theme map references missing artwork: {missing_grayscale[:10]}")
           if unlisted_grayscale:

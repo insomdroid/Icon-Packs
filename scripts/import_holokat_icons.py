@@ -299,6 +299,21 @@ EXPLICIT_ALIASES = {
     "youtuberevanced": "youtube", "youtubemorphe": "youtube",
     "youtub evalure": "youtube", "zen uidialercontacts": "phone",
     "zfile": "files",
+    "fakecall": "phone", "fakescall": "phone", "mizudroid": "phone",
+    "telefono": "phone", "tempnumber": "phone", "talkatone": "phone",
+    "foap": "photos", "inst saver": "instagram", "instasaver": "instagram",
+    "instaflow": "instagram", "pinterest": "photos", "relaxpic": "photos",
+    "inspectandedithtmllive": "browser", "jolt": "browser", "lttrs": "browser",
+    "microsoftword": "docs", "microsoftexcel": "sheets",
+    "microsoftpowerpoint": "slides", "microsoftonenote": "notes",
+    "skypeforbusiness": "skype", "snaptik": "tiktok",
+    "soundloadmate": "downloads", "soundloader": "downloads",
+    "spot iweb": "spotify", "spotiweb": "spotify",
+    "spotifuck": "spotify", "spotishka": "spotify",
+    "mpindirici": "downloads", "servicesinfo": "playservices",
+    "itranslate": "translate", "apk signer": "settings",
+    "apksigner": "settings", "exteraless": "files",
+    "helium": "drive", "hideu": "vault", "network": "cloud",
 }
 
 

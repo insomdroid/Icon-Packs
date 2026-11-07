@@ -106,6 +106,9 @@ jobs:
           test -s "pack-nothing/src/main/res/xml/appfilter.xml"
           test -s "pack-nothing/src/main/res/xml/drawable.xml"
           test -s "pack-nothing/src/main/res/xml/grayscale_icon_map.xml"
+          test -s "pack-nothing/src/main/res/mipmap-anydpi-v26/ic_pack.xml"
+          test -s "pack-nothing/src/main/res/drawable/ic_pack_foreground.xml"
+          test -s "pack-nothing/src/main/res/drawable/ic_pack_monochrome.xml"
           MAPPINGS="$(grep -c '<item component=' pack-nothing/src/main/res/xml/appfilter.xml)"
           ARTWORK="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.png' ! -name 'themed_*' | wc -l)"
           echo "Nothink app mappings: $MAPPINGS"
@@ -127,7 +130,16 @@ jobs:
               raise SystemExit(f"Mapped icons missing PNG artwork: {missing[:10]}")
           if unlisted:
               raise SystemExit(f"Mapped icons missing from drawable.xml: {unlisted[:10]}")
-          print(f"Verified {len(mapped)} mapped icons have artwork and picker entries.")
+          themed = sorted((res / "drawable-nodpi").glob("themed_*.png"))
+          if len(themed) < len(mapped):
+              raise SystemExit(f"Expected themed artwork for mapped apps; found {len(themed)} themed files.")
+          from PIL import Image
+          sample = Image.open(themed[0]).convert("RGBA")
+          if sample.getpixel((0, 0))[3] != 0:
+              raise SystemExit("Themed icon artwork must have a transparent background.")
+          if any(r > 180 and g < 100 and b < 100 and a > 0 for r, g, b, a in sample.getdata()):
+              raise SystemExit("Themed icon artwork must be monochrome and contain no fixed red accent.")
+          print(f"Verified {len(mapped)} mapped icons, {len(themed)} transparent monochrome themed assets, and adaptive launcher layers.")
           PY
           "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | head -n 1
           "$ANDROID_HOME/build-tools/36.0.0/aapt" dump xmltree "$APK" AndroidManifest.xml | grep -E "org.adw.ActivityStarter.THEMES|org.adw.launcher.THEMES|com.novalauncher.THEME|app.lawnchair.icons.THEMED_ICON"

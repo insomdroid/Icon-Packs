@@ -170,7 +170,7 @@ def draw_symbol(draw: ImageDraw.ImageDraw, family: str, digest: bytes, include_a
     elif family == "wallet":
         draw.rounded_rectangle((q(31),q(51),q(161),q(145)), radius=q(16), outline=white, width=w)
         draw.rounded_rectangle((q(94),q(79),q(164),q(119)), radius=q(10), fill=white)
-        draw.ellipse((q(109),q(92),q(120),q(103)), fill=BACKGROUND)
+        draw.ellipse((q(109),q(92),q(120),q(103)), fill=TRANSPARENT)
     elif family == "security":
         points=[(q(96),q(31)),(q(151),q(53)),(q(143),q(111)),(q(96),q(157)),(q(49),q(111)),(q(41),q(53)),(q(96),q(31))]
         draw.line(points, fill=white, width=w, joint="curve")
@@ -179,7 +179,7 @@ def draw_symbol(draw: ImageDraw.ImageDraw, family: str, digest: bytes, include_a
         draw.ellipse((q(39),q(47),q(102),q(112)), fill=white)
         draw.ellipse((q(90),q(47),q(153),q(112)), fill=white)
         draw.polygon([(q(42),q(85)),(q(96),q(153)),(q(150),q(85))], fill=white)
-        draw.line((q(54),q(98),q(78),q(98),q(89),q(77),q(105),q(119),q(119),q(98),q(139),q(98)), fill=BACKGROUND, width=q(7))
+        draw.line((q(54),q(98),q(78),q(98),q(89),q(77),q(105),q(119),q(119),q(98),q(139),q(98)), fill=TRANSPARENT, width=q(7))
     elif family == "education":
         draw.polygon([(q(30),q(49)),(q(88),q(60)),(q(96),q(70)),(q(104),q(60)),(q(162),q(49)),(q(162),q(145)),(q(104),q(155)),(q(96),q(163)),(q(88),q(155)),(q(30),q(145))], outline=white)
         draw.line((q(96),q(70),q(96),q(158)), fill=white, width=w)

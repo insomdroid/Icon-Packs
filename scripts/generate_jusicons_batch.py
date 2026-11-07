@@ -336,98 +336,97 @@ def download_apk(package, folder):
                     time.sleep(1)
     return url,None,last_error
 
-def extract_base_apk(downloaded,destination,aapt):
-    with zipfile.ZipFile(downloaded) as archive:
-        names=archive.namelist()
-        if "AndroidManifest.xml" in names:
-            shutil.copyfile(downloaded,destination)
-            return destination
-        candidates=[n for n in names if n.lower().endswith(".apk")]
-        if not candidates:
-            raise RuntimeError("archive contains no APK")
-        candidates.sort(key=lambda n:(Path(n).name.lower()!="base.apk", "config." in Path(n).name.lower(), n))
-        selected=None
-        for candidate in candidates:
-            temp=destination.with_name(destination.stem+"_candidate.apk")
-            with archive.open(candidate) as src,temp.open("wb") as dst:
-                shutil.copyfileobj(src,dst)
-            probe=subprocess.run([aapt,"dump","badging",str(temp)],capture_output=True,text=True,timeout=90)
-            if probe.returncode==0 and "launchable-activity:" in probe.stdout and "application-icon" in probe.stdout:
-                temp.replace(destination)
-                selected=candidate
-                break
-            temp.unlink(missing_ok=True)
-        if selected is None:
-            raise RuntimeError("XAPK has no base/split APK with launcher activity and icon resources")
-    return destination
+def apk_candidates(downloaded, work, package):
+    if zipfile.is_zipfile(downloaded):
+        with zipfile.ZipFile(downloaded) as archive:
+            names=archive.namelist()
+            if "AndroidManifest.xml" in names:
+                yield downloaded
+                return
+            candidates=[n for n in names if n.lower().endswith(".apk")]
+            if not candidates:
+                raise RuntimeError("archive contains no APK")
+            candidates.sort(key=lambda n:(
+                Path(n).name.lower() not in {"base.apk","universal.apk"},
+                Path(n).name.lower().startswith("config."),
+                "config." in Path(n).name.lower(),
+                -archive.getinfo(n).file_size,
+                n
+            ))
+            for index,name in enumerate(candidates):
+                target=work/(hashlib.sha1(package.encode()).hexdigest()[:12]+f"_split_{index}.apk")
+                with archive.open(name) as src,target.open("wb") as dst:
+                    shutil.copyfileobj(src,dst)
+                yield target
+                target.unlink(missing_ok=True)
+    else:
+        raise RuntimeError("download is not a valid APK/XAPK archive")
 
-def process_apk(group,label,package,apk,work,drawable_dir,aapt):
+def process_apk(group,label,package,apk,work,drawable_dir,apktool):
     key=hashlib.sha1(package.encode()).hexdigest()[:12]
     result={"group":group,"label":label,"package":package,"status":"failed"}
+    errors=[]
     try:
-        base=work/(key+"_base.apk")
-        extract_base_apk(apk,base,aapt)
-        probe=subprocess.run([aapt,"dump","badging",str(base)],capture_output=True,text=True,timeout=120)
-        if probe.returncode:
-            raise RuntimeError("aapt could not inspect APK: "+probe.stderr[-500:])
-        output=probe.stdout
-        package_match=re.search(r"^package: name='([^']+)'",output,re.M)
-        actual=package_match.group(1) if package_match else ""
-        if actual!=package:
-            raise RuntimeError(f"package mismatch: expected {package}, got {actual or 'unknown'}")
-        activity_match=re.search(r"^launchable-activity: name='([^']+)'",output,re.M)
-        if not activity_match:
-            raise RuntimeError("aapt reports no MAIN/LAUNCHER activity")
-        activity=activity_match.group(1)
-        if activity.startswith("."): activity=package+activity
-        elif "." not in activity: activity=package+"."+activity
-        components=[f"ComponentInfo{{{package}/{activity}}}"]
-        icon_matches=re.findall(r"^application-icon(?:-\\d+)?:'([^']+)'",output,re.M)
-        if not icon_matches:
-            raise RuntimeError("aapt did not expose an application icon resource")
-        image=None
-        with zipfile.ZipFile(base) as archive:
-            for icon_path in reversed(icon_matches):
-                try:
-                    raw=archive.read(icon_path)
-                    import io
-                    image=Image.open(io.BytesIO(raw)).convert("RGBA")
-                    break
-                except Exception:
+        for candidate_index,base in enumerate(apk_candidates(apk,work,package)):
+            decoded=work/(key+f"_decoded_{candidate_index}")
+            try:
+                proc=subprocess.run(
+                    ["java","-jar",apktool,"d","--force","--no-src","--output",str(decoded),str(base)],
+                    capture_output=True,text=True,timeout=300
+                )
+                if proc.returncode:
+                    errors.append("apktool decode failed: "+(proc.stderr or proc.stdout)[-500:])
                     continue
-            if image is None:
-                candidates=[n for n in archive.namelist()
-                    if n.startswith("res/") and n.lower().endswith((".png",".webp",".jpg",".jpeg"))
-                    and re.search(r"(?:ic_launcher|launcher|app_icon)",Path(n).stem,re.I)]
-                candidates.sort(key=lambda n:("xxxhdpi" not in n,"xxhdpi" not in n,"xhdpi" not in n,n))
-                for candidate in candidates:
-                    try:
-                        import io
-                        image=Image.open(io.BytesIO(archive.read(candidate))).convert("RGBA")
-                        break
-                    except Exception:
-                        pass
-        if image is None:
-            raise RuntimeError("could not decode launcher icon image from APK resources")
-        mono=mono_process(normalize(image,False))
-        if mono is None:
-            raise RuntimeError("MonoProcessor returned empty artwork")
-        path_data=vectorize(mono)
-        if not path_data:
-            raise RuntimeError("vector output is empty")
-        name=drawable_name(package)
-        xml=('<?xml version="1.0" encoding="utf-8"?>\n'
-             '<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">\n'
-             '    <path android:fillColor="#FF121212" android:pathData="M24,2 A22,22 0 1,0 24,46 A22,22 0 1,0 24,2 Z" />\n'
-             f'    <path android:fillColor="#FFFFFFFF" android:pathData="{path_data}" />\n</vector>\n')
-        (drawable_dir/f"{name}.xml").write_text(xml,encoding="utf-8")
-        result.update({"status":"generated","drawable":name,"components":components,"component_count":len(components),
-                       "icon_source":"apk_application_icon","apk_sha256":hashlib.sha256(base.read_bytes()).hexdigest(),
-                       "vector_path_characters":len(path_data)})
+                manifest_path=decoded/"AndroidManifest.xml"
+                if not manifest_path.is_file():
+                    errors.append("decoded APK has no AndroidManifest.xml")
+                    continue
+                manifest=ET.parse(manifest_path).getroot()
+                actual=manifest.attrib.get("package","")
+                if actual!=package:
+                    errors.append(f"package mismatch: expected {package}, got {actual or 'unknown'}")
+                    continue
+                components=find_launcher_components(manifest,actual)
+                if not components:
+                    errors.append("decoded split has no MAIN/LAUNCHER activity")
+                    continue
+                application=manifest.find("application")
+                icon_ref=""
+                if application is not None:
+                    icon_ref=application.attrib.get(ANDROID+"icon","") or application.attrib.get(ANDROID+"roundIcon","")
+                if not icon_ref:
+                    errors.append("application manifest has no icon or roundIcon reference")
+                    continue
+                image,adaptive=image_for_resource(decoded,icon_ref,public_resource_map(decoded))
+                if image is None:
+                    errors.append(f"could not render launcher icon resource {icon_ref}")
+                    continue
+                mono=mono_process(normalize(image,adaptive))
+                if mono is None:
+                    errors.append("MonoProcessor returned empty artwork")
+                    continue
+                path_data=vectorize(mono)
+                if not path_data:
+                    errors.append("vector output is empty")
+                    continue
+                name=drawable_name(package)
+                xml=('<?xml version="1.0" encoding="utf-8"?>\n'
+                     '<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">\n'
+                     '    <path android:fillColor="#FF121212" android:pathData="M24,2 A22,22 0 1,0 24,46 A22,22 0 1,0 24,2 Z" />\n'
+                     f'    <path android:fillColor="#FFFFFFFF" android:pathData="{path_data}" />\n</vector>\n')
+                (drawable_dir/f"{name}.xml").write_text(xml,encoding="utf-8")
+                result.update({"status":"generated","drawable":name,"components":components,"component_count":len(components),
+                               "icon_source":"adaptive_foreground" if adaptive else "application_icon",
+                               "apk_sha256":hashlib.sha256(base.read_bytes()).hexdigest(),
+                               "vector_path_characters":len(path_data),"selected_split":base.name})
+                return result
+            except Exception as exc:
+                errors.append(f"split {candidate_index}: {exc}")
+            finally:
+                shutil.rmtree(decoded,ignore_errors=True)
+        result["error"]=" | ".join(errors[-5:]) or "no usable APK split found"
     except Exception as exc:
         result["error"]=str(exc)
-    finally:
-        (work/(key+"_base.apk")).unlink(missing_ok=True)
     return result
 
 def main():
@@ -435,7 +434,7 @@ def main():
     parser.add_argument("--minimum",type=int,default=70)
     parser.add_argument("--output",default="pack-nothing/src/main/res")
     parser.add_argument("--work",default="build/jusicons-work")
-    parser.add_argument("--aapt",default="aapt")
+    parser.add_argument("--apktool",default="tools/apktool_3.0.3.jar")
     args=parser.parse_args()
     if len(CATALOG)!=100 or len({x[2] for x in CATALOG})!=100: raise SystemExit(f"Catalog must have 100 unique packages; got {len(CATALOG)}")
     res=Path(args.output); drawable_dir=res/"drawable"; xml_dir=res/"xml"
@@ -461,7 +460,7 @@ def main():
         if apk is None:
             results.append({"group":group,"label":label,"package":package,"status":"download_failed","source_url":url,"error":error})
             print(f"[{index:03d}/100] SKIP {package}: {error}",flush=True); continue
-        item=process_apk(group,label,package,apk,work,drawable_dir,args.aapt); item["source_url"]=url; results.append(item)
+        item=process_apk(group,label,package,apk,work,drawable_dir,args.apktool); item["source_url"]=url; results.append(item)
         print(f"[{index:03d}/100] {item['status'].upper()} {package}: {item.get('drawable',item.get('error',''))}",flush=True)
         apk.unlink(missing_ok=True)
     generated=[x for x in results if x["status"]=="generated"]

@@ -2,17 +2,14 @@
 
 ## Current implementation
 
-KitKat is the only active deliverable. The build now replaces 11 legacy placeholder vectors with original launcher PNGs imported from the pinned AOSP Android 4.4.4 source tag. Remaining vectors are legacy artwork and must not be described as authentic KitKat assets. Application component mappings still come from the pinned Lawnicons appfilter.
+KitKat remains the only active deliverable. The experimental CI importer for AOSP Android 4.4.4 icons was removed after it repeatedly failed before Gradle setup. The workflow now builds the existing module directly. Current drawable files are not yet a verified complete set of original KitKat assets.
 
-- **Authentic AOSP artwork imported during CI:** Contacts, Messaging, Calendar, DeskClock, Calculator, Camera, Gallery, Settings, DocumentsUI, Browser, and Email.
-- **Import source:** `android-4.4.4_r2` tag in `platform/packages/apps/` on `android.googlesource.com`.
-- **Import script:** `scripts/import_aosp_kitkat_icons.py`; it copies original PNG bytes into `drawable-nodpi` and removes the matching legacy XML drawable in the CI workspace.
-- **App mappings:** 2,073 unique component mappings imported/adapted from Lawnicons.
-- **Source:** `LawnchairLauncher/lawnicons`, `app/assets/appfilter.xml`, branch `develop`, commit `cd91ff0bd00ff0a6c9d606d1c326b451b6563506`.
-- **Mapping format:** ADW/Nova-compatible `ComponentInfo{package/activity}` entries.
-- **Attribution and license:** see `docs/LAWNICONS_ATTRIBUTION.md` and `third_party/lawnicons/LICENSE`.
+- **App mappings:** 2,073 unique component mappings adapted from Lawnicons.
+- **Mapping source:** `LawnchairLauncher/lawnicons`, `app/assets/appfilter.xml`, branch `develop`, commit `cd91ff0bd00ff0a6c9d606d1c326b451b6563506`.
+- **Build:** `gradle --no-daemon :pack-kitkat:assembleRelease`.
+- **Artwork source plan:** use verified Android 4.4.4 system APK resources for built-in apps, then verified period-correct/community sources for third-party apps. Do not claim community artwork is official Android artwork.
 
-## Imported original AOSP artwork targets
+## Artwork coverage checklist (not yet verified as authentic KitKat assets)
 
 - [ ] phone (standalone AOSP Phone source not available at this tag; awaiting verified source)
 - [x] contacts (AOSP Contacts)
@@ -83,7 +80,7 @@ KitKat is the only active deliverable. The build now replaces 11 legacy placehol
 
 ## Asset licensing and provenance
 
-The imported system icons come from AOSP application repositories pinned to `android-4.4.4_r2`. AOSP identifies Apache 2.0 as its preferred license and states that most, but not all, Android software is Apache 2.0. The importer deliberately excludes proprietary Google Apps and community icon artwork. Before adding assets from other projects, inspect the exact source file and its applicable license; being included in an icon pack does not itself remove copyright or redistribution requirements.
+No successful AOSP icon import has been verified in the APK. The Android 4.4.4 stock APK archive is a candidate source for extracting built-in application icons, but each asset and its redistribution terms must be checked. AOSP identifies Apache 2.0 as its preferred license, but not every Android component uses it. Community artwork must be clearly distinguished from official Android assets.
 
 ## Mapping adaptation notes
 

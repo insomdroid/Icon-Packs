@@ -15,6 +15,11 @@ on:
       - 'gradle.properties'
       - '.github/workflows/build-nothink.yml'
   workflow_dispatch:
+    inputs:
+      svg_zip_url:
+        description: 'HTTPS URL of your uploaded ZIP containing SVG icons (GitHub attachment URL)'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -61,6 +66,11 @@ jobs:
           echo "$ANDROID_HOME/build-tools/36.0.0" >> "$GITHUB_PATH"
       - name: Download 50 application APKs and generate real monochrome icons
         run: python scripts/generate_jusicons_batch.py --minimum 25 --apktool tools/apktool_3.0.3.jar
+      - name: Apply uploaded custom SVG artwork
+        if: github.event_name == 'workflow_dispatch' && inputs.svg_zip_url != ''
+        env:
+          SVG_ZIP_URL: ${{ inputs.svg_zip_url }}
+        run: python scripts/apply_uploaded_svg_icons.py --url "$SVG_ZIP_URL" --minimum-matches 1
       - name: Build Nothink release APK
         run: gradle --no-daemon :pack-nothing:assembleRelease
       - name: Verify generated pack and APK
@@ -100,6 +110,14 @@ jobs:
           if-no-files-found: error
           retention-days: 7
           compression-level: 0
+      - name: Upload SVG import report
+        if: always() && hashFiles('build/jusicons-report/svg-import-report.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: nothink-svg-import-report
+          path: build/jusicons-report/svg-import-report.json
+          if-no-files-found: warn
+          retention-days: 7
       - name: Upload APK extraction report
         if: always()
         uses: actions/upload-artifact@v4

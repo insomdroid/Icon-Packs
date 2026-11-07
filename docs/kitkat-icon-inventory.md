@@ -2,9 +2,9 @@
 
 ## Current implementation
 
-KitKat is the only active deliverable. The build now replaces 12 legacy placeholder vectors with original launcher PNGs imported from the pinned AOSP Android 4.4.4 source tag. Remaining vectors are legacy artwork and must not be described as authentic KitKat assets. Application component mappings still come from the pinned Lawnicons appfilter.
+KitKat is the only active deliverable. The build now replaces 11 legacy placeholder vectors with original launcher PNGs imported from the pinned AOSP Android 4.4.4 source tag. Remaining vectors are legacy artwork and must not be described as authentic KitKat assets. Application component mappings still come from the pinned Lawnicons appfilter.
 
-- **Authentic AOSP artwork imported during CI:** Phone, Contacts, Messaging, Calendar, DeskClock, Calculator, Camera, Gallery, Settings, DocumentsUI, Browser, and Email.
+- **Authentic AOSP artwork imported during CI:** Contacts, Messaging, Calendar, DeskClock, Calculator, Camera, Gallery, Settings, DocumentsUI, Browser, and Email.
 - **Import source:** `android-4.4.4_r2` tag in `platform/packages/apps/` on `android.googlesource.com`.
 - **Import script:** `scripts/import_aosp_kitkat_icons.py`; it copies original PNG bytes into `drawable-nodpi` and removes the matching legacy XML drawable in the CI workspace.
 - **App mappings:** 2,073 unique component mappings imported/adapted from Lawnicons.
@@ -14,7 +14,7 @@ KitKat is the only active deliverable. The build now replaces 12 legacy placehol
 
 ## Imported original AOSP artwork targets
 
-- [x] phone (AOSP Phone)
+- [ ] phone (standalone AOSP Phone source not available at this tag; awaiting verified source)
 - [x] contacts (AOSP Contacts)
 - [x] messages (AOSP Mms)
 - [x] calendar (AOSP Calendar)

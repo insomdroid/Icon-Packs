@@ -6,7 +6,8 @@ import { parseFig, nodeId } from "openfig-core";
 
 const input = process.argv[2] ?? "references/kitkat-archives/App & Brand Icons Pack (Community).fig";
 const output = process.argv[3] ?? "build/nothink-figma-export";
-await mkdir(output, { recursive: true });\nconsole.log("FIGMA_SOURCE=" + input);
+await mkdir(output, { recursive: true });
+console.log("FIGMA_SOURCE=" + input);
 
 const bytes = new Uint8Array(await readFile(input));
 const parsed = parseFig(bytes);
@@ -22,7 +23,9 @@ try {
     const name = typeof node.name === "string" ? node.name.trim() : "";
     const width = Number(node.size?.x ?? 0);
     const height = Number(node.size?.y ?? 0);
-    const kind = node.type;\n    const renderableContainer = kind === "FRAME" || kind === "COMPONENT" || kind === "INSTANCE" || kind === "GROUP" || kind === 3 || kind === 4 || kind === 15 || kind === 16;\n    if (!id || !name || !renderableContainer || width < 12 || height < 12 || width > 1024 || height > 1024) continue;
+    const kind = node.type;
+    const renderableContainer = kind === "FRAME" || kind === "COMPONENT" || kind === "INSTANCE" || kind === "GROUP" || kind === 3 || kind === 4 || kind === 15 || kind === 16;
+    if (!id || !name || !renderableContainer || width < 12 || height < 12 || width > 1024 || height > 1024) continue;
     const key = id;
     if (seen.has(key)) continue;
     seen.add(key);

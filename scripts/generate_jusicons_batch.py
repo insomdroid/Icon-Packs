@@ -357,8 +357,10 @@ def apk_candidates(downloaded, work, package):
                 target=work/(hashlib.sha1(package.encode()).hexdigest()[:12]+f"_split_{index}.apk")
                 with archive.open(name) as src,target.open("wb") as dst:
                     shutil.copyfileobj(src,dst)
-                yield target
-                target.unlink(missing_ok=True)
+                try:
+                    yield target
+                finally:
+                    target.unlink(missing_ok=True)
     else:
         raise RuntimeError("download is not a valid APK/XAPK archive")
 

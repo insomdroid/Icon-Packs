@@ -7,9 +7,26 @@ import android.widget.TextView
 class PackInfoActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val message = """
+            KitKat Icon Pack
+
+            22 original KitKat-inspired icons are included in this first release, with launcher mappings for Android system apps, Google apps and popular third-party apps.
+
+            Apply the pack:
+            1. Open your launcher's settings.
+            2. Find the Icon style or Icon pack option.
+            3. Select KitKat Icon Pack.
+
+            Compatible launcher integrations are provided for Nova Launcher, ADW Launcher, Action Launcher and Lawnchair. Actual coverage depends on the app versions and launcher activities installed on your device.
+
+            More icons and device-specific mappings will be added in later updates.
+        """.trimIndent()
+
         setContentView(TextView(this).apply {
-            text = "KitKat Icon Pack\n\nThis independently installable theme package is the project foundation. Verified launcher mappings and finished original icon artwork will be added in future updates."
-            textSize = 18f
+            text = message
+            textSize = 16f
+            setLineSpacing(6f, 1f)
             setPadding(32, 48, 32, 32)
         })
     }

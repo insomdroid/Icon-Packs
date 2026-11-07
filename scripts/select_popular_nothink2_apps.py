@@ -15,7 +15,7 @@ from urllib.parse import parse_qs, urlparse
 from urllib.request import Request, urlopen
 
 
-PACKAGE_RE = re.compile(r"^[A-Za-z0-9_]+(?:\\.[A-Za-z0-9_]+)+$")
+PACKAGE_RE = re.compile(r"^[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+$")
 CHARTS = (
     ("topselling_free", "Top Free"),
     ("topgrossing", "Top Grossing"),
@@ -25,7 +25,7 @@ COUNTRIES = ("id", "us", "in", "gb")
 
 
 def package_from_component(component):
-    match = re.search(r"ComponentInfo\\{([^/]+)/", component or "")
+    match = re.search(r"ComponentInfo\{([^/]+)/", component or "")
     return match.group(1) if match else None
 
 
@@ -151,7 +151,7 @@ def main():
     selected = ranked[:args.limit]
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(
-        "".join(package + "\\n" for package, _ in selected),
+        "".join(package + "\n" for package, _ in selected),
         encoding="utf-8",
     )
     print(

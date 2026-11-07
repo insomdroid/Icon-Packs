@@ -12,6 +12,7 @@ This project imports the following original PNG application icons from the Andro
 | `calculator` | [platform_packages_apps_calculator](https://github.com/aosp-mirror/platform_packages_apps_calculator/tree/android-4.4.4_r2) | `res/mipmap-xxxhdpi/ic_launcher_calculator.png` |
 | `mail` | [platform_packages_apps_email](https://github.com/aosp-mirror/platform_packages_apps_email/tree/android-4.4.4_r2) | `res/mipmap-xxhdpi/ic_launcher_email.png` |
 | `browser` | [platform_packages_apps_browser](https://github.com/aosp-mirror/platform_packages_apps_browser/tree/android-4.4.4_r2) | `res/mipmap-xxhdpi/ic_launcher_browser.png` |
+| `downloads` | [platform_packages_providers_downloadprovider](https://github.com/aosp-mirror/platform_packages_providers_downloadprovider/tree/android-4.4.4_r2) | `res/mipmap-xxxhdpi/ic_launcher_download.png` |
 
 Each listed AOSP module contains the `MODULE_LICENSE_APACHE2` marker and a `NOTICE` file. The applicable license text is included in this repository at [third_party/lawnicons/LICENSE](../lawnicons/LICENSE). The files are imported without redrawing or changing their artwork; only their Android resource filenames and density-folder placement are adapted for this icon-pack APK.
 

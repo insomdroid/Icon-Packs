@@ -43,6 +43,9 @@ jobs:
         with:
           gradle-version: '8.13'
 
+      - name: Import original Android 4.4.4 AOSP icons
+        run: python3 scripts/import_kitkat_aosp_icons.py
+
       - name: Generate temporary release signing key
         shell: bash
         run: |

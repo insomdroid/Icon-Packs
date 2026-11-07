@@ -138,7 +138,6 @@ def main() -> int:
     for component, (drawable, _) in sorted(component_map.items()):
         ET.SubElement(appfilter, "item", {"component": component, "drawable": drawable})
     xml_write(appfilter, xml_dir / "appfilter.xml")
-    xml_write(appfilter, args.res / "assets" / "appfilter.xml")
 
     drawable_index = ET.Element("resources")
     for package, drawable in sorted(package_map.items()):

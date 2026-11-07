@@ -49,7 +49,7 @@ def fetch(url: str, destination: Path | None = None, attempts: int = 3) -> bytes
     for attempt in range(attempts):
         try:
             with urllib.request.urlopen(request, timeout=45) as response:
-                data = response.read(MAX_APK_BYTES + 1 if destination else 0)
+                data = response.read(MAX_APK_BYTES + 1) if destination else response.read()
                 if destination:
                     if len(data) > MAX_APK_BYTES:
                         raise ValueError("APK exceeds size limit")

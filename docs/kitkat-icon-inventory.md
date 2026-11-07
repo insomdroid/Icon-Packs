@@ -2,12 +2,12 @@
 
 ## Current implementation
 
-KitKat remains the only active deliverable. The CI importer now downloads eight verified Android 4.4.4 AOSP launcher icons from the `android-4.4.4_r2` source tag and places them in density-specific resource folders. The default XML artwork remains as fallback for all other mapped apps.
+KitKat remains the only active deliverable. The CI importer now downloads nine verified Android 4.4.4 AOSP launcher icons from the `android-4.4.4_r2` source tag and places them in density-specific resource folders. The default XML artwork remains as fallback for all other mapped apps.
 
 - **App mappings:** 2,073 unique component mappings adapted from Lawnicons.
 - **Mapping source:** `LawnchairLauncher/lawnicons`, `app/assets/appfilter.xml`, branch `develop`, commit `cd91ff0bd00ff0a6c9d606d1c326b451b6563506`.
 - **Build:** `gradle --no-daemon :pack-kitkat:assembleRelease`.
-- **Verified artwork:** Contacts, Messages, Settings, Camera, Calendar, Calculator, Mail, and Browser are sourced from AOSP Android 4.4.4. See `third_party/aosp-android-4.4.4/README.md`.
+- **Verified artwork:** Contacts, Messages, Settings, Camera, Calendar, Calculator, Mail, Browser, and Downloads are sourced from AOSP Android 4.4.4. See `third_party/aosp-android-4.4.4/README.md`.
 - **Remaining artwork:** other icons are temporary; third-party icons still need historical, app-specific sources. Do not label community artwork as official Android artwork.
 
 ## Artwork coverage checklist
@@ -22,7 +22,7 @@ KitKat remains the only active deliverable. The CI importer now downloads eight 
 - [ ] gallery
 - [x] settings — original AOSP Android 4.4.4 icon
 - [ ] files
-- [ ] downloads
+- [x] downloads — original AOSP Android 4.4.4 icon
 - [x] browser — original AOSP Android 4.4.4 icon
 - [ ] chrome
 - [ ] maps
@@ -81,7 +81,7 @@ KitKat remains the only active deliverable. The CI importer now downloads eight 
 
 ## Asset licensing and provenance
 
-The eight imported PNGs come from AOSP repositories that mark the corresponding modules `MODULE_LICENSE_APACHE2`; their source repository names, resource paths, and attribution are listed in `third_party/aosp-android-4.4.4/README.md`. The shared Apache License 2.0 text is included at `third_party/lawnicons/LICENSE`. Remaining community artwork must be clearly distinguished from official Android assets.
+The nine imported PNGs come from AOSP repositories that mark the corresponding modules `MODULE_LICENSE_APACHE2`; their source repository names, resource paths, and attribution are listed in `third_party/aosp-android-4.4.4/README.md`. The shared Apache License 2.0 text is included at `third_party/lawnicons/LICENSE`. Remaining community artwork must be clearly distinguished from official Android assets.
 
 ## Mapping adaptation notes
 

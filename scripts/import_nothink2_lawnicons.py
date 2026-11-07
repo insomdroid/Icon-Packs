@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Import pinned Lawnicons SVG artwork as compact Nothing-dark icon-pack assets."""
 import argparse
+import io
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
 import cairosvg
+from PIL import Image
 
 ANDROID = "{http://schemas.android.com/apk/res/android}"
 
@@ -50,21 +52,20 @@ def main():
             svg = svgs / (drawable + ".svg")
             if not svg.is_file():
                 continue
-            cairosvg.svg2png(
+            rendered = cairosvg.svg2png(
                 bytestring=white_svg(svg.read_text(encoding="utf-8")),
-                write_to=str(glyphs / (name + "_glyph.png")),
-                output_width=192, output_height=192
+                output_width=144, output_height=144
             )
+            glyph = Image.open(io.BytesIO(rendered)).convert("RGBA")
+            canvas = Image.new("RGBA", (192, 192), (0, 0, 0, 0))
+            canvas.alpha_composite(glyph, ((192 - glyph.width) // 2, (192 - glyph.height) // 2))
+            canvas.save(glyphs / (name + "_glyph.png"), optimize=True)
+
             layer = ET.Element("layer-list")
             bg_item = ET.SubElement(layer, "item")
             bg_shape = ET.SubElement(bg_item, "shape", {ANDROID + "shape": "rectangle"})
             ET.SubElement(bg_shape, "solid", {ANDROID + "color": "#101010"})
-            fg_item = ET.SubElement(layer, "item", {
-                ANDROID + "width": "176dp", ANDROID + "height": "176dp",
-                ANDROID + "gravity": "center"})
-            ET.SubElement(fg_item, "bitmap", {
-                ANDROID + "src": "@drawable/" + name + "_glyph",
-                ANDROID + "gravity": "center", ANDROID + "filter": "true"})
+            ET.SubElement(layer, "item", {ANDROID + "drawable": "@drawable/" + name + "_glyph"})
             ET.ElementTree(layer).write(
                 wrappers / (name + ".xml"), encoding="utf-8", xml_declaration=True
             )

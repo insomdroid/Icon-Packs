@@ -113,6 +113,7 @@ jobs:
           ARTWORK="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.webp' ! -name 'themed_*' | wc -l)"
           ARTWORK_BYTES="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.webp' -printf '%s\n' | awk '{ total += $1 } END { printf "%d", total }')"
           SAMPLE_DRAWABLE="$(python - <<'PY'
+          import hashlib
           import xml.etree.ElementTree as ET
           root = ET.parse('pack-nothing/src/main/res/xml/appfilter.xml').getroot()
           print(root.find('item').attrib['drawable'])
@@ -125,6 +126,7 @@ jobs:
           test "$ARTWORK" -gt 0
           test "$ARTWORK_BYTES" -lt 40000000
           python - <<'PY'
+          import hashlib
           import xml.etree.ElementTree as ET
           from pathlib import Path
 

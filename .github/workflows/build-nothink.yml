@@ -158,12 +158,12 @@ jobs:
             echo "Compiled APK resource table is missing the appfilter XML resource."
             exit 1
           fi
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | sed -n '1p'
+          MANIFEST_DUMP="$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump xmltree "$APK" AndroidManifest.xml)"
           if ! grep -Fq 'com.novalauncher.THEME' <<< "$MANIFEST_DUMP"; then
             echo "Compiled APK manifest is missing Nova Launcher icon-pack metadata."
             exit 1
           fi
-          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | sed -n '1p'
-          MANIFEST_DUMP="$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump xmltree "$APK" AndroidManifest.xml)"
           if ! grep -Eq "org.adw.ActivityStarter.THEMES|org.adw.launcher.THEMES|com.novalauncher.THEME|app.lawnchair.icons.THEMED_ICON|PackInfoActivity" <<< "$MANIFEST_DUMP"; then
             echo "APK manifest is missing the expected icon-pack launcher integration entries."
             exit 1

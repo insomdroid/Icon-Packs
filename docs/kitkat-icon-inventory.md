@@ -7,7 +7,7 @@ KitKat remains the only active deliverable. The CI importer now downloads nine v
 - **App mappings:** 2,074 unique component mappings adapted from Lawnicons.
 - **Mapping source:** `LawnchairLauncher/lawnicons`, `app/assets/appfilter.xml`, branch `develop`, commit `cd91ff0bd00ff0a6c9d606d1c326b451b6563506`.
 - **Build:** `gradle --no-daemon :pack-kitkat:assembleRelease`.
-- **Verified artwork:** Messages, Settings, Camera, Calendar, Calculator, Mail, Browser, and Downloads, and Music are sourced from AOSP Android 4.4.4. See `third_party/aosp-android-4.4.4/README.md`.
+- **Verified artwork:** Messages, Settings, Camera, Calendar, Calculator, Mail, Browser, Downloads, and Music are sourced from AOSP Android 4.4.4. See `third_party/aosp-android-4.4.4/README.md`.
 - **Remaining artwork:** other icons are temporary; third-party icons still need historical, app-specific sources. Do not label community artwork as official Android artwork.
 
 ## Artwork coverage checklist

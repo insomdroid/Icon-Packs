@@ -1,34 +1,36 @@
-name: Build KitKat Release APK
+name: Build Combined Icon Pack Release APK
 
 on:
   push:
     branches:
       - main
-    paths-ignore:
-      - 'README.md'
-      - '**/*.md'
-      - 'docs/**'
-      - 'references/**'
-      - 'reference/**'
-      - 'reference-images/**'
-      - 'screenshots/**'
-      - 'Screenshot/**'
-      - 'assets/references/**'
-      - 'docs/references/**'
+    paths:
+      - 'app/**'
+      - 'core/**'
+      - 'pack-kitkat/**'
+      - 'scripts/import_kitkat_aosp_icons.py'
+      - 'scripts/import_kitkat_archive_icons.py'
+      - 'scripts/import_holokat_icons.py'
+      - 'references/kitkat-archives/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle/**'
+      - 'gradle.properties'
+      - '.github/workflows/build-icon-packs.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: kitkat-release-${{ github.ref }}
+  group: combined-icon-pack-release-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    name: Build Signed KitKat Release APK
+    name: Build One Combined Release APK
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 120
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,11 +59,14 @@ jobs:
       - name: Import archived KitKat application bitmap icons
         run: python3 scripts/import_kitkat_archive_icons.py
 
+      - name: Merge Jelly Bean archive artwork
+        run: python3 scripts/import_holokat_icons.py
+
       - name: Generate temporary release signing key
         shell: bash
         run: |
           set -euo pipefail
-          KEYSTORE_PATH="$RUNNER_TEMP/kitkat-release-${GITHUB_RUN_ID}.jks"
+          KEYSTORE_PATH="$RUNNER_TEMP/combined-icon-pack-${GITHUB_RUN_ID}.jks"
           STORE_PASSWORD="$(openssl rand -hex 24)"
           KEY_PASSWORD="$(openssl rand -hex 24)"
           keytool -genkeypair -v \
@@ -69,25 +74,34 @@ jobs:
             -storetype JKS \
             -storepass "$STORE_PASSWORD" \
             -keypass "$KEY_PASSWORD" \
-            -alias kitkat-release \
+            -alias combined-icon-pack \
             -keyalg RSA \
             -keysize 2048 \
             -validity 2 \
-            -dname "CN=Insomdroid Temporary KitKat Signing"
+            -dname "CN=Insomdroid Combined Icon Pack Temporary Signing"
           {
             echo "KITKAT_RELEASE_STORE_FILE=$KEYSTORE_PATH"
             echo "KITKAT_RELEASE_STORE_PASSWORD=$STORE_PASSWORD"
-            echo "KITKAT_RELEASE_KEY_ALIAS=kitkat-release"
+            echo "KITKAT_RELEASE_KEY_ALIAS=combined-icon-pack"
             echo "KITKAT_RELEASE_KEY_PASSWORD=$KEY_PASSWORD"
           } >> "$GITHUB_ENV"
 
-      - name: Build signed release variant
+      - name: Build optimized release APK
         run: gradle --no-daemon :pack-kitkat:assembleRelease
 
-      - name: Upload signed release APK
+      - name: Verify APK and report size
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="pack-kitkat/build/outputs/apk/release/pack-kitkat-release.apk"
+          test -s "$APK"
+          ls -lh "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | head -n 1
+
+      - name: Upload the single combined release APK
         uses: actions/upload-artifact@v4
         with:
-          name: kitkat-release-apk
+          name: insomdroid-combined-icon-pack-release
           path: pack-kitkat/build/outputs/apk/release/pack-kitkat-release.apk
           if-no-files-found: error
           retention-days: 1

@@ -153,7 +153,8 @@ jobs:
           sample = webp_sample.convert("RGBA")
           if sample.getpixel((0, 0))[3] != 0:
               raise SystemExit("Themed icon artwork must have a transparent background.")
-          if any(a > 0 and (r, g, b) != (0, 0, 0) for r, g, b, a in sample.getdata()):
+          sample_colors = sample.getcolors(maxcolors=256)
+          if sample_colors is None or any(a > 0 and (r, g, b) != (0, 0, 0) for count, (r, g, b, a) in sample_colors):
               raise SystemExit("Themed artwork must be a neutral alpha mask; launcher supplies theme color.")
           normal = sorted((res / "drawable-nodpi").glob("*.webp"))
           normal = [item for item in normal if not item.name.startswith("themed_")]
@@ -161,7 +162,8 @@ jobs:
               image = Image.open(path).convert("RGBA")
               if image.getpixel((0, 0))[3] != 0:
                   raise SystemExit(f"Normal artwork must have a transparent background: {path.name}")
-              if any(a > 0 and (r, g, b) != (0, 0, 0) for r, g, b, a in image.getdata()):
+              colors = image.getcolors(maxcolors=256)
+              if colors is None or any(a > 0 and (r, g, b) != (0, 0, 0) for count, (r, g, b, a) in colors):
                   raise SystemExit(f"Artwork must use neutral alpha-mask pixels for Android theme tinting: {path.name}")
           benchmarks = ["generic_camera", "google_phone", "google_chrome", "google_calendar", "spotify", "generic_settings"]
           missing_benchmarks = [name for name in benchmarks if not (res / "drawable-nodpi" / f"{name}.webp").is_file()]

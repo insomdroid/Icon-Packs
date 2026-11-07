@@ -64,6 +64,11 @@ ASSETS = {
         "res/mipmap-xxxhdpi/ic_launcher_download.png",
         "drawable-xxxhdpi",
     ),
+    "music": (
+        "platform_packages_apps_music",
+        "res/drawable-hdpi/app_music.png",
+        "drawable-hdpi",
+    ),
 }
 
 

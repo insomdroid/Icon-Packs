@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Import the supplied HKtorito Jelly Bean archives and generate Holokat mappings."""
+"""Merge the supplied Jelly Bean archive artwork into the single KitKat icon pack."""
 from __future__ import annotations
 
 import hashlib
@@ -469,9 +469,7 @@ def main() -> None:
 
     old_filter = APPFILTER_XML
     appfilter = ET.parse(APPFILTER_XML).getroot() if APPFILTER_XML.is_file() else ET.Element("resources")
-    matched_components: set[str] = {
-        item.attrib["component"] for item in appfilter.findall("item") if item.attrib.get("component")
-    }
+    matched_components: set[str] = set()
     matched_artwork: Counter[str] = Counter()
     matched_labels: dict[str, set[str]] = defaultdict(set)
     unmatched_labels: set[str] = set()
@@ -491,13 +489,22 @@ def main() -> None:
 
             if resource is None:
                 unmatched_labels.add(label)
+                matched_components.add(component)
                 continue
 
-            ET.SubElement(appfilter, "item", {
-                "component": component,
-                "drawable": resource,
-                "name": label,
-            })
+            existing_item = next(
+                (entry for entry in appfilter.findall("item")
+                 if entry.attrib.get("component") == component),
+                None,
+            )
+            if existing_item is not None:
+                existing_item.set("drawable", resource)
+            else:
+                ET.SubElement(appfilter, "item", {
+                    "component": component,
+                    "drawable": resource,
+                    "name": label,
+                })
             matched_components.add(component)
             matched_artwork[resource] += 1
             matched_labels[resource].add(label)

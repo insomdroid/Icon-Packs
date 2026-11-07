@@ -13,7 +13,7 @@ A separate monochrome geometric icon pack inspired by Nothing OS. Its visual dir
 - Name: Nothink
 - Application ID: `com.insomdroid.iconpacks.nothink`
 - Mapping: Lawnicons component mappings, pinned to a fixed source revision
-- Artwork: original semantic pictograms and abstract geometric marks, generated for every unique mapped drawable
+- Artwork: original Nothink-inspired geometric pictograms, generated for every unique mapped drawable; separate transparent monochrome assets support wallpaper-tinted themed icons
 - Build: [Build Nothink Icon Pack Release APK](https://github.com/insomdroid/Icon-Packs/actions/workflows/build-nothink.yml)
 - Artifact: `nothink-icon-pack-release` (one-day retention)
 

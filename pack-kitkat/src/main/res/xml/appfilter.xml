@@ -2079,4 +2079,5 @@
   <item component="ComponentInfo{com.htetznaing.zfile/com.htetznaing.zfile.ui.MainActivity}" drawable="files" name="zFile" />
   <item component="ComponentInfo{com.htetznaing.zfile/com.htetz.zfile4.MainActivity}" drawable="files" name="zFile" />
   <item component="ComponentInfo{com.android.settings.new/com.android.settings.SplashActivity}" drawable="settings" name="安卓快捷设置 ~~ Android Quick Settings" />
+  <item component="ComponentInfo{com.android.music/com.android.music.MusicBrowserActivity}" drawable="music" name="Music" />
 </resources>

@@ -15,7 +15,7 @@ KitKat remains the only active deliverable. The CI importer now downloads eight 
 - [ ] phone
 - [x] contacts — original AOSP Android 4.4.4 icon
 - [x] messages — original AOSP Android 4.4.4 icon
-- [ ] calendar — existing artwork remains temporary until the importer replaces it in the APK
+- [x] calendar — original AOSP Android 4.4.4 icon
 - [ ] clock
 - [x] calculator — original AOSP Android 4.4.4 icon
 - [x] camera — original AOSP Android 4.4.4 icon

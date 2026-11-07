@@ -1,0 +1,49 @@
+name: Inspect Uploaded Legacy Icon APKs
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'references/kitkat-archives/**'
+      - 'scripts/inspect_uploaded_icon_apks.py'
+      - '.github/workflows/inspect-reference-apks.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: inspect-reference-apks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Android build tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "build-tools;35.0.0"
+          echo "$ANDROID_HOME/build-tools/35.0.0" >> "$GITHUB_PATH"
+
+      - name: Inspect uploaded APKs without installing them
+        run: python3 scripts/inspect_uploaded_icon_apks.py
+
+      - name: Upload inspection report and extracted launcher icons
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-icon-apk-inspection
+          path: build/reference-inspection/
+          if-no-files-found: error
+          retention-days: 7

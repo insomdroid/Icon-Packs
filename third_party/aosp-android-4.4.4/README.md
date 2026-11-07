@@ -14,7 +14,7 @@ This project imports the following original PNG application icons from the Andro
 | `downloads` | [platform_packages_providers_downloadprovider](https://github.com/aosp-mirror/platform_packages_providers_downloadprovider/tree/android-4.4.4_r2) | `res/mipmap-xxxhdpi/ic_launcher_download.png` |
 | `music` | [platform_packages_apps_music](https://github.com/aosp-mirror/platform_packages_apps_music/tree/android-4.4.4_r2) | `res/drawable-hdpi/app_music.png` |
 
-Each listed AOSP module contains the `MODULE_LICENSE_APACHE2` marker and a `NOTICE` file. The applicable license text is included in this repository at [third_party/lawnicons/LICENSE](../lawnicons/LICENSE). The files are imported without redrawing or changing their artwork; only their Android resource filenames and density-folder placement are adapted for this icon-pack APK.
+Each listed AOSP module contains the `MODULE_LICENSE_APACHE2` marker and a `NOTICE` file. The applicable license text is included in this repository at [LICENSE](LICENSE). The files are imported without redrawing or changing their artwork; only their Android resource filenames and density-folder placement are adapted for this icon-pack APK.
 
 The build script downloads from the pinned Android 4.4.4 release tag and fails the build if a required PNG cannot be retrieved or does not have a valid PNG signature.
 

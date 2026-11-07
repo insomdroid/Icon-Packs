@@ -1,35 +1,22 @@
-# Insomdroid Icon Pack
+# Insomdroid Icon Packs
 
-One installable Android icon pack APK combining authentic Android 4.4 KitKat artwork and the supplied Jelly Bean-era artwork archives. These are artwork sources inside one pack, not separate themes or APKs.
+Two separately installable Android icon pack APKs are maintained in this repository.
 
-## Combined icon collection
+## Holokat
 
-- Original Android 4.4.4 AOSP application icons imported from the pinned `android-4.4.4_r2` source tag.
-- Archived KitKat-era bitmap icons from `references/kitkat-archives/drawable-xxxhdpi`.
-- 265 unique Jelly Bean archive images from the two HKtorito archives. Original images are retained without redrawing or recoloring.
-- Launcher component mappings use the available artwork matches; where no reliable Jelly Bean match exists, the existing KitKat artwork remains assigned.
-- Mapping source: [Lawnicons](https://github.com/LawnchairLauncher/lawnicons), pinned to `cd91ff0bd00ff0a6c9d606d1c326b451b6563506`. Lawnicons artwork is not included.
+The original Android 4.4 KitKat and supplied Jelly Bean artwork combined in one APK. See the existing [combined icon pack workflow](https://github.com/insomdroid/Icon-Packs/actions/workflows/build-icon-packs.yml) and [Jelly Bean artwork attribution](docs/HOLOKAT_ATTRIBUTION.md).
 
-## Build
+## Nothink
 
-The single **Build Combined Icon Pack Release APK** workflow runs on relevant pushes to `main` or manually from [GitHub Actions](https://github.com/insomdroid/Icon-Packs/actions/workflows/build-icon-packs.yml).
+A separate monochrome icon pack inspired by Nothing OS. It uses the pinned Lawnicons component mapping and SVG source artwork, transformed during the first GitHub Actions build into a dark circular monochrome icon set plus a separate glyph-only layer for compatible wallpaper-tinted themed-icon launchers.
 
-It imports both artwork sources, merges their drawable catalog and launcher mappings, builds the optimized Gradle `release` variant, and uploads one artifact:
+- Name: Nothink
+- Application ID: `com.insomdroid.iconpacks.nothink`
+- Target: at least 3,000 app component mappings from Lawnicons
+- Artwork: every mapped SVG is generated into the APK during the build; missing source artwork fails the build instead of silently leaving mappings without images
+- Build: [Build Nothink Icon Pack Release APK](https://github.com/insomdroid/Icon-Packs/actions/workflows/build-nothink.yml)
+- Artifact: `nothink-icon-pack-release` (one-day retention)
 
-`insomdroid-combined-icon-pack-release`
+The number of supported app components and the number of unique source illustrations are different counts. The workflow prints both values and verifies the 3,000-mapping minimum.
 
-The artifact is retained for one day. PNG artwork is preserved as supplied; R8 code shrinking and Android resource shrinking are enabled, with all icon drawables explicitly retained because launcher metadata references drawable names dynamically.
-
-## Compatibility
-
-- Minimum SDK: Android 10 (API 29).
-- Compile SDK / Target SDK: 36.
-- Java: 17.
-
-## Attribution
-
-See [Jelly Bean artwork attribution](docs/HOLOKAT_ATTRIBUTION.md), [Lawnicons attribution](docs/LAWNICONS_ATTRIBUTION.md), and the included [Apache License 2.0](third_party/lawnicons/LICENSE). Acknowledgement does not imply that a third-party redistribution license has been verified.
-
-## Build history cleanup
-
-Use the manual **Cleanup Workflow History** workflow to retain the three newest completed workflow runs across the repository and delete older completed runs. In-progress runs are not deleted.
+See [Nothink artwork and mapping attribution](docs/NOTHINK_ATTRIBUTION.md). Nothink is an unofficial independent project and is not affiliated with Nothing Technology Limited.

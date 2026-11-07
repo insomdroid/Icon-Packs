@@ -181,8 +181,7 @@ def main() -> int:
                     '<vector xmlns:android="http://schemas.android.com/apk/res/android" '
                     'android:width="48dp" android:height="48dp" '
                     'android:viewportWidth="48" android:viewportHeight="48">\n'
-                    '    <path android:fillColor="#FF000000" '
-                    'android:pathData="M24,0 A24,24 0 1,0 24,48 A24,24 0 1,0 24,0 Z" />\n'
+                    '    <path android:fillColor="#FF000000" android:pathData="M0,0h48v48h-48Z" />\n'
                     f'    <path android:fillColor="#FFFFFFFF" android:pathData="{html.escape(path_data, quote=True)}" />\n'
                     '</vector>\n'
                 )

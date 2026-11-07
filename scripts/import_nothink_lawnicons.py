@@ -403,7 +403,7 @@ def draw_brand(draw: ImageDraw.ImageDraw, brand: str) -> None:
     elif brand == "messenger":
         draw.rounded_rectangle((q(23),q(28),q(169),q(153)), radius=q(55), fill=white)
         draw.polygon([(q(53),q(139)),(q(40),q(173)),(q(87),q(148))], fill=white)
-        draw.polygon([(q(47),q(111)),(q(87),q(72)),(q(112),q(95)),(q(151),q(66)),(q(111),q(120)),(q(86),q(98))], fill=(0,0,0,255))
+        draw.polygon([(q(47),q(111)),(q(87),q(72)),(q(112),q(95)),(q(151),q(66)),(q(111),q(120)),(q(86),q(98))], fill=BACKGROUND)
     elif brand == "reddit":
         draw.ellipse((q(30),q(45),q(162),q(158)), outline=white, width=w)
         draw.line((q(96),q(47),q(111),q(22),q(139),q(30)), fill=white, width=q(7))
@@ -450,11 +450,11 @@ def draw_brand(draw: ImageDraw.ImageDraw, brand: str) -> None:
         draw.rounded_rectangle((q(53),q(32),q(166),q(160)), radius=q(12), outline=white, width=q(8))
         draw.line((q(57),q(57),q(110),q(99),q(162),q(57)), fill=white, width=q(8))
         draw.rounded_rectangle((q(23),q(62),q(99),q(130)), radius=q(12), fill=white)
-        draw.ellipse((q(48),q(78),q(75),q(112)), outline=(0,0,0,255), width=q(6))
+        draw.ellipse((q(48),q(78),q(75),q(112)), outline=BACKGROUND, width=q(6))
     elif brand == "maps":
         draw.ellipse((q(44),q(22),q(148),q(126)), outline=white, width=q(10))
         draw.polygon([(q(47),q(100)),(q(96),q(177)),(q(145),q(100))], fill=white)
-        draw.ellipse((q(80),q(58),q(112),q(90)), fill=(0,0,0,255))
+        draw.ellipse((q(80),q(58),q(112),q(90)), fill=BACKGROUND)
     elif brand == "photos":
         for angle in range(0,360,90):
             draw.pieslice((q(45),q(45),q(147),q(147)), angle, angle+82, fill=white)

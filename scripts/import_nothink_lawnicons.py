@@ -22,7 +22,7 @@ SCALE = 3
 CANVAS = ICON_SIZE * SCALE
 MIN_MAPPINGS = 3000
 BACKGROUND = (0, 0, 0, 0)
-GLYPH = (0, 0, 0, 255)
+GLYPH = (255, 255, 255, 255)
 TRANSPARENT = (0, 0, 0, 0)
 STROKE = 12 * SCALE
 
@@ -309,7 +309,6 @@ def write_normal_icon_wrapper(drawable: str, destination: Path) -> None:
     ET.SubElement(shape, "solid", {"android:color": "#FF000000"})
     ET.SubElement(root, "item", {
         "android:drawable": f"@drawable/{drawable}",
-        "android:tint": "#FFFFFFFF",
     })
     write_xml(root, destination)
 

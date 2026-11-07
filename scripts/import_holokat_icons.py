@@ -348,6 +348,32 @@ def semantic_artwork(label: str, artwork_by_label: dict[str, str]) -> str | None
             if target in artwork_by_label:
                 return artwork_by_label[target]
     return None
+# Additional verified Google launcher components missing from the older
+# Lawnicons-derived component list. Only component identifiers are reused;
+# all drawable artwork still comes from the user's supplied Jelly Bean ZIPs.
+EXTRA_COMPONENTS = [
+    ("ComponentInfo{com.google.android.keep/com.google.android.keep.activities.BrowseActivity}", "Google Keep", "keep"),
+    ("ComponentInfo{com.google.android.apps.docs/com.google.android.apps.docs.app.NewMainProxyActivity}", "Google Drive", "drive"),
+    ("ComponentInfo{com.google.android.apps.docs.editors.docs/com.google.android.apps.docs.editors.kix.KixEditorActivity}", "Google Docs", "docs"),
+    ("ComponentInfo{com.google.android.apps.docs.editors.sheets/com.google.android.apps.docs.editors.sheets.SheetsEditorActivity}", "Google Sheets", "sheets"),
+    ("ComponentInfo{com.google.android.apps.docs.editors.slides/com.google.android.apps.docs.editors.slides.SlidesEditorActivity}", "Google Slides", "slides"),
+    ("ComponentInfo{com.google.android.apps.photos/com.google.android.apps.photos.home.HomeActivity}", "Google Photos", "photos"),
+    ("ComponentInfo{com.google.android.apps.books/com.google.android.apps.books.app.HomeActivity}", "Google Play Books", "books"),
+    ("ComponentInfo{com.google.android.apps.books/com.google.android.apps.books.app.BooksActivity}", "Google Play Books", "books"),
+    ("ComponentInfo{com.google.android.apps.podcasts/com.google.android.apps.podcasts.app.LauncherActivity}", "Google Podcasts", "podcasts"),
+    ("ComponentInfo{com.google.android.apps.youtube.music/com.google.android.apps.youtube.music.activities.MusicActivity}", "YouTube Music", "youtubemusic"),
+    ("ComponentInfo{com.google.android.apps.classroom/com.google.android.apps.classroom.ClassListActivity}", "Google Classroom", "classroom"),
+    ("ComponentInfo{com.google.android.apps.meetings/com.google.android.apps.meetings.MainActivity}", "Google Meet", "meet"),
+    ("ComponentInfo{com.google.android.apps.meetings/com.google.android.apps.meetings.launch.MeetLaunchActivity}", "Google Meet", "meet"),
+    ("ComponentInfo{com.google.android.apps.tachyon/com.google.android.apps.tachyon.ui.main.MainActivity}", "Google Duo", "duo"),
+    ("ComponentInfo{com.google.android.apps.walletnfcrel/com.google.android.apps.walletnfcrel.WalletActivity}", "Google Wallet", "wallet"),
+    ("ComponentInfo{com.google.android.apps.magazines/com.google.apps.magazines.activities.HomeActivity}", "Google News", "newsweather"),
+    ("ComponentInfo{com.google.android.apps.translate/com.google.android.apps.translate.TranslateActivity}", "Google Translate", "translate"),
+    ("ComponentInfo{com.android.vending/com.google.android.finsky.activities.MainActivity}", "Google Play Store", "playstore"),
+    ("ComponentInfo{com.google.android.music/com.google.android.music.MusicBrowserActivity}", "Google Play Music", "playmusic"),
+    ("ComponentInfo{com.google.android.videos/com.google.android.archive.ReactivateActivity}", "Google Play Movies & TV", "playmoviestv"),
+]
+
 
 def main() -> None:
     missing = [str(path) for path in ARCHIVES if not path.is_file()]
@@ -436,6 +462,21 @@ def main() -> None:
             matched_components.add(component)
             matched_artwork[resource] += 1
             matched_labels[resource].add(label)
+
+    for component, label, artwork in EXTRA_COMPONENTS:
+        if component in matched_components:
+            continue
+        resource = artwork_by_label.get(normalize(artwork))
+        if resource is None:
+            continue
+        ET.SubElement(appfilter, "item", {
+            "component": component,
+            "drawable": resource,
+            "name": label,
+        })
+        matched_components.add(component)
+        matched_artwork[resource] += 1
+        matched_labels[resource].add(label)
 
     ET.indent(appfilter, space="    ")
     APPFILTER_XML.write_text(

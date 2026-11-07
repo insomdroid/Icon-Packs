@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Import original Android 4.4.4 AOSP launcher artwork into the KitKat pack.
 
-The source tag is pinned to android-4.4.4_r2. Only PNG resources that are
-explicitly referenced as app icons by the corresponding AOSP manifests are
-included here. Existing default-density XML artwork remains as fallback for
+The source tag is pinned to android-4.4.4_r2. Only PNG resources verified in the corresponding Android 4.4.4 AOSP source
+repositories are included here. Manifest references are checked where the
+source repository contains the app manifest. Existing default-density XML artwork remains as fallback for
 icons that are not covered by this verified source list.
 """
 
@@ -25,7 +25,7 @@ PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 # These paths were checked against the Android 4.4.4_r2 AOSP source trees.
 ASSETS = {
     "contacts": (
-        "platform_packages_apps_mms",
+        "platform_packages_apps_contacts",
         "res/mipmap-xxhdpi/ic_launcher_contacts.png",
         "drawable-xxhdpi",
     ),
@@ -56,7 +56,7 @@ ASSETS = {
     ),
     "mail": (
         "platform_packages_apps_email",
-        "res/mipmap-xxhdpi/ic_launcher_email.png",
+        "res/mipmap-xxhdpi/ic_launcher_mail.png",
         "drawable-xxhdpi",
     ),
     "browser": (

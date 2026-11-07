@@ -111,6 +111,7 @@ jobs:
           test -s "pack-nothing/src/main/res/drawable/ic_pack_monochrome.xml"
           MAPPINGS="$(grep -c '<item component=' pack-nothing/src/main/res/xml/appfilter.xml)"
           ARTWORK="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.png' ! -name 'themed_*' | wc -l)"
+          ARTWORK_BYTES="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.png' -printf '%s\\n' | awk '{ total += $1 } END { printf \"%d\", total }')"
           SAMPLE_DRAWABLE="$(python - <<'PY'
           import xml.etree.ElementTree as ET
           root = ET.parse('pack-nothing/src/main/res/xml/appfilter.xml').getroot()
@@ -119,8 +120,10 @@ jobs:
           )"
           echo "Nothink app mappings: $MAPPINGS"
           echo "Nothink unique artwork: $ARTWORK"
+          echo "Nothink artwork payload: $ARTWORK_BYTES bytes"
           test "$MAPPINGS" -ge 3000
           test "$ARTWORK" -gt 0
+          test "$ARTWORK_BYTES" -lt 40000000
           python - <<'PY'
           import xml.etree.ElementTree as ET
           from pathlib import Path
@@ -142,7 +145,10 @@ jobs:
           if missing_themed:
               raise SystemExit(f"Mapped icons missing themed artwork: {missing_themed[:10]}")
           from PIL import Image
-          sample = Image.open(themed[0]).convert("RGBA")
+          indexed_sample = Image.open(themed[0])
+          if indexed_sample.mode != "P":
+              raise SystemExit("Artwork PNGs must use optimized indexed colour palettes.")
+          sample = indexed_sample.convert("RGBA")
           if sample.getpixel((0, 0))[3] != 0:
               raise SystemExit("Themed icon artwork must have a transparent background.")
           if any(r > 180 and g < 100 and b < 100 and a > 0 for r, g, b, a in sample.getdata()):

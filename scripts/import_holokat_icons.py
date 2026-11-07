@@ -390,6 +390,16 @@ EXTRA_COMPONENTS = [
     ("ComponentInfo{com.google.android.play.games/com.google.android.apps.play.games.app.atv.features.home.HomeActivity}", "Google Play Games", "playgames"),
     ("ComponentInfo{com.google.android.apps.plus/com.google.android.apps.plusone.app.HomeScreenActivity}", "Google+", "Google+"),
     ("ComponentInfo{com.google.android.apps.plus/com.google.android.apps.plus.phone.HomeActivity}", "Google+", "Google+"),
+    ("ComponentInfo{com.sec.android.app.camera/com.sec.android.app.camera.Camera}", "Samsung Camera", "Camera Galaxy"),
+    ("ComponentInfo{com.samsung.android.camera/com.sec.android.app.camera.Camera}", "Samsung Camera", "Camera Galaxy"),
+    ("ComponentInfo{com.lge.camera/com.lge.camera.LGCameraActivity}", "LG Camera", "Camera LG"),
+    ("ComponentInfo{com.motorola.camera2/com.motorola.camera2.CameraActivity}", "Motorola Camera", "Camera Moto"),
+    ("ComponentInfo{com.motorola.camera2/com.motorola.camera.Camera}", "Motorola Camera", "Camera Moto"),
+    ("ComponentInfo{com.oneplus.camera/com.oneplus.camera.OPCameraActivity}", "OnePlus Camera", "Camera One"),
+    ("ComponentInfo{org.codeaurora.snapcam/com.android.camera.CameraLauncher}", "Snap Camera", "Camera ALT"),
+    ("ComponentInfo{com.google.android.deskclock/com.android.deskclock.DeskClock}", "Google Clock", "Clock"),
+    ("ComponentInfo{com.android.deskclock/com.android.deskclock.DeskClockTabActivity}", "AOSP Clock", "Clock"),
+    ("ComponentInfo{com.samsung.android.app.clockpack/com.sec.android.app.clockpackage.ClockPackage}", "Samsung Clock", "Clock ALT"),
 ]
 
 

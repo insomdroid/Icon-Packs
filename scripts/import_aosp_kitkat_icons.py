@@ -99,6 +99,18 @@ def resolve_png(project: Path, reference: str) -> Path:
     for candidate in candidates:
         if candidate.is_file() and candidate.suffix.lower() == ".png":
             return candidate
+
+    # Some KitKat projects store a mipmap resource in a drawable density
+    # folder (or use a different resource folder convention). Search by the
+    # exact resource basename as a safe fallback, still accepting PNG only.
+    matches = sorted(
+        (path for path in (project / "res").rglob(f"{resource_name}.png") if path.is_file()),
+        key=lambda path: (("xxxhdpi", "xxhdpi", "xhdpi", "hdpi", "mdpi", "nodpi").index(
+            next((density for density in ("xxxhdpi", "xxhdpi", "xhdpi", "hdpi", "mdpi", "nodpi") if density in path.parent.name), "nodpi")
+        )),
+    )
+    if matches:
+        return matches[0]
     raise FileNotFoundError(
         f"No PNG source found for {reference} in {project}/res"
     )

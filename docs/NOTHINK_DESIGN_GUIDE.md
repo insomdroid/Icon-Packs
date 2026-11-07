@@ -112,8 +112,10 @@ An artwork set is not accepted merely because the APK compiles. Review must conf
 
 A passing automated check cannot replace visual review.
 
-## 8. Current implementation warning
+## 8. Implementation status
 
-The generator present when this guide was added still produced dark backgrounds, red dots, dot-matrix details, and repeated category-family pictograms. That implementation does **not** satisfy this guide and must not be treated as the approved Nothink visual direction. Update and visually review the generator and artwork against this document before claiming the new design is implemented.
+The generator has been migrated away from the former dark background, red accents, and dot-matrix decorations. Normal artwork is now transparent with pure-white glyphs; themed artwork uses the same transparent monochrome silhouette. The six benchmark drawable identifiers have individually authored artwork: `generic_camera`, `google_phone`, `google_chrome`, `google_calendar`, `spotify`, and `generic_settings`.
+
+**The collection is not yet fully custom-designed.** The remaining mapped apps still use the legacy semantic-family artwork, including a hash-varied abstract fallback. Those assets are not approved as final custom artwork under this guide. A successful APK build or automated color/transparency check does not mean the full collection has passed visual design review. Do not describe the full pack as complete until every mapped identity has been individually reviewed and its artwork replaced or explicitly approved.
 
 When uncertain, follow this guide and preserve the user's approved decisions. Do not reintroduce removed elements without explicit approval.

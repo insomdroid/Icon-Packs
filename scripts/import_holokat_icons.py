@@ -372,6 +372,21 @@ EXTRA_COMPONENTS = [
     ("ComponentInfo{com.android.vending/com.google.android.finsky.activities.MainActivity}", "Google Play Store", "playstore"),
     ("ComponentInfo{com.google.android.music/com.google.android.music.MusicBrowserActivity}", "Google Play Music", "playmusic"),
     ("ComponentInfo{com.google.android.videos/com.google.android.archive.ReactivateActivity}", "Google Play Movies & TV", "playmoviestv"),
+    ("ComponentInfo{com.google.android.projection.gearhead/com.google.android.projection.gearhead.companion.MainActivity}", "Android Auto", "androidauto"),
+    ("ComponentInfo{com.google.android.apps.nbu.files/com.google.android.apps.nbu.files.home.HomeActivity}", "Files by Google", "filesgo"),
+    ("ComponentInfo{com.google.android.apps.googleassistant/com.google.android.apps.googleassistant.AssistantActivity}", "Google Assistant", "assistant"),
+    ("ComponentInfo{com.google.android.googlequicksearchbox/com.google.android.googlequicksearchbox.SearchActivity}", "Google Now", "googlenow"),
+    ("ComponentInfo{com.google.android.apps.fitness/com.google.android.apps.fitness.welcome.WelcomeActivity}", "Google Fit", "fit"),
+    ("ComponentInfo{com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.home.TopLevelActivity}", "Digital Wellbeing", "digitalwellbeing"),
+    ("ComponentInfo{com.google.android.apps.safetyhub/com.google.android.apps.safetyhub.home.SafetyHubActivity}", "Personal Safety", "personalsafety"),
+    ("ComponentInfo{com.google.android.apps.adwords/com.google.android.apps.adwords.ui.LaunchActivity}", "AdWords", "adwords"),
+    ("ComponentInfo{com.google.android.apps.paidtasks/com.google.android.apps.paidtasks.ui.overview.OverviewActivity}", "Opinion Rewards", "opinionrewards"),
+    ("ComponentInfo{com.google.android.apps.googlevoice/com.google.android.apps.googlevoice.SplashActivity}", "Google Voice", "voice"),
+    ("ComponentInfo{com.google.android.apps.tasks/com.google.android.apps.tasks.ui.TaskListsActivity}", "Google Tasks", "tasks"),
+    ("ComponentInfo{com.google.android.apps.kids.familylink/com.google.android.apps.kids.familylink.flutter.standalone.HomeActivity}", "Family Link", "familylink"),
+    ("ComponentInfo{com.google.android.apps.kids.familylink/com.google.android.apps.kids.familylink.home.HomeActivityV2}", "Family Link", "familylink"),
+    ("ComponentInfo{com.google.android.apps.chromecast.app/com.google.android.apps.chromecast.app.DiscoveryActivity}", "Google Home", "home"),
+    ("ComponentInfo{com.google.android.apps.dynamite/com.google.android.apps.dynamite.startup.SplashActivity}", "Google Chat", "chat"),
 ]
 
 

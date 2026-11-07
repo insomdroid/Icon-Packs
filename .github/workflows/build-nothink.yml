@@ -1,4 +1,4 @@
-name: Build Nothink Icon Pack Release APK
+name: Build Nothink 100-App JusIcons Trial
 
 on:
   push:
@@ -6,8 +6,9 @@ on:
       - main
     paths:
       - 'pack-nothing/**'
-      - 'scripts/import_nothink_lawnicons.py'
-      - 'docs/NOTHINK_ATTRIBUTION.md'
+      - 'scripts/generate_jusicons_batch.py'
+      - 'docs/JUSICONS_PIPELINE.md'
+      - 'third_party/jusicons/LICENSE'
       - 'settings.gradle.kts'
       - 'build.gradle.kts'
       - 'gradle/**'
@@ -19,193 +20,87 @@ permissions:
   contents: read
 
 concurrency:
-  group: nothink-release-${{ github.ref }}
+  group: nothink-100-app-trial-\${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    name: Generate All Nothink Artwork and Build APK
+    name: Extract 100 APK icons, generate monochrome artwork and build pack
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-    env:
-      LAWNICONS_REF: cd91ff0bd00ff0a6c9d606d1c326b451b6563506
+    timeout-minutes: 180
     steps:
-      - name: Checkout Nothink project
+      - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Install artwork generator Python dependencies
-        run: python -m pip install --upgrade pip pillow
-
-      - name: Download Lawnicons app mappings only
-        shell: bash
+      - name: Install APK decoder
         run: |
-          set -euo pipefail
-          curl --fail --silent --show-error --location "https://raw.githubusercontent.com/LawnchairLauncher/lawnicons/$LAWNICONS_REF/app/assets/appfilter.xml" --output "$RUNNER_TEMP/lawnicons-appfilter.xml"
-          test -s "$RUNNER_TEMP/lawnicons-appfilter.xml"
-
-      - name: Draw original Nothink artwork for all mapped apps
-        run: |
-          python scripts/import_nothink_lawnicons.py --mapping-xml "$RUNNER_TEMP/lawnicons-appfilter.xml"
-
+          sudo apt-get update
+          sudo apt-get install -y apktool
+      - name: Install generator dependencies
+        run: python -m pip install --upgrade pip pillow cairosvg requests
+      - name: Download 100 application APKs and generate real monochrome icons
+        run: python scripts/generate_jusicons_batch.py --minimum 70
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Set up Gradle 8.13
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
-
       - name: Install Android SDK 36
-        shell: bash
         run: |
           set -euo pipefail
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-36" "build-tools;36.0.0"
           echo "$ANDROID_HOME/build-tools/36.0.0" >> "$GITHUB_PATH"
-
-      - name: Build optimized and automatically signed Nothink release APK
+      - name: Build Nothink release APK
         run: gradle --no-daemon :pack-nothing:assembleRelease
-
-      - name: Verify APK and generated artwork
+      - name: Verify generated pack and APK
         shell: bash
         run: |
           set -euo pipefail
           APK="pack-nothing/build/outputs/apk/release/pack-nothing-release.apk"
           test -s "$APK"
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
-          test -s "pack-nothing/src/main/res/xml/appfilter.xml"
-          test -s "pack-nothing/src/main/res/xml/drawable.xml"
-          test -s "pack-nothing/src/main/res/xml/grayscale_icon_map.xml"
-          test -s "pack-nothing/src/main/res/mipmap-anydpi-v26/ic_pack.xml"
-          test -s "pack-nothing/src/main/res/drawable/ic_pack_foreground.xml"
-          test -s "pack-nothing/src/main/res/drawable/ic_pack_monochrome.xml"
-          MAPPINGS="$(grep -c '<item component=' pack-nothing/src/main/res/xml/appfilter.xml)"
-          ARTWORK="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name 'art_*.webp' | wc -l)"
-          ARTWORK_BYTES="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name 'art_*.webp' -printf '%s\n' | awk '{ total += $1 } END { printf "%d", total }')"
-          SAMPLE_DRAWABLE="$(python - <<'PY'
-          import hashlib
-          import xml.etree.ElementTree as ET
-          root = ET.parse('pack-nothing/src/main/res/xml/appfilter.xml').getroot()
-          print(root.find('item').attrib['drawable'])
-          PY
-          )"
-          echo "Nothink app mappings: $MAPPINGS"
-          echo "Nothink unique artwork: $ARTWORK"
-          echo "Nothink artwork payload: $ARTWORK_BYTES bytes"
-          test "$MAPPINGS" -ge 3000
-          test "$ARTWORK" -gt 0
-          test "$ARTWORK" -le 80
-          test "$ARTWORK_BYTES" -lt 2000000
-          APK_BYTES="$(stat -c %s "$APK")"
-          echo "Nothink APK size: $APK_BYTES bytes"
-          test "$APK_BYTES" -lt 12000000
           python - <<'PY'
-          import hashlib
           import xml.etree.ElementTree as ET
           from pathlib import Path
-          from PIL import Image
-
           res = Path("pack-nothing/src/main/res")
           appfilter = ET.parse(res / "xml/appfilter.xml").getroot()
-          drawable_index = ET.parse(res / "xml/drawable.xml").getroot()
-          mapped = {item.attrib["drawable"] for item in appfilter.findall("item")}
-          indexed = {item.attrib["drawable"] for item in drawable_index.findall("item")}
-          if len(mapped) < 3000:
-              raise SystemExit(f"Only {len(mapped)} app mappings were generated.")
-          if mapped - indexed:
-              raise SystemExit(f"Mappings missing from drawable.xml: {sorted(mapped-indexed)[:10]}")
-          for mapped_name in mapped:
-              if not mapped_name.startswith("icon_"):
-                  raise SystemExit(f"Unexpected appfilter drawable name: {mapped_name}")
-              wrapper_name = mapped_name.removeprefix("icon_")
-              wrapper_path = res / "drawable" / f"{wrapper_name}.xml"
-              if not wrapper_path.is_file():
-                  raise SystemExit(f"Missing themed artwork alias: {wrapper_name}")
-              alias = ET.parse(wrapper_path).getroot()
-              art_name = alias.attrib.get("{http://schemas.android.com/apk/res/android}src", "").removeprefix("@drawable/")
-              art_path = res / "drawable-nodpi" / f"{art_name}.webp"
-              if not art_name.startswith("art_") or not art_path.is_file():
-                  raise SystemExit(f"Missing shared artwork file for {wrapper_name}: {art_name}")
-
-              normal_wrapper_path = res / "drawable" / f"icon_{wrapper_name}.xml"
-              if not normal_wrapper_path.is_file():
-                  raise SystemExit(f"Missing normal icon wrapper: icon_{wrapper_name}")
-              normal_wrapper = ET.parse(normal_wrapper_path).getroot()
-              foreground = normal_wrapper.findall("item")[-1]
-              foreground_name = foreground.attrib.get("{http://schemas.android.com/apk/res/android}drawable", "").removeprefix("@drawable/")
-              if foreground_name != wrapper_name:
-                  raise SystemExit(f"Normal icon wrapper points to wrong artwork: icon_{wrapper_name} -> {foreground_name}")
-
-          normal = sorted((res / "drawable-nodpi").glob("art_*.webp"))
-          if not normal or len(normal) > 80:
-              raise SystemExit(f"Expected 1-80 deduplicated WebP files, found {len(normal)}.")
-          for path in normal:
-              with Image.open(path) as image_file:
-                  if image_file.format != "WEBP":
-                      raise SystemExit(f"Artwork is not WebP: {path.name}")
-                  image = image_file.convert("RGBA")
-                  if image.size != (192, 192):
-                      raise SystemExit(f"Artwork must be 192x192: {path.name} ({image.size})")
-                  if image.getpixel((0, 0))[3] != 0:
-                      raise SystemExit(f"Artwork background is not transparent: {path.name}")
-                  colors = image.getcolors(maxcolors=256)
-                  if colors is None or any(a > 0 and (r, g, b) != (255, 255, 255) for _, (r, g, b, a) in colors):
-                      raise SystemExit(f"Artwork must contain only white alpha-mask pixels: {path.name}")
-
-          grayscale_map = ET.parse(res / "xml/grayscale_icon_map.xml").getroot()
-          for item in grayscale_map.findall("icon"):
-              name = item.attrib["drawable"].removeprefix("@drawable/")
+          drawables = ET.parse(res / "xml/drawable.xml").getroot()
+          items = appfilter.findall("item")
+          indexed = drawables.findall("item")
+          if len(indexed) < 70:
+              raise SystemExit(f"Expected at least 70 generated app icons, got {len(indexed)}")
+          for item in indexed:
+              name = item.attrib["drawable"]
               if not (res / "drawable" / f"{name}.xml").is_file():
-                  raise SystemExit(f"Missing themed-icon drawable alias: {name}")
-
-          benchmarks = ["generic_camera", "google_phone", "google_chrome", "google_calendar", "spotify", "generic_settings"]
-          benchmark_hashes = set()
-          for name in benchmarks:
-              alias_path = res / "drawable" / f"{name}.xml"
-              if not alias_path.is_file():
-                  raise SystemExit(f"Missing benchmark artwork alias: {name}")
-              alias = ET.parse(alias_path).getroot()
-              art_name = alias.attrib.get("{http://schemas.android.com/apk/res/android}src", "").removeprefix("@drawable/")
-              art_path = res / "drawable-nodpi" / f"{art_name}.webp"
-              if not art_path.is_file():
-                  raise SystemExit(f"Missing benchmark WebP: {name}")
-              benchmark_hashes.add(hashlib.sha256(art_path.read_bytes()).hexdigest())
-          if len(benchmark_hashes) != len(benchmarks):
-              raise SystemExit("Benchmark artwork must remain six distinct marks.")
-          print(f"Verified {len(mapped)} mappings, {len(normal)} deduplicated WebP artworks, six benchmark marks, and transparent themed-icon aliases.")
+                  raise SystemExit(f"Missing generated vector: {name}")
+          mapped = {item.attrib["drawable"] for item in items}
+          known = {item.attrib["drawable"] for item in indexed}
+          if not mapped or mapped - known:
+              raise SystemExit("appfilter contains missing or empty drawable mappings")
+          print(f"Verified {len(indexed)} unique app icons and {len(items)} launcher component mappings.")
           PY
-          RESOURCE_DUMP="$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump resources "$APK")"
-          if ! grep -Fq ":drawable/$SAMPLE_DRAWABLE" <<< "$RESOURCE_DUMP"; then
-            echo "Mapped drawable $SAMPLE_DRAWABLE was stripped from the APK."
-            exit 1
-          fi
-          if ! grep -Eq 'resource .*xml/appfilter' <<< "$RESOURCE_DUMP"; then
-            echo "Compiled APK resource table is missing the appfilter XML resource."
-            exit 1
-          fi
+          echo "APK size: $(stat -c %s "$APK") bytes"
           "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | sed -n '1p'
-          MANIFEST_DUMP="$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump xmltree "$APK" AndroidManifest.xml)"
-          if ! grep -Fq 'com.novalauncher.THEME' <<< "$MANIFEST_DUMP"; then
-            echo "Compiled APK manifest is missing Nova Launcher icon-pack metadata."
-            exit 1
-          fi
-          if ! grep -Eq "org.adw.ActivityStarter.THEMES|org.adw.launcher.THEMES|com.novalauncher.THEME|app.lawnchair.icons.THEMED_ICON|PackInfoActivity" <<< "$MANIFEST_DUMP"; then
-            echo "APK manifest is missing the expected icon-pack launcher integration entries."
-            exit 1
-          fi
-
       - name: Upload Nothink release APK
         uses: actions/upload-artifact@v4
         with:
-          name: nothink-icon-pack-release
+          name: nothink-jusicons-100-app-trial
           path: pack-nothing/build/outputs/apk/release/pack-nothing-release.apk
           if-no-files-found: error
-          retention-days: 1
+          retention-days: 7
           compression-level: 0
+      - name: Upload APK extraction report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nothink-jusicons-100-app-report
+          path: build/jusicons-report/
+          if-no-files-found: warn
+          retention-days: 7

@@ -37,8 +37,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--upstream", type=Path, required=True)
     parser.add_argument("--module", type=Path, default=Path("pack-nothink2"))
-    parser.add_argument("--popular-list", type=Path, required=True)
-    parser.add_argument("--limit", type=int, default=1000)
+    parser.add_argument(
+        "--popular-list",
+        type=Path,
+        help="Optional newline-separated package allowlist; omit to import all supported apps.",
+    )
     args = parser.parse_args()
 
     root = args.upstream
@@ -47,15 +50,15 @@ def main():
     if not svgs.is_dir() or not source_filter.is_file():
         raise SystemExit("Pinned Lawnicons source archive is incomplete")
 
-    selected = {
-        line.strip()
-        for line in args.popular_list.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    }
-    if len(selected) != args.limit:
-        raise SystemExit(
-            f"Expected exactly {args.limit} unique selected packages; got {len(selected)}"
-        )
+    selected = None
+    if args.popular_list:
+        selected = {
+            line.strip()
+            for line in args.popular_list.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        }
+        if not selected:
+            raise SystemExit("The supplied package allowlist is empty")
 
     res = args.module / "src/main/res"
     glyphs, wrappers, xml = res / "drawable-nodpi", res / "drawable", res / "xml"
@@ -79,7 +82,7 @@ def main():
         if not component or not drawable:
             continue
         match = re.search(r"ComponentInfo\{([^/]+)/", component)
-        if not match or match.group(1) not in selected:
+        if not match or (selected is not None and match.group(1) not in selected):
             continue
 
         name = safe_name(drawable)
@@ -137,7 +140,7 @@ def main():
             packages.add(package)
         count += 1
 
-    missing = selected - packages
+    missing = selected - packages if selected is not None else set()
     if missing:
         sample = ", ".join(sorted(missing)[:10])
         raise SystemExit(
@@ -159,7 +162,7 @@ def main():
         )
 
     print(
-        f"Imported {count} mapped components for {len(packages)} popular apps, "
+        f"Imported {count} mapped components for {len(packages)} supported apps, "
         f"{len(done)} unique WebP glyphs at 120x120 on 192x192 canvas."
     )
 

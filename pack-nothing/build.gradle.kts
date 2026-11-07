@@ -40,7 +40,9 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
-            isShrinkResources = true
+            // appfilter.xml stores drawable names as strings, so the resource shrinker
+            // cannot see those references and would strip the mapped icon artwork.
+            isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
             if (hasReleaseSigning) {
                 signingConfig = signingConfigs.getByName("temporaryRelease")

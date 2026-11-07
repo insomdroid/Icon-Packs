@@ -10,7 +10,7 @@ The original Android 4.4 KitKat and supplied Jelly Bean artwork combined in one 
 
 Nothink is an independent icon pack inspired by the visual discipline of Nothing OS 2.0/3.0 and Nothing OS 5.0. Its approved design direction is modern, monochrome, and built from custom recognizable symbols using a consistent hybrid of solid shapes and outline strokes.
 
-**The approved design specification is recorded in [Nothink Design Guide](docs/NOTHINK_DESIGN_GUIDE.md).** Treat that document as the source of truth before changing the artwork, generator, mappings, or validation. The current generator has not yet been migrated to the approved design; existing generated artwork must not be considered compliant until that migration and visual review are complete.
+**The approved design specification is recorded in [Nothink Design Guide](docs/NOTHINK_DESIGN_GUIDE.md).** Treat that document as the source of truth before changing the artwork, generator, mappings, or validation. The generator now produces transparent pure-white normal artwork and monochrome themed artwork, with six individually authored benchmark symbols. The remaining mapped icons still need individual custom artwork and visual review; see the implementation status in the design guide.
 
 - Name: Nothink
 - Application ID: `com.insomdroid.iconpacks.nothink`

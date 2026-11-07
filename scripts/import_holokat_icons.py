@@ -14,7 +14,7 @@ ARCHIVES = [
     ROOT / "references/kitkat-archives/Icons jb 1.zip",
     ROOT / "references/kitkat-archives/icons jb2.zip",
 ]
-RES = ROOT / "pack-holokat/src/main/res"
+RES = ROOT / "pack-kitkat/src/main/res"
 DRAWABLE_DIR = RES / "drawable-nodpi"
 DRAWABLE_XML = RES / "xml/drawable.xml"
 APPFILTER_XML = RES / "xml/appfilter.xml"
@@ -430,7 +430,7 @@ def main() -> None:
                 if digest in hashes:
                     continue
                 hashes.add(digest)
-                base = resource_name(Path(info.filename).name)
+                base = "jb_" + resource_name(Path(info.filename).name)
                 name = base
                 suffix = 2
                 while name in images:
@@ -445,14 +445,15 @@ def main() -> None:
         extension = Path(original_path).suffix.lower()
         (DRAWABLE_DIR / f"{name}{extension}").write_bytes(data)
 
-    resources = ET.Element("resources")
-    ET.SubElement(resources, "item", {"drawable": "ic_pack", "name": "holokat_pack"})
+    drawable_root = ET.parse(DRAWABLE_XML).getroot() if DRAWABLE_XML.is_file() else ET.Element("resources")
+    existing_drawables = {item.attrib.get("name") for item in drawable_root.findall("item")}
     for name in sorted(images):
-        ET.SubElement(resources, "item", {"drawable": name, "name": name})
-    ET.indent(resources, space="    ")
+        if name not in existing_drawables:
+            ET.SubElement(drawable_root, "item", {"drawable": name, "name": name})
+    ET.indent(drawable_root, space="    ")
     DRAWABLE_XML.write_text(
         '<?xml version="1.0" encoding="utf-8"?>\n'
-        + ET.tostring(resources, encoding="unicode") + "\n",
+        + ET.tostring(drawable_root, encoding="unicode") + "\n",
         encoding="utf-8",
     )
 
@@ -466,9 +467,11 @@ def main() -> None:
         artwork_by_label_and_path[label] = resource
         artwork_by_original_stem[original_stem.casefold()] = resource
 
-    old_filter = ROOT / "pack-kitkat/src/main/res/xml/appfilter.xml"
-    appfilter = ET.Element("resources")
-    matched_components: set[str] = set()
+    old_filter = APPFILTER_XML
+    appfilter = ET.parse(APPFILTER_XML).getroot() if APPFILTER_XML.is_file() else ET.Element("resources")
+    matched_components: set[str] = {
+        item.attrib["component"] for item in appfilter.findall("item") if item.attrib.get("component")
+    }
     matched_artwork: Counter[str] = Counter()
     matched_labels: dict[str, set[str]] = defaultdict(set)
     unmatched_labels: set[str] = set()
@@ -523,7 +526,7 @@ def main() -> None:
         encoding="utf-8",
     )
 
-    print(f"Holokat imported {len(images)} unique image assets from {len(ARCHIVES)} archives.")
+    print(f"Jelly Bean imported {len(images)} unique image assets into the combined icon pack.")
     print(f"Generated {len(appfilter.findall('item'))} unique launcher component mappings.")
     print(f"Artwork used by mappings: {len(matched_artwork)} / {len(images)}.")
     print(f"Unmatched app labels: {len(unmatched_labels)}.")
@@ -532,7 +535,7 @@ def main() -> None:
         print(f"  {resource}: {count} components [{labels}]")
     if unmatched_labels:
         print("Unmatched labels: " + " | ".join(sorted(unmatched_labels)))
-    print("Archive artwork is retained without redrawing or recoloring.")
+    print("Jelly Bean archive artwork is retained without redrawing or recoloring.")
 
 
 if __name__ == "__main__":

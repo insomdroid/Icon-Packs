@@ -229,64 +229,69 @@ def main() -> int:
 
     with tempfile.TemporaryDirectory(prefix="kitkat-fdroid-") as temp:
         temp_dir = Path(temp)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        for batch_start in range(0, len(queue), WORKERS):
+            if len(unique) >= MIN_UNIQUE_ICONS:
+                break
+            batch = queue[batch_start:batch_start + WORKERS]
             futures = {}
-            for candidate in queue:
-                if attempted >= MAX_CANDIDATES:
-                    break
-                attempted += 1
-                apk_path = temp_dir / f"{attempted}.apk"
-                url = ARCHIVE_BASE + candidate["apk_name"]
-                futures[pool.submit(fetch, url, apk_path)] = (candidate, apk_path)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as pool:
+                for candidate in batch:
+                    attempted += 1
+                    apk_path = temp_dir / f"{attempted}.apk"
+                    url = ARCHIVE_BASE + candidate["apk_name"]
+                    futures[pool.submit(fetch, url, apk_path)] = (candidate, apk_path)
 
-            for future in concurrent.futures.as_completed(futures):
-                candidate, apk_path = futures[future]
-                try:
-                    data = future.result()
-                except Exception as error:
-                    print(f"WARNING: download task failed for {candidate['package']}: {error}", file=sys.stderr)
-                    continue
-                if data is None:
-                    continue
+                for future in concurrent.futures.as_completed(futures):
+                    candidate, apk_path = futures[future]
+                    try:
+                        data = future.result()
+                    except Exception as error:
+                        print(f"WARNING: download task failed for {candidate['package']}: {error}", file=sys.stderr)
+                        continue
+                    if data is None:
+                        continue
 
-                actual_apk_hash = hashlib.sha256(data).hexdigest()
-                if actual_apk_hash != candidate["apk_hash"]:
-                    print(f"WARNING: hash mismatch for {candidate['package']}; skipped", file=sys.stderr)
-                    continue
+                    actual_apk_hash = hashlib.sha256(data).hexdigest()
+                    if actual_apk_hash != candidate["apk_hash"]:
+                        print(f"WARNING: hash mismatch for {candidate['package']}; skipped", file=sys.stderr)
+                        continue
 
-                details = parse_badging(apk_path, aapt)
-                if not details or details["package"] != candidate["package"]:
-                    continue
-                image_data = extract_png(apk_path, details["icon_paths"])
-                if not image_data:
-                    continue
+                    details = parse_badging(apk_path, aapt)
+                    if not details or details["package"] != candidate["package"]:
+                        continue
+                    image_data = extract_png(apk_path, details["icon_paths"])
+                    if not image_data:
+                        continue
 
-                digest = hashlib.sha256(image_data).hexdigest()
-                resource = unique.get(digest)
-                if resource is None:
-                    resource = "fdroid_" + digest[:20]
-                    unique[digest] = resource
-                    (RESOURCE_DIR / f"{resource}.png").write_bytes(image_data)
-                    drawable_items.append(f'  <item drawable="{resource}" name="{resource}" />')
+                    digest = hashlib.sha256(image_data).hexdigest()
+                    resource = unique.get(digest)
+                    if resource is None:
+                        resource = "fdroid_" + digest[:20]
+                        unique[digest] = resource
+                        (RESOURCE_DIR / f"{resource}.png").write_bytes(image_data)
+                        drawable_items.append(f'  <item drawable="{resource}" name="{resource}" />')
 
-                package = details["package"]
-                activity = normalize_activity(package, details["activity"])
-                app_name = html.escape(candidate["app_name"], quote=True)
-                appfilter_items.append(
-                    f'  <item component="ComponentInfo{{{package}/{activity}}}" '
-                    f'drawable="{resource}" name="{app_name}" />'
-                )
-                inventory_rows.append([
-                    package, candidate["app_name"], candidate["version_name"],
-                    candidate["version_code"], candidate["license"],
-                    details["target_sdk"], candidate["apk_name"],
-                    actual_apk_hash, digest, f"drawable-nodpi/{resource}.png"
-                ])
-                accepted += 1
-                if len(unique) >= MIN_UNIQUE_ICONS:
-                    break
-                if accepted % 50 == 0:
-                    print(f"Processed {accepted} apps; {len(unique)} unique icons")
+                    package = details["package"]
+                    activity = normalize_activity(package, details["activity"])
+                    app_name = html.escape(candidate["app_name"], quote=True)
+                    appfilter_items.append(
+                        f'  <item component="ComponentInfo{{{package}/{activity}}}" '
+                        f'drawable="{resource}" name="{app_name}" />'
+                    )
+                    inventory_rows.append([
+                        package, candidate["app_name"], candidate["version_name"],
+                        candidate["version_code"], candidate["license"],
+                        details["target_sdk"], candidate["apk_name"],
+                        actual_apk_hash, digest, f"drawable-nodpi/{resource}.png"
+                    ])
+                    accepted += 1
+                    if accepted % 50 == 0:
+                        print(f"Processed {accepted} apps; {len(unique)} unique icons")
+                    if len(unique) >= MIN_UNIQUE_ICONS:
+                        for pending in futures:
+                            if not pending.done():
+                                pending.cancel()
+                        break
 
     if len(unique) < MIN_UNIQUE_ICONS:
         raise RuntimeError(

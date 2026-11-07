@@ -10,12 +10,20 @@ Independently installable Android icon pack APKs. Development is currently focus
 - Minimum SDK: Android 10 (API 29).
 - Compile/Target SDK: 36.
 
-## Build KitKat
+## Automatic build
 
-1. Open **Actions**.
-2. Select **Build KitKat Icon Pack**.
-3. Run the workflow on `main`.
-4. Download the `kitkat-icon-pack` artifact after the workflow succeeds.
+The **Build KitKat Release APK** workflow runs automatically when build-related files are pushed to `main`.
+
+It skips commits that only change:
+- `README.md` or Markdown documentation.
+- Files under `docs/`.
+- Reference images under `references/`, `reference/`, `reference-images/`, `screenshots/`, `Screenshot/`, or `assets/references/`.
+
+You can also start a build manually from [GitHub Actions](https://github.com/insomdroid/Icon-Packs/actions/workflows/build-icon-packs.yml).
+
+The workflow builds the Gradle **release** variant and uploads the `kitkat-release-unsigned-apk` artifact for 7 days. Artifact compression is disabled to avoid wasting time recompressing an APK.
+
+> **Signing:** the current project has no release keystore configured. The generated release APK is therefore unsigned and cannot be installed directly. Configure a persistent release signing keystore through GitHub Actions secrets before distributing an installable release APK. Do not use a temporary runner-generated debug key for release updates.
 
 ## Mapping source and attribution
 

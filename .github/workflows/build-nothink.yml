@@ -88,7 +88,7 @@ jobs:
           test -s "pack-nothing/src/main/res/drawable/ic_pack_monochrome.xml"
           MAPPINGS="$(grep -c '<item component=' pack-nothing/src/main/res/xml/appfilter.xml)"
           ARTWORK="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.webp' ! -name 'themed_*' | wc -l)"
-          ARTWORK_BYTES="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.webp' -printf '%s\n' | awk '{ total += $1 } END { printf "%d", total }')"
+          ARTWORK_BYTES="$(find pack-nothing/src/main/res/drawable-nodpi -maxdepth 1 -name '*.webp' ! -name 'themed_*' -printf '%s\n' | awk '{ total += $1 } END { printf "%d", total }')"
           SAMPLE_DRAWABLE="$(python - <<'PY'
           import hashlib
           import xml.etree.ElementTree as ET
@@ -118,27 +118,26 @@ jobs:
               raise SystemExit(f"Mapped icons missing WebP artwork: {missing[:10]}")
           if unlisted:
               raise SystemExit(f"Mapped icons missing from drawable.xml: {unlisted[:10]}")
-          themed = sorted((res / "drawable-nodpi").glob("themed_*.webp"))
-          themed_names = {item.name.removeprefix("themed_").removesuffix(".webp") for item in themed}
-          missing_themed = sorted(mapped - themed_names)
-          if missing_themed:
-              raise SystemExit(f"Mapped icons missing themed artwork: {missing_themed[:10]}")
           from PIL import Image
-          webp_sample = Image.open(themed[0])
-          if webp_sample.format != "WEBP":
-              raise SystemExit("Generated icon artwork must be stored as WebP.")
-          sample = webp_sample.convert("RGBA")
-          if sample.getpixel((0, 0))[3] != 0:
-              raise SystemExit("Themed icon artwork must have a transparent background.")
-          sample_colors = sample.getcolors(maxcolors=256)
-          if sample_colors is None or any(a > 0 and (r, g, b) != (0, 0, 0) for count, (r, g, b, a) in sample_colors):
-              raise SystemExit("Themed artwork must be a neutral alpha mask; launcher supplies theme color.")
           normal = sorted((res / "drawable-nodpi").glob("*.webp"))
           normal = [item for item in normal if not item.name.startswith("themed_")]
+          if not normal:
+              raise SystemExit("No generated WebP artwork was found.")
+          grayscale_map = ET.parse(res / "xml/grayscale_icon_map.xml").getroot()
+          grayscale_drawables = {
+              item.attrib["drawable"].removeprefix("@drawable/")
+              for item in grayscale_map.findall("icon")
+          }
+          missing_grayscale = sorted(mapped - grayscale_drawables)
+          if missing_grayscale:
+              raise SystemExit(f"Mapped icons missing from grayscale theme map: {missing_grayscale[:10]}")
           for path in normal:
-              image = Image.open(path).convert("RGBA")
+              image_file = Image.open(path)
+              if image_file.format != "WEBP":
+                  raise SystemExit(f"Generated icon artwork must be stored as WebP: {path.name}")
+              image = image_file.convert("RGBA")
               if image.getpixel((0, 0))[3] != 0:
-                  raise SystemExit(f"Normal artwork must have a transparent background: {path.name}")
+                  raise SystemExit(f"Artwork must have a transparent background: {path.name}")
               colors = image.getcolors(maxcolors=256)
               if colors is None or any(a > 0 and (r, g, b) != (0, 0, 0) for count, (r, g, b, a) in colors):
                   raise SystemExit(f"Artwork must use neutral alpha-mask pixels for Android theme tinting: {path.name}")
@@ -152,7 +151,7 @@ jobs:
           }
           if len(benchmark_hashes) != len(benchmarks):
               raise SystemExit("Benchmark icons must have distinct artwork files.")
-          print(f"Verified {len(mapped)} mappings, transparent neutral alpha-mask assets for Android theme tinting, and six distinct benchmark assets.")
+          print(f"Verified {len(mapped)} mappings, shared transparent neutral alpha-mask assets for Android theme tinting, and six distinct benchmark assets.")
           PY
           RESOURCE_DUMP="$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump resources "$APK")"
           if ! grep -Fq ":drawable/$SAMPLE_DRAWABLE" <<< "$RESOURCE_DUMP"; then

@@ -74,33 +74,56 @@ def main() -> None:
     ET.indent(resources, space="    ")
     DRAWABLE_XML.write_text('<?xml version="1.0" encoding="utf-8"?>\n' + ET.tostring(resources, encoding="unicode") + "\n", encoding="utf-8")
 
-    # Reuse only known component-to-icon mappings from the existing KitKat pack
-    # where the Jelly Bean archive contains the same app-name artwork.
-    known = {
-        "phone": "phone", "contacts": "contacts", "people": "contacts",
-        "messaging": "messages", "messages": "messages", "calendar": "calendar",
-        "google_calendar": "calendar", "clock": "clock", "calculator": "calculator",
-        "camera": "camera", "camera_google": "camera", "downloads": "downloads",
-        "browser": "browser", "chromium": "browser", "email": "mail",
-        "gmail": "mail", "music": "music", "play_music": "music",
+    # Map installed apps by exact display-name matches against original artwork filenames.
+    def normalize_label(value: str) -> str:
+        return re.sub(r"[^a-z0-9]+", "", value.lower())
+
+    artwork_by_label: dict[str, str] = {}
+    for resource, (_, original_path) in images.items():
+        artwork_by_label.setdefault(normalize_label(Path(original_path).stem), resource)
+
+    aliases = {
+        "googlechrome": "chrome", "chromebrowser": "chrome",
+        "googlecalendar": "calendar", "androidcalendar": "calendar",
+        "googlecamera": "cameragoogle", "gcam": "cameragoogle",
+        "googlemessages": "messages", "androidmessages": "messaging",
+        "googlephone": "phone", "googledialer": "phone",
+        "googlemail": "gmail", "googlemaps": "maps",
+        "googlephotos": "photos", "googleplaystore": "playstore",
+        "googleplaymusic": "playmusic", "googleplaygames": "playgames",
+        "googleplaybooks": "playbooks", "googleplaymovies": "playmoviestv",
+        "googlekeep": "keep", "googledrive": "drive", "googledocs": "docs",
+        "googlesheets": "sheets", "googleslides": "slides",
+        "googletranslate": "translate", "googleyoutube": "youtube",
+        "microsoftoutlook": "outlook", "outlookmail": "outlook",
+        "androidsettings": "settings", "aospbrowser": "browser",
+        "aospcalculator": "calculator", "aospclock": "clock",
+        "aospcamera": "camera", "aospdownloads": "downloads",
+        "aospmusic": "music",
     }
-    available = {name.lower(): name for name in images}
-    chosen = {key: available[value] for key, value in known.items() if value in available}
+
     old_filter = ROOT / "pack-kitkat/src/main/res/xml/appfilter.xml"
     appfilter = ET.Element("resources")
-    if old_filter.is_file() and chosen:
+    matched_components: set[str] = set()
+    if old_filter.is_file():
         old_root = ET.parse(old_filter).getroot()
         for item in old_root.findall("item"):
             component = item.attrib.get("component")
-            drawable = item.attrib.get("drawable", "").lower()
-            replacement = chosen.get(drawable)
-            if component and replacement:
-                ET.SubElement(appfilter, "item", {"component": component, "drawable": replacement})
+            label = item.attrib.get("name", "")
+            if not component or component in matched_components:
+                continue
+            normalized = normalize_label(label)
+            target = aliases.get(normalized, normalized)
+            resource = artwork_by_label.get(target)
+            if resource is None:
+                continue
+            ET.SubElement(appfilter, "item", {"component": component, "drawable": resource})
+            matched_components.add(component)
     ET.indent(appfilter, space="    ")
     APPFILTER_XML.write_text('<?xml version="1.0" encoding="utf-8"?>\n' + ET.tostring(appfilter, encoding="unicode") + "\n", encoding="utf-8")
 
     print(f"Holokat imported {len(images)} unique image assets from {len(ARCHIVES)} archives.")
-    print(f"Generated {len(appfilter.findall('item'))} verified inherited launcher component mappings.")
+    print(f"Generated {len(appfilter.findall('item'))} exact-name launcher component mappings.")
     print("Archive artwork is retained without redrawing or recoloring.")
 
 

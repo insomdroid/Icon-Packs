@@ -1,47 +1,54 @@
-name: Build Nothink 50-App JusIcons Trial
+name: Build Nothink from Figma artwork
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
+      - 'references/kitkat-archives/App & Brand Icons Pack (Community).fig'
+      - 'scripts/export_nothink_figma.mjs'
+      - 'scripts/import_nothink_figma.py'
       - 'pack-nothing/**'
-      - 'scripts/generate_jusicons_batch.py'
-      - 'docs/JUSICONS_PIPELINE.md'
-      - 'third_party/jusicons/LICENSE'
-      - 'settings.gradle.kts'
-      - 'build.gradle.kts'
-      - 'gradle/**'
-      - 'gradle.properties'
       - '.github/workflows/build-nothink.yml'
   workflow_dispatch:
-    inputs:
-      svg_zip_url:
-        description: 'HTTPS URL of your uploaded ZIP containing SVG icons (GitHub attachment URL)'
-        required: false
-        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: nothink-50-app-trial-v1-${{ github.ref }}
+  group: nothink-figma-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    name: Extract 50 APK icons, generate monochrome artwork and build pack
+    name: Export Figma artwork and build Nothink APK
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 90
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install offline Figma parser and renderer
+        run: npm install --no-save --no-package-lock @grida/refig openfig-core
+      - name: Render artwork from the committed Figma file
+        run: node scripts/export_nothink_figma.mjs
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install generator dependencies
-        run: python -m pip install --upgrade pip pillow cairosvg requests
+      - name: Install image processing dependency
+        run: python -m pip install --upgrade pip pillow
+      - name: Download pinned Lawnicons component mappings only
+        run: |
+          set -euo pipefail
+          mkdir -p build/nothink-mappings
+          curl -fsSL https://raw.githubusercontent.com/LawnchairLauncher/lawnicons/cd91ff0bd00ff0a6c9d606d1c326b451b6563506/app/assets/appfilter.xml -o build/nothink-mappings/appfilter.xml
+          test -s build/nothink-mappings/appfilter.xml
+      - name: Import exact-name Figma artworks into Nothink resources
+        run: python scripts/import_nothink_figma.py --mapping build/nothink-mappings/appfilter.xml --minimum 1
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -51,78 +58,43 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
-      - name: Install Apktool 3.0.3
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p tools
-          curl -fsSL "https://github.com/iBotPeaches/Apktool/releases/download/v3.0.3/apktool_3.0.3.jar" -o tools/apktool_3.0.3.jar
-          echo "dbf930b076c6b9be08d57c449cacefc3bdd6b71ebd59b3066fc0e1f5b14f9423  tools/apktool_3.0.3.jar" | sha256sum --check
-          java -jar tools/apktool_3.0.3.jar --version
       - name: Install Android SDK 36
         run: |
           set -euo pipefail
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-36" "build-tools;36.0.0"
           echo "$ANDROID_HOME/build-tools/36.0.0" >> "$GITHUB_PATH"
-      - name: Download 50 application APKs and generate real monochrome icons
-        run: python scripts/generate_jusicons_batch.py --minimum 25 --apktool tools/apktool_3.0.3.jar
-      - name: Apply uploaded custom SVG artwork
-        if: github.event_name == 'workflow_dispatch' && inputs.svg_zip_url != ''
-        env:
-          SVG_ZIP_URL: ${{ inputs.svg_zip_url }}
-        run: python scripts/apply_uploaded_svg_icons.py --url "$SVG_ZIP_URL" --minimum-matches 1
       - name: Build Nothink release APK
         run: gradle --no-daemon :pack-nothing:assembleRelease
-      - name: Verify generated pack and APK
-        shell: bash
+      - name: Verify APK and imported artwork
         run: |
           set -euo pipefail
-          APK="pack-nothing/build/outputs/apk/release/pack-nothing-release.apk"
+          APK=pack-nothing/build/outputs/apk/release/pack-nothing-release.apk
           test -s "$APK"
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
           python - <<'PY'
-          import xml.etree.ElementTree as ET
+          import json
           from pathlib import Path
-          res = Path("pack-nothing/src/main/res")
-          appfilter = ET.parse(res / "xml/appfilter.xml").getroot()
-          drawables = ET.parse(res / "xml/drawable.xml").getroot()
-          items = appfilter.findall("item")
-          indexed = drawables.findall("item")
-          if len(indexed) < 25:
-              raise SystemExit(f"Expected at least 25 generated app icons, got {len(indexed)}")
-          for item in indexed:
-              name = item.attrib["drawable"]
-              if not (res / "drawable" / f"{name}.xml").is_file():
-                  raise SystemExit(f"Missing generated vector: {name}")
-          mapped = {item.attrib["drawable"] for item in items}
-          known = {item.attrib["drawable"] for item in indexed}
-          if not mapped or mapped - known:
-              raise SystemExit("appfilter contains missing or empty drawable mappings")
-          print(f"Verified {len(indexed)} unique app icons and {len(items)} launcher component mappings.")
+          report = json.loads(Path("build/nothink-figma-report/report.json").read_text())
+          apk = Path("pack-nothing/build/outputs/apk/release/pack-nothing-release.apk")
+          if report["mapped_applications"] < 1 or report["unique_artworks"] < 1:
+              raise SystemExit("No Figma artwork was integrated.")
+          print(f"Verified {report['mapped_applications']} mapped apps, {report['unique_artworks']} unique Figma artworks, APK {apk.stat().st_size} bytes.")
           PY
-          echo "APK size: $(stat -c %s "$APK") bytes"
-          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | sed -n '1p'
-      - name: Upload Nothink release APK
+      - name: Upload Nothink APK
         uses: actions/upload-artifact@v4
         with:
-          name: nothink-jusicons-50-app-trial
+          name: nothink-figma-release
           path: pack-nothing/build/outputs/apk/release/pack-nothing-release.apk
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 14
           compression-level: 0
-      - name: Upload SVG import report
-        if: always() && hashFiles('build/jusicons-report/svg-import-report.json') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: nothink-svg-import-report
-          path: build/jusicons-report/svg-import-report.json
-          if-no-files-found: warn
-          retention-days: 7
-      - name: Upload APK extraction report
+      - name: Upload Figma export and mapping report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nothink-jusicons-50-app-report
-          path: build/jusicons-report/
+          name: nothink-figma-build-report
+          path: |
+            build/nothink-figma-export/manifest.json
+            build/nothink-figma-report/report.json
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 14

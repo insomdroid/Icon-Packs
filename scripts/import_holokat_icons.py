@@ -533,6 +533,14 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    unused_assets = [
+        (resource, Path(original_path).stem)
+        for resource, (_, original_path) in images.items()
+        if resource not in matched_artwork
+    ]
+    print("Unmapped Jelly Bean artwork filenames:")
+    for resource, original_stem in unused_assets:
+        print(f"  {resource} <- {original_stem}")
     print(f"Jelly Bean imported {len(images)} unique image assets into the combined icon pack.")
     print(f"Generated {len(appfilter.findall('item'))} unique launcher component mappings.")
     print(f"Artwork used by mappings: {len(matched_artwork)} / {len(images)}.")

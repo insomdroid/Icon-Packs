@@ -182,6 +182,155 @@ ALIASES = {
 }
 
 
+# Semantic fallbacks for catalog labels whose app names differ from the
+# Jelly Bean artwork filenames. Every target below is an existing archive asset.
+SEMANTIC_RULES = [
+    (("calendar", "calender"), "calendar"),
+    (("calculator", "calc"), "calculator"),
+    (("clock", "watch", "time"), "clock"),
+    (("camera", "gcam"), "camera"),
+    (("dialer", "phone", "calling", "caller"), "phone"),
+    (("contact", "people"), "people"),
+    (("gallery", "album"), "gallery"),
+    (("photo", "picture", "wallpaper"), "photos"),
+    (("filemanager", "fileexplorer", "myfiles", "files"), "files"),
+    (("download", "downloader"), "downloads"),
+    (("browser", "webview", "chromium"), "browser"),
+    (("map", "navigation", "osm2gmaps"), "maps"),
+    (("message", "messenger", "sms", "chat", "telegram", "talk", "gram"), "messages"),
+    (("email", "mail", "inbox"), "email"),
+    (("music", "audio", "spotify", "soundcloud"), "music"),
+    (("youtube", "yt"), "youtube"),
+    (("setting", "configuration", "quicksettings"), "settings"),
+    (("video", "movie", "stream"), "videos"),
+]
+
+EXPLICIT_ALIASES = {
+    "acrphone": "phone", "aigallery": "gallery", "aospclock": "clock",
+    "aospdialer": "phone", "asuscalculator": "calculator",
+    "asuscalendar": "calendar", "asusgallery": "gallery",
+    "asuscallingscreen": "phone", "asusdigitalclockwidget": "clock",
+    "ahafast": "downloads", "alcatelcontacts": "people",
+    "alcatelphone": "phone", "alightphone": "phone",
+    "androidhiddensettings": "settings", "androidquicksettings": "settings",
+    "androidfiles": "files", "appinfomanager": "settings",
+    "axetscallrecorder": "soundrecorder", "bitcalculator": "calculator",
+    "bromitedev": "chromium", "calcu": "calculator", "calcyou": "calculator",
+    "calendarplanner": "calendar", "callassistant": "phone",
+    "callrecorder": "soundrecorder", "callerid": "phone",
+    "camera2": "camera", "camerawatch": "camera",
+    "chromium": "chromium", "chronos": "clock",
+    "clevcalc": "calculator", "clockmaster": "clock",
+    "clockyou": "clock", "coloroscalendar": "calendar",
+    "colorosdownloads": "downloads", "colorosmyfiles": "files",
+    "colorosodialer": "phone", "colorosphotos": "photos",
+    "contactsphonecall": "people", "dialer": "phone",
+    "downloadvideonowatermark": "downloads", "easyphone": "phone",
+    "everdialer": "phone", "fossbrowser": "browser",
+    "fileexplorer": "files", "filemanager": "filemanager",
+    "filemanagershortcut": "filemanager", "filesgoogleshortcutslauncher": "filesgo",
+    "filesbygoogle": "filesgo", "filesshortcut": "files",
+    "flashgram": "instagram", "fossifycalendar": "calendar",
+    "fossifyclock": "clock", "fossifycontacts": "people",
+    "fossifygallery": "gallery", "fossifymessages": "messages",
+    "fossifyphone": "phone", "gbinstagram": "instagram",
+    "gbwhatsapp": "whatsapp", "gcam": "cameragoogle",
+    "gcammgc": "cameragoogle", "gmailgo": "gmailgo",
+    "googlecalendar": "googlecalendar", "googlecamera": "cameragoogle",
+    "googlecontacts": "people", "googlemaps": "maps",
+    "googlemapsgo": "mapsgo", "googlemessages": "messaging",
+    "googlephone": "phone", "googletranslate": "translate",
+    "grapheneossecurecamera": "camera", "grapheneosvanadium": "browser",
+    "grindrphone": "phone", "hiddensettings": "settings",
+    "honorcalculator": "calculator", "honorcontacts": "people",
+    "honorfiles": "files", "honorgallery": "gallery",
+    "huaweiclock": "clock", "huaweicontacts": "people",
+    "huaweifiles": "files", "hyperosclock": "clock",
+    "hyperosfiles": "files", "instagramlite": "instagram",
+    "instapro": "instagram", "instapro2": "instagram",
+    "instafel": "instagram", "jtf acebook": "facebook",
+    "kashcal": "calendar", "koler": "phone", "kwikpic": "gallery",
+    "lgclock": "clock", "lgemail": "email", "lgfilemanager": "filemanager",
+    "lmc83i": "cameragoogle", "lenovofilemanager": "filemanager",
+    "lenovozuifilemanager": "filemanager", "lineageosgallery": "gallery",
+    "liquiddialer": "phone", "miuicalculator": "calculator",
+    "mail": "email", "materialfiles": "files", "mediadownloader": "downloads",
+    "meizucalculator": "calculator", "messages": "messages",
+    "messenger": "facebookmessenger", "mibrowser": "browser",
+    "microsoftoutlook": "outlook", "mizu droid": "phone",
+    "modgcam": "cameragoogle", "motocamera": "cameramoto",
+    "motoemail": "email", "motogallery": "gallery",
+    "mulch": "browser", "mydevicesetting": "settings",
+    "myfiles": "files", "mycamguides": "camera",
+    "myinsta": "instagram", "ncalc": "calculator",
+    "ntcalculator": "calculator", "nothingdialer": "phone",
+    "nubiafilemanager": "filemanager", "onepluscalculator": "calculator",
+    "oneplusdialer": "phone", "oneplusfilemanager": "filemanager",
+    "oneplusgallery": "gallery", "oneplusmessages": "messages",
+    "opencamera": "camera", "opencalc": "calculator",
+    "opencontacts": "people", "pdfscanner": "pdfviewer",
+    "photostampcamera": "camera", "photoscompanion": "photos",
+    "piko instagram": "instagram", "protonmail": "email",
+    "pulsesms": "messages", "qksms": "messages", "quiksms": "messages",
+    "rightdialer": "phone", "rightfiles": "files",
+    "samsungcalculator": "calculator", "samsungcamera": "camera",
+    "samsungcontacts": "people", "samsunggallery": "gallery",
+    "samsunginternetbrowser": "browser", "samsunginternetlite": "browser",
+    "samsungmessages": "messages", "samsungmyfiles": "files",
+    "samsungphone": "phone", "showcaller": "phone",
+    "silencesms": "messages", "simpleanalogclock": "clock",
+    "simplecalculator": "calculator", "simplecalendar": "calendar",
+    "simplecontacts": "people", "simplecontactsprose": "people",
+    "simpledialer": "phone", "simplefilemanager": "filemanager",
+    "simplegallery": "gallery", "simplesmsmessenger": "messages",
+    "snapchat": "snapchat", "sonyalbum": "gallery",
+    "son yphone": "phone", "soundcloud": "music",
+    "spotify": "spotify", "spotify premium": "spotify",
+    "spotifyweb": "spotify", "telegram": "messages",
+    "telegrambeta": "messages", "telegramx": "messages",
+    "textra sms": "messages", "thorium": "browser",
+    "truecaller": "phone", "ungoogledchromium": "chromium",
+    "ungoogledchromiumextensions": "chromium", "ungoogledmaps": "maps",
+    "user settings": "settings", "videodownloader": "downloads",
+    "whatsapp": "whatsapp", "whatsappbusiness": "whatsapp",
+    "wingoscamera": "camera", "youtubego": "youtube go",
+    "youtubekids": "youtube kids", "youtubemusic": "youtube music",
+    "youtubetv": "youtube tv", "youtube for androidtv": "youtube tv",
+    "youtuberevanced": "youtube", "youtubemorphe": "youtube",
+    "youtub evalure": "youtube", "zen uidialercontacts": "phone",
+    "zfile": "files",
+}
+
+
+def semantic_artwork(label: str, artwork_by_label: dict[str, str]) -> str | None:
+    normalized = normalize(label)
+    alias = EXPLICIT_ALIASES.get(normalized) or ALIASES.get(normalized)
+    if alias:
+        target = normalize(alias)
+        if target in artwork_by_label:
+            return artwork_by_label[target]
+
+    # Exact app-family hints for variants and localized labels.
+    if "youtube" in normalized or normalized == "yt":
+        for target in ("youtube", "youtubealt"):
+            if target in artwork_by_label:
+                return artwork_by_label[target]
+    if "instagram" in normalized or normalized in {"insta", "flashgram", "wavegram"}:
+        return artwork_by_label.get("instagram")
+    if "whatsapp" in normalized or "yowhatsapp" in normalized:
+        return artwork_by_label.get("whatsapp")
+    if "facebook" in normalized:
+        return artwork_by_label.get("facebook")
+    if "spotify" in normalized:
+        return artwork_by_label.get("spotify")
+    if "chrome" in normalized or "chromium" in normalized or "browser" in normalized:
+        return artwork_by_label.get("chrome") or artwork_by_label.get("browser")
+    for tokens, target in SEMANTIC_RULES:
+        if any(token in normalized for token in tokens):
+            if target in artwork_by_label:
+                return artwork_by_label[target]
+    return None
+
 def main() -> None:
     missing = [str(path) for path in ARCHIVES if not path.is_file()]
     if missing:
@@ -255,9 +404,7 @@ def main() -> None:
             normalized = normalize(label)
             resource = artwork_by_label.get(normalized)
             if resource is None:
-                alias = ALIASES.get(normalized)
-                if alias:
-                    resource = artwork_by_label.get(normalize(alias))
+                resource = semantic_artwork(label, artwork_by_label)
 
             if resource is None:
                 unmatched_labels.add(label)

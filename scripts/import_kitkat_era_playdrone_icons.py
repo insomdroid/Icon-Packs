@@ -17,7 +17,7 @@ MAX_APK=100*1024*1024
 BEGIN="<!-- BEGIN GENERATED PLAYDRONE 2014 ICONS -->"
 END="<!-- END GENERATED PLAYDRONE 2014 ICONS -->"
 PNG=b"\x89PNG\r\n\x1a\n"
-UA="Insomdroid-KitKat-Icon-Importer/1.0 (+https://github.com/insomdroid/Icon-Packs)"
+UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36"
 def fetch(url,dest=None,attempts=3):
     req=urllib.request.Request(url,headers={"User-Agent":UA}); error=None
     for i in range(attempts):
@@ -31,10 +31,36 @@ def fetch(url,dest=None,attempts=3):
             error=exc
             if i+1<attempts: time.sleep(i+1)
     print(f"WARNING download failed {url}: {error}",file=sys.stderr); return None
+def fetch_snapshot():
+    # Internet Archive's public download front door can return 403 to CI runners.
+    # Resolve the item's storage hosts through the metadata API and try both mirrors.
+    urls=[SNAPSHOT_URL, SNAPSHOT_URL+"?download=1"]
+    metadata=fetch("https://archive.org/metadata/playdrone-snapshots")
+    if metadata:
+        try:
+            item=json.loads(metadata)
+            directory=item.get("dir") or "/"
+            for host in (item.get("d1"),item.get("d2")):
+                if host:
+                    urls.insert(0,"https://"+host+directory.rstrip("/")+"/2014-10-31.json")
+        except (ValueError,TypeError):
+            pass
+    for url in dict.fromkeys(urls):
+        print(f"Trying snapshot source: {url}")
+        data=fetch(url,attempts=2)
+        if data:
+            try:
+                parsed=json.loads(data)
+                if isinstance(parsed,list) and parsed:
+                    return data
+            except (ValueError,TypeError):
+                pass
+    return None
+
 def main():
     print("Downloading Playdrone Google Play snapshot 2014-10-31")
-    raw=fetch(SNAPSHOT_URL)
-    if not raw: raise RuntimeError("Unable to download 2014 Playdrone snapshot")
+    raw=fetch_snapshot()
+    if not raw: raise RuntimeError("Unable to download 2014 Playdrone snapshot from Internet Archive download or storage mirrors")
     snapshot=json.loads(raw)
     if not isinstance(snapshot,list): raise RuntimeError("Unexpected snapshot format")
     print(f"Snapshot records: {len(snapshot):,}")

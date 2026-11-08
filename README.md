@@ -27,3 +27,7 @@ Nothink2 is a separate Lawnicons-based icon pack with a Nothing OS 5.0 dark pres
 Enable themed icons in Android and in a compatible launcher to use wallpaper-derived icon colors. Classic icon-pack and themed-icon support varies by launcher.
 
 See [Nothink2 artwork attribution](docs/NOTHINK2_ATTRIBUTION.md). Nothink2 is unofficial and is not affiliated with Lawnchair, Lawnicons, or Nothing Technology Limited.
+
+## Development workflow
+
+For the project-specific ChatGPT workflow, audit checklist, copy-ready prompts, and verification rules, see [CHATGPT_DEVELOPMENT_GUIDE.md](CHATGPT_DEVELOPMENT_GUIDE.md).

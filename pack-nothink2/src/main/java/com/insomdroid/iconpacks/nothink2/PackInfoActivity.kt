@@ -75,21 +75,35 @@ private fun Nothink2InfoScreen() {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "1. Open your launcher settings.\n2. Open Icon Pack or Icon Style.\n3. Choose Nothink2.",
+                text = "1. Open your launcher settings.\\n2. Open Icon Pack or Icon Style.\\n3. Choose Nothink2.",
                 fontSize = 15.sp,
                 lineHeight = 25.sp,
                 color = Color(0xFFCCCCCC)
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "THEMED ICONS",
+                text = "ADAPTIVE ICONS",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFFFFFFFF)
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Enable Themed Icons in Android and in a compatible launcher to use wallpaper-derived colors. Icon shape follows the shape selected in your launcher.",
+                text = "The original dark background and white artwork are retained. On launchers that support adaptive icon resources, the icon shape follows the mask selected by that launcher. Other launchers use the conventional icon-pack artwork.",
+                fontSize = 15.sp,
+                lineHeight = 23.sp,
+                color = Color(0xFFCCCCCC)
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "THEMED COLORS",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFFFFFFF)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Enable Themed Icons in Android and in a compatible launcher to apply wallpaper-derived colors. This is optional; the original dark-and-white appearance remains the default. Availability depends on Android version and launcher support.",
                 fontSize = 15.sp,
                 lineHeight = 23.sp,
                 color = Color(0xFFCCCCCC)

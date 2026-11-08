@@ -33,6 +33,14 @@ def white_svg(source):
     return source.replace("currentColor", "#ffffff").encode("utf-8")
 
 
+def write_xml(element, destination):
+    ET.ElementTree(element).write(
+        destination,
+        encoding="utf-8",
+        xml_declaration=True,
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--upstream", type=Path, required=True)
@@ -61,13 +69,19 @@ def main():
             raise SystemExit("The supplied package allowlist is empty")
 
     res = args.module / "src/main/res"
-    glyphs, wrappers, xml = res / "drawable-nodpi", res / "drawable", res / "xml"
-    for folder in (glyphs, wrappers, xml):
+    glyphs = res / "drawable-nodpi"
+    wrappers = res / "drawable"
+    adaptive = res / "drawable-anydpi-v26"
+    xml = res / "xml"
+    for folder in (glyphs, wrappers, adaptive, xml):
         folder.mkdir(parents=True, exist_ok=True)
 
     for pattern in ("*_glyph.png", "*_glyph.webp"):
         for stale in glyphs.glob(pattern):
             stale.unlink()
+    # This directory is generated entirely from the pinned upstream mapping.
+    for stale in adaptive.glob("*.xml"):
+        stale.unlink()
 
     ET.register_namespace("android", "http://schemas.android.com/apk/res/android")
     source = ET.parse(source_filter).getroot()
@@ -75,7 +89,7 @@ def main():
     drawable_list = ET.Element("resources")
     themed = ET.Element("icons")
     done, packages = set(), set()
-    count = 0
+    component_count = 0
 
     for item in source.findall("item"):
         component, drawable = item.get("component"), item.get("drawable")
@@ -91,8 +105,8 @@ def main():
             if not svg.is_file():
                 continue
 
-            # 120 px glyph in a 192 px transparent canvas: smaller artwork,
-            # while retaining the same centered alignment and lossless quality.
+            # 120 px glyph in a 192 px transparent canvas keeps the original
+            # compact appearance and leaves room for adaptive-icon masking.
             rendered = cairosvg.svg2png(
                 bytestring=white_svg(svg.read_text(encoding="utf-8")),
                 output_width=120,
@@ -111,6 +125,7 @@ def main():
                 method=6,
             )
 
+            # Conventional icon-pack fallback: dark circular background + glyph.
             layer = ET.Element("layer-list")
             bg_item = ET.SubElement(layer, "item")
             bg_shape = ET.SubElement(
@@ -122,23 +137,44 @@ def main():
                 "item",
                 {ANDROID + "drawable": "@drawable/" + name + "_glyph"},
             )
-            ET.ElementTree(layer).write(
-                wrappers / (name + ".xml"),
-                encoding="utf-8",
-                xml_declaration=True,
+            write_xml(layer, wrappers / (name + ".xml"))
+
+            # Android 8+ adaptive drawable. The launcher supplies the mask;
+            # the original dark background and white artwork remain unchanged.
+            adaptive_icon = ET.Element("adaptive-icon")
+            ET.SubElement(
+                adaptive_icon,
+                "background",
+                {ANDROID + "drawable": "@color/icon_adaptive_background"},
             )
+            ET.SubElement(
+                adaptive_icon,
+                "foreground",
+                {ANDROID + "drawable": "@drawable/" + name + "_glyph"},
+            )
+            ET.SubElement(
+                adaptive_icon,
+                "monochrome",
+                {ANDROID + "drawable": "@drawable/" + name + "_glyph"},
+            )
+            write_xml(adaptive_icon, adaptive / (name + ".xml"))
+
             ET.SubElement(drawable_list, "item", {"drawable": name})
             done.add(name)
 
         ET.SubElement(appfilter, "item", {"component": component, "drawable": name})
         package = match.group(1)
         if package not in packages:
-            ET.SubElement(themed, "icon", {
-                "package": package,
-                "drawable": "@drawable/" + name + "_glyph",
-            })
+            ET.SubElement(
+                themed,
+                "icon",
+                {
+                    "package": package,
+                    "drawable": "@drawable/" + name + "_glyph",
+                },
+            )
             packages.add(package)
-        count += 1
+        component_count += 1
 
     missing = selected - packages if selected is not None else set()
     if missing:
@@ -155,15 +191,17 @@ def main():
         (drawable_list, "drawable.xml"),
         (themed, "grayscale_icon_map.xml"),
     ):
-        ET.ElementTree(element).write(
-            xml / filename,
-            encoding="utf-8",
-            xml_declaration=True,
+        write_xml(element, xml / filename)
+
+    adaptive_count = len(list(adaptive.glob("*.xml")))
+    if adaptive_count != len(done):
+        raise SystemExit(
+            f"Adaptive resource mismatch: {adaptive_count} files for {len(done)} icons"
         )
 
     print(
-        f"Imported {count} mapped components for {len(packages)} supported apps, "
-        f"{len(done)} unique WebP glyphs at 120x120 on 192x192 canvas."
+        f"Imported {component_count} mapped components for {len(packages)} supported apps, "
+        f"{len(done)} unique WebP glyphs and {adaptive_count} adaptive drawables."
     )
 
 

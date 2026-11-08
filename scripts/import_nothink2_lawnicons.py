@@ -139,8 +139,13 @@ def main():
             )
             write_xml(layer, wrappers / (name + ".xml"))
 
-            # Android 8+ adaptive drawable. The launcher supplies the mask;
-            # the original dark background and white artwork remain unchanged.
+            # Keep adaptive resources under a distinct name. Android resource
+            # qualifiers otherwise let drawable-anydpi-v26/<name>.xml replace
+            # the conventional drawable/<name>.xml on Android 8+, bypassing
+            # icon-pack layer-list scaling and making glyphs appear oversized.
+            # Launchers that explicitly support this resource can use the
+            # adaptive variant; classic appfilter mapping keeps the exact
+            # compact circular icon used by the default pack.
             adaptive_icon = ET.Element("adaptive-icon")
             ET.SubElement(
                 adaptive_icon,
@@ -157,7 +162,7 @@ def main():
                 "monochrome",
                 {ANDROID + "drawable": "@drawable/" + name + "_glyph"},
             )
-            write_xml(adaptive_icon, adaptive / (name + ".xml"))
+            write_xml(adaptive_icon, adaptive / (name + "_adaptive.xml"))
 
             ET.SubElement(drawable_list, "item", {"drawable": name})
             done.add(name)

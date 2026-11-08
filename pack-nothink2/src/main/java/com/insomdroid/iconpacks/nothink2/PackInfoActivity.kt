@@ -75,7 +75,7 @@ private fun Nothink2InfoScreen() {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "1. Open your launcher settings.\\n2. Open Icon Pack or Icon Style.\\n3. Choose Nothink2.",
+                text = "1. Open your launcher settings.\n2. Open Icon Pack or Icon Style.\n3. Choose Nothink2.",
                 fontSize = 15.sp,
                 lineHeight = 25.sp,
                 color = Color(0xFFCCCCCC)
@@ -89,7 +89,7 @@ private fun Nothink2InfoScreen() {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "The original dark background and white artwork are retained. On launchers that support adaptive icon resources, the icon shape follows the mask selected by that launcher. Other launchers use the conventional icon-pack artwork.",
+                text = "The original dark background and white artwork are retained. Compatible launchers can apply their selected adaptive shape. Launchers differ in how they handle adaptive icon-pack resources, so exact shape support cannot be guaranteed on every launcher.",
                 fontSize = 15.sp,
                 lineHeight = 23.sp,
                 color = Color(0xFFCCCCCC)
@@ -103,7 +103,7 @@ private fun Nothink2InfoScreen() {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Enable Themed Icons in Android and in a compatible launcher to apply wallpaper-derived colors. This is optional; the original dark-and-white appearance remains the default. Availability depends on Android version and launcher support.",
+                text = "Enable Themed Icons in Android and in a compatible launcher to apply wallpaper-derived colors. Without themed-icon support, icons keep their original dark background and white artwork. Availability depends on Android version and launcher support.",
                 fontSize = 15.sp,
                 lineHeight = 23.sp,
                 color = Color(0xFFCCCCCC)

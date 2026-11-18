@@ -435,6 +435,13 @@ EXTRA_COMPONENTS = [
     ("ComponentInfo{com.google.android.talk/com.google.android.talk.SigningInActivity}", "Hangouts", "Hangouts"),
     ("ComponentInfo{com.google.android.apps.plus/com.google.android.apps.plus.phone.HomeActivity}", "Google+", "Google"),
     ("ComponentInfo{com.google.android.apps.plus/com.google.android.apps.plusone.app.HomeScreenActivity}", "Google+", "Google"),
+    ("ComponentInfo{com.google.android.apps.plus/com.google.android.apps.circles.realtimechat.ConversationListActivity}", "Google+ Messenger", "G+ Messenger"),
+    ("ComponentInfo{com.google.android.apps.maps/com.google.android.maps.PlacesActivity}", "Google Maps Places", "Places"),
+    ("ComponentInfo{com.android.videoeditor/com.android.videoeditor.ProjectsActivity}", "Movie Studio", "Movie Studio"),
+    ("ComponentInfo{com.android.voicedialer/com.android.voicedialer.VoiceDialerLauncherActivity}", "Voice Dialer", "Voice Dialer"),
+    ("ComponentInfo{com.qo.android.am3/com.qo.android.quickoffice.QuickofficeDispatcher}", "Quickoffice", "Quickoffice"),
+    ("ComponentInfo{com.google.android.gms/com.google.android.gms.app.settings.GoogleSettingsActivity}", "Google Settings", "Google Settings"),
+    ("ComponentInfo{com.google.android.apps.currents/com.google.apps.dots.android.app.activity.CurrentsStartActivity}", "Google Currents", "Currents"),
 ]
 
 

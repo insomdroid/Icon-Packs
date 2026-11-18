@@ -594,7 +594,7 @@ def main() -> None:
                     webp_buffer,
                     format="WEBP",
                     lossless=True,
-                    method=6,
+                    method=4,
                 )
                 webp_data = webp_buffer.getvalue()
             if len(webp_data) < len(data):

@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "InsomdroidIconPacks"
-include(":core", ":pack-kitkat", ":pack-nothink2")
+include(":pack-kitkat", ":pack-nothink2")

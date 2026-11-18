@@ -6,7 +6,7 @@ This guide is the working standard for icon-pack artwork, mappings, Android pack
 
 ## Scope
 
-This repository contains multiple independent icon-pack products and source collections, including Holokat, Nothink, and Nothink2. Keep their artwork, package IDs, mappings, build outputs, and design rules distinct. Do not assume a change for one pack applies to another.
+This repository contains exactly two independent icon-pack products: HoloKat and Nothink2. Keep their artwork, package IDs, mappings, build outputs, and design rules distinct. Do not reintroduce retired Nothink, Jusicons, or other icon-pack projects without explicit approval.
 
 ## Non-negotiable working rules
 
@@ -17,7 +17,7 @@ This repository contains multiple independent icon-pack products and source coll
 - Never replace approved artwork or mappings without a clear reason and user approval.
 - Do not add generic or unrelated icons merely to increase the supported-app count.
 - Keep each icon pack's application ID, launcher integration, versioning, and release artifact identity correct.
-- Do not create multiple APKs when the agreed release is one combined APK.
+- Build only the requested pack: HoloKat and Nothink2 have separate APKs and separate release workflows.
 - Verify APK size and contents; do not assume a larger APK means better coverage.
 
 ## Artwork quality rules

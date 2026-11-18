@@ -18,7 +18,7 @@
     <string name="music_next">Next track</string>
     <string name="gallery_widget_name">KitKat Photo Gallery</string>
     <string name="gallery_widget_description">Photo gallery shortcut widget</string>
-    <string name="gallery_widget_open">Open Photos</string>
+    <string name="gallery_widget_open">Choose photo</string>
     <string name="power_widget_name">KitKat Power Control</string>
     <string name="power_widget_description">Quick shortcuts to system controls</string>
     <string name="power_wifi">Wi-Fi settings</string>
@@ -29,4 +29,11 @@
     <string name="wallpaper_kitkat">KitKat Default</string>
     <string name="wallpaper_aosp">AOSP</string>
     <string name="github_link">GitHub</string>
+    <string name="calendar_widget_name">KitKat Calendar</string>
+    <string name="calendar_widget_description">Upcoming events from your calendar</string>
+    <string name="calendar_permission_required">Calendar access is required to show events.</string>
+    <string name="calendar_empty">No upcoming events</string>
+    <string name="calendar_title">Calendar</string>
+    <string name="gallery_widget_change">Change photo</string>
+    <string name="gallery_widget_preview">Choose a photo for this widget</string>
 </resources>

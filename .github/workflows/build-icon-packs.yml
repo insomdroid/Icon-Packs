@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'pack-kitkat/**'
+      - 'pack-kitkat/**'\n      - 'scripts/import_android_time_machine_icons.py'
       - 'scripts/import_kitkat_aosp_icons.py'
       - 'scripts/import_kitkat_archive_icons.py'
       - 'scripts/import_android_time_machine_icons.py'

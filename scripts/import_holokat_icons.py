@@ -598,6 +598,7 @@ def main() -> None:
     matched_artwork: Counter[str] = Counter()
     matched_labels: dict[str, set[str]] = defaultdict(set)
     unmatched_labels: set[str] = set()
+    removed_unmatched_components: list[dict[str, str]] = []
 
     for item in old_root.findall("item"):
         component = item.attrib.get("component")
@@ -615,8 +616,13 @@ def main() -> None:
             matched_artwork[resource] += 1
             matched_labels[resource].add(label)
         else:
-            ET.SubElement(appfilter, "item", dict(item.attrib))
+            # Keep the generated appfilter clean: components without a matching
+            # artwork resource must not remain as unthemed entries.
             unmatched_labels.add(label)
+            removed_unmatched_components.append({
+                "component": component,
+                "name": label,
+            })
         matched_components.add(component)
 
     for component, label, artwork in EXTRA_COMPONENTS:
@@ -679,6 +685,8 @@ def main() -> None:
         "launcher_component_mappings": len(appfilter.findall("item")),
         "new_pinned_lawnicons_mappings": upstream_added,
         "unmapped_artworks": unused_assets,
+        "removed_unmatched_components": removed_unmatched_components,
+        "removed_unmatched_component_count": len(removed_unmatched_components),
         "mapped_artworks_detail": [
             {"resource": resource, "components": count, "labels": sorted(matched_labels[resource])}
             for resource, count in sorted(matched_artwork.items())

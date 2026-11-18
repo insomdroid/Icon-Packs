@@ -15,7 +15,6 @@ on:
       - 'settings.gradle.kts'
       - 'gradle/**'
       - 'gradle.properties'
-      - '.github/workflows/build-icon-packs.yml'
   workflow_dispatch:
 
 permissions:

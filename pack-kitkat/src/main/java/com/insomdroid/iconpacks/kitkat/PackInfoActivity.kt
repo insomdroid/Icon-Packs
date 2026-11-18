@@ -119,7 +119,8 @@ private fun loadKitKatIcons(context: Context): List<KitKatIcon> {
 @Composable
 private fun KitKatPackDashboard() {
     val context = LocalContext.current
-    var selectedIcon by remember { mutableStateOf<KitKatIcon?>(null) }\n    val kitKatIcons = remember(context) { loadKitKatIcons(context) }
+    var selectedIcon by remember { mutableStateOf<KitKatIcon?>(null) }
+    val kitKatIcons = remember(context) { loadKitKatIcons(context) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),

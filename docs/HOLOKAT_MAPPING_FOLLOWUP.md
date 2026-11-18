@@ -86,3 +86,15 @@ Two additional Google-era artwork entries were added after confirming their exac
 | G+ Photos | `com.google.android.apps.plus/com.google.android.apps.plus.pho` | [LineageOS theme template](https://github.com/LineageOS/android_packages_themes_Template/blob/master/theme/build/intermediates/assets/debug/icons/res/xml/appfilter.xml) |
 
 These are historical component IDs supported by public icon-pack catalogues, not proof that the same activities remain available in current releases. The build report determines whether each distinct archive artwork was newly covered.
+
+
+## Seventh mapping pass
+
+Two further legacy launcher components were corroborated in the historical CrapCons appfilter catalogue:
+
+| Artwork | Component | Evidence |
+|---|---|---|
+| Analytics | `com.google.android.apps.giant/com.google.android.apps.giant.activity.AnalyticsLaunchActivity` | [CrapCons appfilter](https://github.com/the-dagger/CrapCons-IconPack/blob/master/app/src/main/res/xml/appfilter.xml) |
+| Hangouts Dialer | `com.google.android.apps.hangoutsdialer/com.google.android.apps.hangoutsdialer.app.LaunchActivity` | [CrapCons appfilter](https://github.com/the-dagger/CrapCons-IconPack/blob/master/app/src/main/res/xml/appfilter.xml) |
+
+The Analytics profile-picker component from the previous pass is retained as a historical alias. Both Analytics activity IDs are catalogue-backed. These entries are not device-manifest verification; the next CI report will show the distinct artwork count actually covered.

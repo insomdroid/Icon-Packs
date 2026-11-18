@@ -417,6 +417,12 @@ EXTRA_COMPONENTS = [
     ("ComponentInfo{com.google.android.apps.cultural/com.google.android.apps.cultural.web.WebViewActivity}", "Arts & Culture", "Arts & Culture"),
     ("ComponentInfo{com.google.android.apps.youtube.creator/com.google.android.apps.youtube.creator.activities.SplashActivity}", "YouTube Creator Studio", "YouTube Creator Studio"),
 
+    ("ComponentInfo{com.netflix.mediaclient/com.netflix.mediaclient.ui.launch.UIWebViewActivity}", "Netflix", "Netfilx"),
+    ("ComponentInfo{com.netflix.mediaclient/com.netflix.mediaclient.UIWebViewActivity}", "Netflix", "Netfilx"),
+    ("ComponentInfo{com.twitter.android/com.twitter.android.StartActivity}", "Twitter", "Twitter"),
+    ("ComponentInfo{com.twitter.android/com.twitter.android.LoginActivity}", "Twitter", "Twitter"),
+    ("ComponentInfo{com.google.android.apps.youtube.creator/.main.MainActivity}", "YouTube Studio", "YouTube Creator Studio"),
+    ("ComponentInfo{com.google.android.apps.youtube.creator/com.google.android.apps.youtube.creator.activities.SplashActivity}", "YouTube Studio", "YouTube Creator Studio"),
 ]
 
 

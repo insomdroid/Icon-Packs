@@ -1,14 +1,18 @@
 package com.insomdroid.iconpacks.kitkat
 
+import android.Manifest
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -51,6 +55,7 @@ import androidx.compose.foundation.lazy.items
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 import com.insomdroid.iconpacks.kitkat.widget.KitKatClockWidgetProvider
+import com.insomdroid.iconpacks.kitkat.widget.KitKatCalendarWidgetProvider
 import com.insomdroid.iconpacks.kitkat.widget.KitKatDigitalClockWidgetProvider
 import com.insomdroid.iconpacks.kitkat.widget.KitKatSearchWidgetProvider
 import com.insomdroid.iconpacks.kitkat.widget.KitKatMusicWidgetProvider
@@ -64,10 +69,10 @@ class PackInfoActivity : ComponentActivity() {
         setContent {
             MaterialTheme(
                 colorScheme = lightColorScheme(
-                    primary = Color(0xFF3F51B5),
+                    primary = Color(0xFF33B5E5),
                     onPrimary = Color.White,
-                    surface = Color(0xFFF7F7FA),
-                    background = Color(0xFFF7F7FA)
+                    surface = Color.White,
+                    background = Color(0xFFF1F1F1)
                 )
             ) {
                 KitKatPackDashboard()
@@ -91,7 +96,10 @@ private fun loadKitKatIcons(context: Context): List<KitKatIcon> {
                 val drawableName = parser.getAttributeValue(null, "drawable")
                     ?: parser.getAttributeValue(null, "name")
 
-                if (!drawableName.isNullOrBlank()) {
+                if (!drawableName.isNullOrBlank() &&
+                    !drawableName.startsWith("kitkat_") &&
+                    drawableName != "aosp_wallpaper"
+                ) {
                     val resourceId = context.resources.getIdentifier(
                         drawableName,
                         "drawable",
@@ -122,6 +130,15 @@ private fun KitKatPackDashboard() {
     val context = LocalContext.current
     var selectedIcon by remember { mutableStateOf<KitKatIcon?>(null) }
     val kitKatIcons = remember(context) { loadKitKatIcons(context) }
+    val calendarPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            pinKitKatWidget(context, KitKatCalendarWidgetProvider::class.java, "KitKat Calendar")
+        } else {
+            Toast.makeText(context, "Calendar access was not granted.", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         LazyColumn(
@@ -132,8 +149,8 @@ private fun KitKatPackDashboard() {
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text("HoloKat", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Color(0xFF212121))
-                    Text("Android 4.4.4", style = MaterialTheme.typography.bodySmall, color = Color(0xFF757575))
-                    Text("WALLPAPERS", style = MaterialTheme.typography.labelLarge, color = Color(0xFF52616B), fontWeight = FontWeight.Bold)
+                    Text("Android 4.4.4", style = MaterialTheme.typography.bodySmall, color = Color(0xFF666666))
+                    Text("WALLPAPERS", style = MaterialTheme.typography.labelLarge, color = Color(0xFF0099CC), fontWeight = FontWeight.Bold)
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         WallpaperOption("KitKat", "Default", R.drawable.kitkat_wallpaper, Modifier.weight(1f)) { applyWallpaper(context, R.drawable.kitkat_wallpaper) }
                         WallpaperOption("AOSP", "Classic", R.drawable.aosp_wallpaper, Modifier.weight(1f)) { applyWallpaper(context, R.drawable.aosp_wallpaper) }
@@ -142,6 +159,13 @@ private fun KitKatPackDashboard() {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         WidgetRow("Analog Clock", "Original KitKat clock face") { pinKitKatWidget(context, KitKatClockWidgetProvider::class.java, "KitKat Analog Clock") }
                         WidgetRow("Digital Clock", "Time and date") { pinKitKatWidget(context, KitKatDigitalClockWidgetProvider::class.java, "KitKat Digital Clock") }
+                        WidgetRow("Calendar", "Upcoming events") {
+                            if (context.checkSelfPermission(Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
+                                pinKitKatWidget(context, KitKatCalendarWidgetProvider::class.java, "KitKat Calendar")
+                            } else {
+                                calendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+                            }
+                        }
                         WidgetRow("Search", "Google web search") { pinKitKatWidget(context, KitKatSearchWidgetProvider::class.java, "KitKat Search") }
                         WidgetRow("Music Player", "Media playback controls") {
                             pinKitKatWidget(context, KitKatMusicWidgetProvider::class.java, "KitKat Music Player")
@@ -197,11 +221,6 @@ private fun KitKatPackDashboard() {
                         modifier = Modifier.size(176.dp),
                         contentScale = ContentScale.Fit
                     )
-                    Text(
-                        text = "Original HoloKat artwork",
-                        color = Color(0xFF687080),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
                 }
             }
         )
@@ -220,7 +239,7 @@ private fun applyWallpaper(context: Context, resourceId: Int) {
 
 @Composable
 private fun WallpaperOption(title: String, subtitle: String, wallpaperId: Int, modifier: Modifier = Modifier, onApply: () -> Unit) {
-    Card(modifier = modifier, shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+    Card(modifier = modifier, shape = RoundedCornerShape(4.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Image(painter = painterResource(wallpaperId), contentDescription = title, modifier = Modifier.fillMaxWidth().height(112.dp), contentScale = ContentScale.Crop)
             Text(title, modifier = Modifier.padding(start = 10.dp, end = 10.dp), fontWeight = FontWeight.Bold)
@@ -251,7 +270,7 @@ private fun SummaryTile(
 ) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(
@@ -264,12 +283,12 @@ private fun SummaryTile(
                 text = value,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF303F9F)
+                color = Color(0xFF0099CC)
             )
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF687080)
+                color = Color(0xFF666666)
             )
         }
     }
@@ -285,7 +304,7 @@ private fun IconTile(
         modifier = modifier
             .aspectRatio(0.82f)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(15.dp),
+        shape = RoundedCornerShape(5.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(

@@ -62,7 +62,7 @@ ICONS = {
     "youtube": "youtube.png",
 }
 
-WALLPAPER_FILENAME = "aosp-wallpaper.jpg"
+WALLPAPER_FILENAME = "kk-default_wallpaper.jpg"
 WALLPAPER_RESOURCE = "kitkat_wallpaper"
 
 CLOCK_ASSETS = {

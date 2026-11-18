@@ -74,3 +74,15 @@ Seven historical component entries were added for archive assets that are genuin
 These are historical catalogue-backed IDs, not claims that these apps are currently installed or that the same activities exist in modern releases. The importer skips components already claimed by an earlier mapping. The build report from the fifth-pass workflow is the authority for how many distinct artwork resources this pass actually adds.
 
 The other remaining artwork is not automatically an app icon. Names such as platform capabilities, input methods, widgets, TV/Wear system surfaces, and feature-specific artwork must be classified before mapping. An icon can remain available in the drawable picker without having a launcher component.
+
+
+## Sixth mapping pass
+
+Two additional Google-era artwork entries were added after confirming their exact component IDs in independent historical public appfilter catalogues:
+
+| Artwork | Component | Evidence |
+|---|---|---|
+| Analytics | `com.google.android.apps.giant/com.google.android.apps.giant.activity.ProfilePickerActivity` | [Nicque appfilter catalogue](https://github.com/Nicque/appfilter-1/blob/master/appfilter.xml) |
+| G+ Photos | `com.google.android.apps.plus/com.google.android.apps.plus.pho` | [LineageOS theme template](https://github.com/LineageOS/android_packages_themes_Template/blob/master/theme/build/intermediates/assets/debug/icons/res/xml/appfilter.xml) |
+
+These are historical component IDs supported by public icon-pack catalogues, not proof that the same activities remain available in current releases. The build report determines whether each distinct archive artwork was newly covered.

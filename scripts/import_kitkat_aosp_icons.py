@@ -69,16 +69,6 @@ ASSETS = {
         "res/drawable-hdpi/app_music.png",
         "drawable-hdpi",
     ),
-    "clock": (
-        "platform_packages_apps_deskclock",
-        "res/mipmap-xxhdpi/ic_launcher_alarmclock.png",
-        "drawable-xxhdpi",
-    ),
-    "gallery": (
-        "platform_packages_apps_gallery2",
-        "res/mipmap-xhdpi/ic_launcher_gallery.png",
-        "drawable-xhdpi",
-    ),
 }
 
 
@@ -103,6 +93,18 @@ def download(url: str) -> bytes:
 
 
 EXTRA_ASSETS = {
+    "clock": (
+        "aosp-mirror-neo/platform_packages_apps_deskclock",
+        "android-4.4.4_r2",
+        "res/mipmap-xxhdpi/ic_launcher_alarmclock.png",
+        "drawable-xxhdpi",
+    ),
+    "gallery": (
+        "aosp-mirror-neo/platform_packages_apps_gallery2",
+        "android-4.4.4_r2",
+        "res/mipmap-xhdpi/ic_launcher_gallery.png",
+        "drawable-xhdpi",
+    ),
     # The AOSP Phone app was removed from the 4.4.4 Nexus 5 image; retain its
     # immediately preceding Jelly Bean AOSP artwork rather than using Google Dialer art.
     "phone": (

@@ -24,9 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -54,6 +52,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 
@@ -125,13 +125,15 @@ private fun KitKatPackDashboard() {
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 18.dp, vertical = 18.dp),
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 18.dp, vertical = 18.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
+            item {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(18.dp)
+                ) {
             Text(
                 text = "HOLOKAT",
                 style = MaterialTheme.typography.labelLarge,
@@ -239,7 +241,10 @@ private fun KitKatPackDashboard() {
                 )
             }
 
-            kitKatIcons.chunked(4).forEach { iconRow ->
+                }
+            }
+
+            items(kitKatIcons.chunked(4)) { iconRow ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -257,17 +262,18 @@ private fun KitKatPackDashboard() {
                 }
             }
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
-            ) {
-                Column(
-                    modifier = Modifier.padding(18.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
-                    Text(
-                        text = "About this collection",
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = "About this collection",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -284,14 +290,19 @@ private fun KitKatPackDashboard() {
                 }
             }
 
-            Text(
-                text = "HOLOKAT ICON PACK",
+                }
+            }
+
+            item {
+                Text(
+                    text = "HOLOKAT ICON PACK",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
                 style = MaterialTheme.typography.labelSmall,
-                color = Color(0xFF9299A5)
-            )
+                    color = Color(0xFF9299A5)
+                )
+            }
         }
     }
 

@@ -456,6 +456,8 @@ EXTRA_COMPONENTS = [
     # Further Jelly Bean-era Google apps corroborated by public historical appfilter catalogues.
     ("ComponentInfo{com.google.android.apps.giant/com.google.android.apps.giant.activity.ProfilePickerActivity}", "Google Analytics", "Analytics"),
     ("ComponentInfo{com.google.android.apps.plus/com.google.android.apps.plus.pho}", "Google+ Photos", "G+ Photos"),
+    ("ComponentInfo{com.google.android.apps.giant/com.google.android.apps.giant.activity.AnalyticsLaunchActivity}", "Google Analytics", "Analytics"),
+    ("ComponentInfo{com.google.android.apps.hangoutsdialer/com.google.android.apps.hangoutsdialer.app.LaunchActivity}", "Hangouts Dialer", "Hangouts Dialer"),
 ]
 
 

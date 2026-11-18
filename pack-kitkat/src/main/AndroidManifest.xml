@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
 
     <application
         android:allowBackup="false"
@@ -29,9 +30,19 @@
             <intent-filter><action android:name="com.actionlauncher.THEME" /></intent-filter>
         </activity>
 
+        <activity
+            android:name=".widget.KitKatGalleryWidgetConfigureActivity"
+            android:exported="true"
+            android:label="@string/gallery_widget_name"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <service android:name=".widget.KitKatMusicNotificationListener" android:label="@string/music_widget_name" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" android:exported="true">
             <intent-filter><action android:name="android.service.notification.NotificationListenerService" /></intent-filter>
         </service>
+
+        <receiver android:name=".widget.KitKatCalendarWidgetProvider" android:exported="true" android:label="@string/calendar_widget_name">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/kitkat_calendar_widget_info" />
+        </receiver>
 
         <receiver android:name=".widget.KitKatDigitalClockWidgetProvider" android:exported="true" android:label="@string/digital_clock_widget_name">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /><action android:name="android.intent.action.TIME_TICK" /><action android:name="android.intent.action.TIME_CHANGED" /><action android:name="android.intent.action.TIMEZONE_CHANGED" /><action android:name="android.intent.action.DATE_CHANGED" /></intent-filter>

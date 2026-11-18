@@ -13,6 +13,7 @@ on:
       - 'scripts/import_holokat_icons.py'
       - 'scripts/import_nothink_figma.py'
       - 'scripts/export_nothink_figma.mjs'
+      - '.github/workflows/build-nothink.yml'
       - 'references/kitkat-archives/**'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
@@ -55,6 +56,14 @@ jobs:
           echo "$ANDROID_HOME/build-tools/35.0.0" >> "$GITHUB_PATH"
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "build-tools;35.0.0"
 
+      - name: Set up Python for archive and image processing
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Pillow
+        run: python -m pip install --disable-pip-version-check pillow
+
       - name: Import original Android 4.4.4 AOSP icons
         run: python3 scripts/import_kitkat_aosp_icons.py
 
@@ -63,6 +72,35 @@ jobs:
 
       - name: Merge Jelly Bean archive artwork
         run: python3 scripts/import_holokat_icons.py
+
+      - name: Set up Node.js for Figma source
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Figma parser and renderer
+        run: npm install --no-save --no-package-lock @grida/refig openfig-core
+
+      - name: Render Figma artwork
+        run: node scripts/export_nothink_figma.mjs 'references/kitkat-archives/App & Brand Icons Pack (Community).fig' build/kitkat-figma-export
+
+      - name: Download pinned Figma app mapping catalogue
+        run: |
+          set -euo pipefail
+          mkdir -p build/kitkat-mappings
+          curl -fsSL https://raw.githubusercontent.com/LawnchairLauncher/lawnicons/cd91ff0bd00ff0a6c9d606d1c326b451b6563506/app/assets/appfilter.xml -o build/kitkat-mappings/appfilter.xml
+          test -s build/kitkat-mappings/appfilter.xml
+
+      - name: Merge Figma artwork into Holokat resources
+        run: python scripts/import_nothink_figma.py --exports build/kitkat-figma-export --mapping build/kitkat-mappings/appfilter.xml --res pack-kitkat/src/main/res --minimum 1
+
+      - name: Upload Figma mapping report
+        uses: actions/upload-artifact@v4
+        with:
+          name: holokat-figma-mapping-report
+          path: build/kitkat-figma-report/report.json
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Upload Holokat archive mapping report
         uses: actions/upload-artifact@v4

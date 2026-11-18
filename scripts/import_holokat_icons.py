@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import re
 import xml.etree.ElementTree as ET
 import zipfile
 import urllib.request
 from collections import Counter, defaultdict
 from pathlib import Path
+
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 ARCHIVES = [
@@ -567,10 +570,53 @@ def main() -> None:
             "the ZIP entries may be encrypted, unsupported, or non-image sources."
         )
 
+    original_image_bytes = 0
+    optimized_image_bytes = 0
+    webp_converted = 0
+
     for name, (data, original_path) in images.items():
         member_name = original_path.split("!/")[-1]
-        extension = Path(member_name).suffix.lower()
-        (DRAWABLE_DIR / f"{name}{extension}").write_bytes(data)
+        original_extension = Path(member_name).suffix.lower()
+        output_data = data
+        output_extension = original_extension
+
+        # WebP lossless preserves every source pixel and alpha value. Keep the
+        # original file whenever WebP would be larger, so conversion can never
+        # increase the packaged artwork size.
+        try:
+            with Image.open(io.BytesIO(data)) as source_image:
+                source_image.load()
+                if source_image.mode not in ("RGB", "RGBA"):
+                    target_mode = "RGBA" if "A" in source_image.getbands() else "RGB"
+                    source_image = source_image.convert(target_mode)
+                webp_buffer = io.BytesIO()
+                source_image.save(
+                    webp_buffer,
+                    format="WEBP",
+                    lossless=True,
+                    method=6,
+                )
+                webp_data = webp_buffer.getvalue()
+            if len(webp_data) < len(data):
+                output_data = webp_data
+                output_extension = ".webp"
+                webp_converted += 1
+        except Exception as error:
+            raise RuntimeError(
+                f"Could not losslessly optimize artwork {member_name}: {error}"
+            ) from error
+
+        # Remove stale formats if this importer is run more than once.
+        for stale_extension in (".png", ".webp", ".jpg", ".jpeg"):
+            stale_file = DRAWABLE_DIR / f"{name}{stale_extension}"
+            if stale_file.exists():
+                stale_file.unlink()
+
+        (DRAWABLE_DIR / f"{name}{output_extension}").write_bytes(output_data)
+        original_image_bytes += len(data)
+        optimized_image_bytes += len(output_data)
+
+    saved_image_bytes = original_image_bytes - optimized_image_bytes
 
     drawable_root = ET.parse(DRAWABLE_XML).getroot() if DRAWABLE_XML.is_file() else ET.Element("resources")
     existing_drawables = {item.attrib.get("name") for item in drawable_root.findall("item")}
@@ -701,6 +747,12 @@ def main() -> None:
 
     print(f"Jelly Bean archive inventory: {archive_inventory}")
     print(f"Imported {len(images)} unique archive images.")
+    print(
+        "Lossless image optimization: "
+        f"{webp_converted}/{len(images)} converted to WebP; "
+        f"{original_image_bytes} -> {optimized_image_bytes} bytes "
+        f"(saved {saved_image_bytes} bytes)."
+    )
     print(f"Mapped {len(matched_artwork)} distinct archive artworks to {len(matched_components)} components.")
     print(f"Added {upstream_added} app components from pinned Lawnicons mapping.")
     print(f"Unmapped source artwork report: {report_dir / 'unmapped-artwork.txt'}")

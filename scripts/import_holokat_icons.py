@@ -458,6 +458,7 @@ EXTRA_COMPONENTS = [
     ("ComponentInfo{com.google.android.apps.plus/com.google.android.apps.plus.pho}", "Google+ Photos", "G+ Photos"),
     ("ComponentInfo{com.google.android.apps.giant/com.google.android.apps.giant.activity.AnalyticsLaunchActivity}", "Google Analytics", "Analytics"),
     ("ComponentInfo{com.google.android.apps.hangoutsdialer/com.google.android.apps.hangoutsdialer.app.LaunchActivity}", "Hangouts Dialer", "Hangouts Dialer"),
+    ("ComponentInfo{com.google.android.apps.enterprise.cpanel/com.google.android.apps.enterprise.cpanel.activities.EntryPointActivity}", "Google Admin", "Admin"),
 ]
 
 

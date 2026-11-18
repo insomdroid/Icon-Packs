@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Import original Android 4.4.4 AOSP launcher artwork into the KitKat pack.
+"""Import verified AOSP launcher artwork into the KitKat pack.
 
-The source tag is pinned to android-4.4.4_r2. Only PNG resources verified in the corresponding Android 4.4.4 AOSP source
-repositories are included here. Manifest references are checked where the
+Most source assets are pinned to android-4.4.4_r2. Phone uses the preceding
+AOSP android-4.3_r1.1 resource because the Nexus 5 image uses Google Phone. Manifest references are checked where the
 source repository contains the app manifest. Existing default-density XML artwork remains as fallback for
 icons that are not covered by this verified source list.
 """
@@ -137,7 +137,7 @@ def main() -> int:
         imported.append((drawable, destination.relative_to(ROOT), len(data), digest))
         print(f"Imported {drawable}: {destination.relative_to(ROOT)} ({len(data)} bytes)")
 
-    print(f"Imported {len(imported)} original AOSP Android 4.4.4 icons.")
+    print(f"Imported {len(imported)} verified AOSP icons across pinned source tags.")
     for drawable, path, size, digest in imported:
         print(f"ASSET {drawable} {path} {size} sha256={digest}")
     return 0

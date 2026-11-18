@@ -83,7 +83,7 @@ KitKat remains the only active deliverable. The CI importer downloads eleven ver
 
 ## Asset licensing and provenance
 
-The eleven imported AOSP PNGs come from AOSP repositories that mark the corresponding modules `MODULE_LICENSE_APACHE2`; their source repository names, resource paths, and attribution are listed in `third_party/aosp-android-4.4.4/README.md`. The shared Apache License 2.0 text is included at `third_party/lawnicons/LICENSE`. Phone is explicitly sourced from the Android 4.3.1 AOSP tag; Clock and Gallery use Android 4.4.4 AOSP resources. The Google+ PNG is public domain from Wikimedia Commons and is not covered by Apache-2.0. Remaining community artwork must be clearly distinguished from official Android assets.
+The eleven Android 4.4.4 PNGs come from AOSP repositories that mark the corresponding modules `MODULE_LICENSE_APACHE2`; their source repository names, resource paths, and attribution are listed in `third_party/aosp-android-4.4.4/README.md`. The shared Apache License 2.0 text is included at `third_party/lawnicons/LICENSE`. Phone is an additional AOSP PNG sourced from the Android 4.3.1 tag; Clock and Gallery use Android 4.4.4 AOSP resources. The Google+ PNG is public domain from Wikimedia Commons and is not covered by Apache-2.0. Remaining community artwork must be clearly distinguished from official Android assets.
 
 ## Mapping adaptation notes
 

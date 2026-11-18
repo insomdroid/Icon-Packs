@@ -7,9 +7,12 @@ artwork cannot override the selected KitKat application icons.
 from __future__ import annotations
 
 import hashlib
+from io import BytesIO
 import re
 import urllib.request
 import xml.etree.ElementTree as ET
+
+from PIL import Image, ImageDraw
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,7 +32,8 @@ JPEG_SIGNATURE = b"\xff\xd8\xff"
 # Resource name -> exact original asset filename.
 ICONS = {
     "apps": "apps.png",
-    "browser": "earth.png",
+    "browser": "chrome.png",
+    "earth": "earth.png",
     "calculator": "calculator.png",
     "calendar": "calendar.png",
     "camera": "camera.png",
@@ -68,12 +72,13 @@ WALLPAPERS = {
 }
 
 WIDGET_ASSETS = {
-    "kitkat_music_background": "music-appwidget_bg.png",
+    # Exact Google Play Music 4.4.4 widget artwork (widget_nowplaying_small).
+    "kitkat_music_background": "pmw-appwidget_bg.png",
     "kitkat_music_unknown": "music-albumart_mp_unknown.png",
-    "kitkat_music_previous": "music-ic_media_previous.png",
-    "kitkat_music_play": "music-ic_media_play.png",
-    "kitkat_music_pause": "music-ic_media_pause.png",
-    "kitkat_music_next": "music-ic_media_next.png",
+    "kitkat_music_previous": "pmw-btn_playback_rew_normal_jb_dark.png",
+    "kitkat_music_play": "pmw-btn_playback_play_normal_jb_dark.png",
+    "kitkat_music_pause": "pmw-btn_playback_pause_normal_jb_dark.png",
+    "kitkat_music_next": "pmw-btn_playback_ff_normal_jb_dark.png",
     "kitkat_gallery_preview": "gallery-widget_preview.png",
     "kitkat_gallery_border": "gallery-appwidget_photo_border.png",
     "kitkat_power_background": "widget-power-bg.png",
@@ -82,8 +87,8 @@ WIDGET_ASSETS = {
     "kitkat_power_gps_on": "power-gps-on.png",
     "kitkat_power_sync_on": "power-sync-on.png",
     "kitkat_power_brightness_full": "power-brightness-full.png",
-    "kitkat_search_icon": "google-search.png",
-    "kitkat_voice_search": "kd-ic_voice_search.png",
+    "kitkat_search_icon": "gel-ic_google_small_light.png",
+    "kitkat_voice_search": "gel-ic_mic_light.png",
     "kitkat_digital_clock_preview": "jbclock-appwidget_digital_clock_preview.png",
 }
 
@@ -99,7 +104,11 @@ CLOCK_ASSETS = {
 
 # Labels in appfilter.xml -> original KitKat artwork resource.
 LABEL_RULES = (
+    (("gmail",), "gmail"),
     (("googleplus", "google+"), "google_plus"),
+    (("google drive", "googledrive"), "drive"),
+    (("google earth", "earth"), "earth"),
+    (("google play music", "playmusic"), "play_music"),
     (("newsstand", "playnewsstand", "magazines"), "newsstand"),
     (("google news", "googlenews", "news"), "news_weather"),
     (("googlesearch", "search"), "google_search"),
@@ -137,8 +146,58 @@ LABEL_RULES = (
 )
 
 
+PACKAGE_RULES = (
+    ("com.google.android.apps.docs.editors", "quickoffice"),
+    ("com.google.android.apps.magazines", "newsstand"),
+    ("com.google.android.apps.walletnfcrel", "wallet"),
+    ("com.google.android.apps.books", "play_books"),
+    ("com.google.android.play.games", "play_games"),
+    ("com.google.android.videos", "play_movies"),
+    ("com.google.android.apps.photos", "photos"),
+    ("com.google.android.apps.plus", "google_plus"),
+    ("com.google.android.apps.hangouts", "hangouts"),
+    ("com.google.android.googlequicksearchbox", "google_search"),
+    ("com.google.android.voicesearch", "voice_search"),
+    ("com.google.android.keep", "keep"),
+    ("com.google.android.apps.maps", "maps"),
+    ("com.google.android.apps.docs", "drive"),
+    ("com.google.android.talk", "hangouts"),
+    ("com.google.android.music", "play_music"),
+    ("com.google.android.youtube", "youtube"),
+    ("com.google.android.chrome", "chrome"),
+    ("com.google.android.gm", "gmail"),
+    ("com.google.earth", "earth"),
+    ("com.android.providers.downloads.ui", "downloads"),
+    ("com.android.documentsui", "downloads"),
+    ("com.android.deskclock", "clock"),
+    ("com.android.calculator2", "calculator"),
+    ("com.android.gallery3d", "gallery"),
+    ("com.android.camera2", "camera"),
+    ("com.android.contacts", "contacts"),
+    ("com.android.calendar", "calendar"),
+    ("com.android.settings", "settings"),
+    ("com.android.dialer", "phone"),
+    ("com.android.phone", "phone"),
+    ("com.android.browser", "browser"),
+    ("com.android.chrome", "chrome"),
+    ("com.android.mms", "hangouts"),
+    ("com.android.music", "play_music"),
+)
+
+
 def normalize(value: str) -> str:
     return re.sub(r"[^a-z0-9+]+", "", value.casefold())
+
+
+def resource_for_item(item: ET.Element) -> str | None:
+    component = item.attrib.get("component", "")
+    match = re.search(r"ComponentInfo\{([^/]+)/", component)
+    if match:
+        package_name = match.group(1).casefold()
+        for package_prefix, resource in PACKAGE_RULES:
+            if package_name == package_prefix or package_name.startswith(package_prefix + "."):
+                return resource
+    return resource_for_label(item.attrib.get("name", ""))
 
 
 def resource_for_label(label: str) -> str | None:
@@ -226,7 +285,21 @@ def main() -> None:
             asset_data = response.read()
         if not asset_data.startswith(PNG_SIGNATURE):
             raise ValueError(f"Widget artwork is not a PNG: {filename}")
-        (destination_dir / f"{resource}.png").write_bytes(asset_data)
+        if resource == "kitkat_music_background":
+            with Image.open(BytesIO(asset_data)) as source_image:
+                source_image = source_image.convert("RGBA")
+                width, height = source_image.size
+                nine_patch = Image.new("RGBA", (width + 2, height + 2), (0, 0, 0, 0))
+                nine_patch.alpha_composite(source_image, (1, 1))
+                marker = ImageDraw.Draw(nine_patch)
+                marker.point((1 + width // 2, 0), fill=(0, 0, 0, 255))
+                marker.point((0, 1 + height // 2), fill=(0, 0, 0, 255))
+                nine_patch.save(destination_dir / f"{resource}.9.png", format="PNG", optimize=True)
+            stale_image = destination_dir / f"{resource}.png"
+            if stale_image.exists():
+                stale_image.unlink()
+        else:
+            (destination_dir / f"{resource}.png").write_bytes(asset_data)
         print(f"WIDGET_ASSET {resource} <- {filename} ({len(asset_data)} bytes)")
 
     # Register widget artwork as standalone drawable resources.
@@ -279,7 +352,7 @@ def main() -> None:
     appfilter_root = ET.parse(APPFILTER_XML).getroot()
     remapped = 0
     for item in appfilter_root.findall("item"):
-        resource = resource_for_label(item.attrib.get("name", ""))
+        resource = resource_for_item(item)
         if resource is not None:
             item.set("drawable", resource)
             remapped += 1

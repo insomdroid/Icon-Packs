@@ -453,6 +453,9 @@ EXTRA_COMPONENTS = [
     ("ComponentInfo{com.google.android.inputmethod.latin/com.android.inputmethod.latin.setup.SetupActivity}", "Google Keyboard", "Keyboard"),
     ("ComponentInfo{com.google.android.inputmethod.pinyin/com.google.android.apps.inputmethod.libs.framework.core.LauncherActivity}", "Google Pinyin Input", "Pinyin Input"),
     ("ComponentInfo{com.google.android.inputmethod.pinyin/com.google.android.apps.inputmethod.preference.SettingsActivity}", "Google Pinyin Keyboard Settings", "Pinyin Keyboard"),
+    # Further Jelly Bean-era Google apps corroborated by public historical appfilter catalogues.
+    ("ComponentInfo{com.google.android.apps.giant/com.google.android.apps.giant.activity.ProfilePickerActivity}", "Google Analytics", "Analytics"),
+    ("ComponentInfo{com.google.android.apps.plus/com.google.android.apps.plus.pho}", "Google+ Photos", "G+ Photos"),
 ]
 
 

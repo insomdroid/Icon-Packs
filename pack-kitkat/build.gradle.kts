@@ -20,7 +20,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.insomdroid.iconpacks.kitkat"
+        applicationId = "com.insomdroid.holokat"
         minSdk = 29
         targetSdk = 36
         versionCode = 2

@@ -442,6 +442,17 @@ EXTRA_COMPONENTS = [
     ("ComponentInfo{com.qo.android.am3/com.qo.android.quickoffice.QuickofficeDispatcher}", "Quickoffice", "Quickoffice"),
     ("ComponentInfo{com.google.android.gms/com.google.android.gms.app.settings.GoogleSettingsActivity}", "Google Settings", "Google Settings"),
     ("ComponentInfo{com.google.android.apps.currents/com.google.apps.dots.android.app.activity.CurrentsStartActivity}", "Google Currents", "Currents"),
+
+    # Additional legacy Jelly Bean-era entries corroborated by independent
+    # LineageOS and Nicque appfilter catalogues. These are historical IDs;
+    # verify against the target APK before assuming current-version support.
+    ("ComponentInfo{com.adobe.flashplayer/com.adobe.flashplayer.SettingsManager}", "Adobe Flash Player", "Flash Player"),
+    ("ComponentInfo{com.dreamstep.wPicasaWeb/com.dreamstep.wPicasaWeb.MainNavigationActivity}", "Picasa Web Albums", "Picasa"),
+    ("ComponentInfo{com.android.vending/com.android.vending.AssetBrowserActivity}", "Android Market", "Market"),
+    ("ComponentInfo{com.android.stk/com.android.stk.StkLauncherActivity}", "SIM Toolkit", "SIM Manager"),
+    ("ComponentInfo{com.google.android.inputmethod.latin/com.android.inputmethod.latin.setup.SetupActivity}", "Google Keyboard", "Keyboard"),
+    ("ComponentInfo{com.google.android.inputmethod.pinyin/com.google.android.apps.inputmethod.libs.framework.core.LauncherActivity}", "Google Pinyin Input", "Pinyin Input"),
+    ("ComponentInfo{com.google.android.inputmethod.pinyin/com.google.android.apps.inputmethod.preference.SettingsActivity}", "Google Pinyin Keyboard Settings", "Pinyin Keyboard"),
 ]
 
 

@@ -423,6 +423,18 @@ EXTRA_COMPONENTS = [
     ("ComponentInfo{com.twitter.android/com.twitter.android.LoginActivity}", "Twitter", "Twitter"),
     ("ComponentInfo{com.google.android.apps.youtube.creator/.main.MainActivity}", "YouTube Studio", "YouTube Creator Studio"),
     ("ComponentInfo{com.google.android.apps.youtube.creator/com.google.android.apps.youtube.creator.activities.SplashActivity}", "YouTube Studio", "YouTube Creator Studio"),
+    ("ComponentInfo{com.google.android.apps.adwords/com.google.android.apps.adwords.ui.LaunchActivity}", "AdWords Express", "AdWords Express"),
+    ("ComponentInfo{com.google.android.apps.cloudprint/com.google.android.apps.cloudprint.printdialog.CloudPrintLauncherVisibility}", "Cloud Print", "Cloud Print"),
+    ("ComponentInfo{com.google.android.apps.magazines/com.google.apps.dots.android.app.activity.CurrentsStartActivity}", "Currents", "Currents"),
+    ("ComponentInfo{com.google.android.apps.unveil/com.google.android.apps.unveil.SearchHistoryActivity}", "Google Goggles", "Goggles"),
+    ("ComponentInfo{com.google.android.apps.chromecast.app/com.google.android.apps.chromecast.app.DiscoveryActivity}", "Chromecast", "Chromecast"),
+    ("ComponentInfo{com.google.android.apps.inbox/com.google.android.apps.bigtop.activities.InitActivity}", "Inbox", "Inbox"),
+    ("ComponentInfo{com.google.android.apps.m4b/com.google.android.apps.mymaps.activities.maplist.MapListActivity}", "My Maps", "My Maps"),
+    ("ComponentInfo{com.google.android.apps.maps/com.google.android.maps.driveabout.app.DestinationActivity}", "Google Maps Navigation", "Navigation"),
+    ("ComponentInfo{com.google.android.street/com.google.android.apps.dragonfly.activities.main.MainActivity}", "Street View", "Street View"),
+    ("ComponentInfo{com.google.android.talk/com.google.android.talk.SigningInActivity}", "Hangouts", "Hangouts"),
+    ("ComponentInfo{com.google.android.apps.plus/com.google.android.apps.plus.phone.HomeActivity}", "Google+", "Google"),
+    ("ComponentInfo{com.google.android.apps.plus/com.google.android.apps.plusone.app.HomeScreenActivity}", "Google+", "Google"),
 ]
 
 

@@ -72,14 +72,6 @@ jobs:
       - name: Restore original Android 4.4.4 application icons
         run: python3 scripts/import_android_time_machine_icons.py
 
-      - name: Upload HoloKat artwork mapping report
-        uses: actions/upload-artifact@v4
-        with:
-          name: holokat-archive-mapping-report
-          path: build/holokat-import-report/
-          if-no-files-found: error
-          retention-days: 14
-
       - name: Generate temporary release signing key
         shell: bash
         run: |
@@ -107,7 +99,7 @@ jobs:
       - name: Build HoloKat release APK
         run: gradle --no-daemon :pack-kitkat:assembleRelease
 
-      - name: Verify APK and report size
+      - name: Verify APK
         shell: bash
         run: |
           set -euo pipefail

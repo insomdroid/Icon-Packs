@@ -33,4 +33,21 @@
   <item drawable="pinterest" name="pinterest" />
   <item drawable="hangouts" name="hangouts" />
   <item drawable="google_plus" name="google_plus" />
+  <item drawable="kitkat_music_background" name="kitkat_music_background" />
+  <item drawable="kitkat_music_unknown" name="kitkat_music_unknown" />
+  <item drawable="kitkat_music_previous" name="kitkat_music_previous" />
+  <item drawable="kitkat_music_play" name="kitkat_music_play" />
+  <item drawable="kitkat_music_pause" name="kitkat_music_pause" />
+  <item drawable="kitkat_music_next" name="kitkat_music_next" />
+  <item drawable="kitkat_gallery_preview" name="kitkat_gallery_preview" />
+  <item drawable="kitkat_gallery_border" name="kitkat_gallery_border" />
+  <item drawable="kitkat_power_background" name="kitkat_power_background" />
+  <item drawable="kitkat_power_wifi_on" name="kitkat_power_wifi_on" />
+  <item drawable="kitkat_power_bluetooth_on" name="kitkat_power_bluetooth_on" />
+  <item drawable="kitkat_power_gps_on" name="kitkat_power_gps_on" />
+  <item drawable="kitkat_power_sync_on" name="kitkat_power_sync_on" />
+  <item drawable="kitkat_power_brightness_full" name="kitkat_power_brightness_full" />
+  <item drawable="kitkat_search_icon" name="kitkat_search_icon" />
+  <item drawable="kitkat_voice_search" name="kitkat_voice_search" />
+  <item drawable="kitkat_digital_clock_preview" name="kitkat_digital_clock_preview" />
 </resources>

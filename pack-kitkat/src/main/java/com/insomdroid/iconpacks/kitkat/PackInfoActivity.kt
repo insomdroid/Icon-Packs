@@ -4,6 +4,7 @@ import android.app.WallpaperManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -56,6 +57,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
+import com.insomdroid.iconpacks.kitkat.widget.KitKatClockWidgetProvider
+import com.insomdroid.iconpacks.kitkat.widget.KitKatDigitalClockWidgetProvider
+import com.insomdroid.iconpacks.kitkat.widget.KitKatSearchWidgetProvider
+import com.insomdroid.iconpacks.kitkat.widget.KitKatMusicWidgetProvider
+import com.insomdroid.iconpacks.kitkat.widget.KitKatGalleryWidgetProvider
+import com.insomdroid.iconpacks.kitkat.widget.KitKatPowerWidgetProvider
+import com.insomdroid.iconpacks.kitkat.widget.pinKitKatWidget
 
 class PackInfoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -122,109 +130,53 @@ private fun KitKatPackDashboard() {
     var selectedIcon by remember { mutableStateOf<KitKatIcon?>(null) }
     val kitKatIcons = remember(context) { loadKitKatIcons(context) }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 18.dp, vertical = 18.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
-                    Text(
-                        text = "HOLOKAT",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = Color(0xFF687080),
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp
-                    )
-                    Text(
-                        text = "HoloKat Icon Pack",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF171923)
-                    )
-                    Text(
-                        text = "Android 4.4.4 • Original artwork collection",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF687080)
-                    )
-                    WallpaperChooser(
-                        onApply = { wallpaperId ->
-                            try {
-                                val manager = WallpaperManager.getInstance(context)
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                    manager.setResource(wallpaperId, WallpaperManager.FLAG_SYSTEM)
-                                } else {
-                                    manager.setResource(wallpaperId)
-                                }
-                                Toast.makeText(context, "Wallpaper applied successfully", Toast.LENGTH_SHORT).show()
-                            } catch (error: Exception) {
-                                Toast.makeText(context, "Could not apply wallpaper: ${error.localizedMessage}", Toast.LENGTH_LONG).show()
-                            }
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text("HoloKat", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Color(0xFF212121))
+                    Text("Android 4.4.4", style = MaterialTheme.typography.bodySmall, color = Color(0xFF757575))
+                    Text("WALLPAPERS", style = MaterialTheme.typography.labelLarge, color = Color(0xFF52616B), fontWeight = FontWeight.Bold)
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        WallpaperOption("KitKat", "Default", R.drawable.kitkat_wallpaper, Modifier.weight(1f)) { applyWallpaper(context, R.drawable.kitkat_wallpaper) }
+                        WallpaperOption("AOSP", "Classic", R.drawable.aosp_wallpaper, Modifier.weight(1f)) { applyWallpaper(context, R.drawable.aosp_wallpaper) }
+                    }
+                    Text("WIDGETS", style = MaterialTheme.typography.labelLarge, color = Color(0xFF52616B), fontWeight = FontWeight.Bold)
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        WidgetRow("Analog Clock", "Original KitKat clock face") { pinKitKatWidget(context, KitKatClockWidgetProvider::class.java, "KitKat Analog Clock") }
+                        WidgetRow("Digital Clock", "Time and date") { pinKitKatWidget(context, KitKatDigitalClockWidgetProvider::class.java, "KitKat Digital Clock") }
+                        WidgetRow("Search", "Google web search") { pinKitKatWidget(context, KitKatSearchWidgetProvider::class.java, "KitKat Search") }
+                        WidgetRow("Music Player", "Media playback controls") {
+                            pinKitKatWidget(context, KitKatMusicWidgetProvider::class.java, "KitKat Music Player")
+                            try { context.startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")) } catch (_: Exception) { }
                         }
-                    )
-                    FeatureSection(
-                        title = "Widgets",
-                        description = "Add classic Android widgets to your home screen.",
-                        entries = listOf(
-                            "Analog Clock" to "kitkat_clock",
-                            "Digital Clock" to "kitkat_digital_clock",
-                            "Search" to "kitkat_search",
-                            "Music Player" to "kitkat_music",
-                            "Photo Gallery" to "kitkat_gallery",
-                            "Power Control" to "kitkat_power"
-                        ),
-                        onOpen = { name ->
-                            when (name) {
-                                "Analog Clock" -> pinWidget(context, KitKatClockWidgetProvider::class.java)
-                                "Digital Clock" -> pinWidget(context, KitKatDigitalClockWidgetProvider::class.java)
-                                "Search" -> pinWidget(context, KitKatSearchWidgetProvider::class.java)
-                                "Music Player" -> pinWidget(context, KitKatMusicWidgetProvider::class.java)
-                                "Photo Gallery" -> pinWidget(context, KitKatGalleryWidgetProvider::class.java)
-                                "Power Control" -> pinWidget(context, KitKatPowerWidgetProvider::class.java)
-                            }
-                        }
-                    )
-                    SummaryTile(
-                        value = kitKatIcons.size.toString(),
-                        label = "Icons",
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Text(
-                        text = "Icon Preview",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF171923)
-                    )
+                        WidgetRow("Photo Gallery", "Open your photo collection") { pinKitKatWidget(context, KitKatGalleryWidgetProvider::class.java, "KitKat Photo Gallery") }
+                        WidgetRow("Power Control", "Shortcuts to system controls") { pinKitKatWidget(context, KitKatPowerWidgetProvider::class.java, "KitKat Power Control") }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        SummaryTile(kitKatIcons.size.toString(), "Icons", Modifier.weight(1f))
+                        SummaryTile("4.4.4", "Android", Modifier.weight(1f))
+                    }
+                    Text("ICON PREVIEW", style = MaterialTheme.typography.labelLarge, color = Color(0xFF52616B), fontWeight = FontWeight.Bold)
                 }
             }
             items(kitKatIcons.chunked(4)) { iconRow ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     iconRow.forEach { icon ->
-                        IconTile(
-                            icon = icon,
-                            modifier = Modifier.weight(1f),
-                            onClick = { selectedIcon = icon }
-                        )
+                        IconTile(icon = icon, modifier = Modifier.weight(1f), onClick = { selectedIcon = icon })
                     }
-                    repeat(4 - iconRow.size) {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
+                    repeat(4 - iconRow.size) { Spacer(modifier = Modifier.weight(1f)) }
                 }
             }
             item {
                 TextButton(
-                    onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/insomdroid/Icon-Packs"))) },
+                    onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/insomdroid/Icon-Packs"))) },
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("GitHub · insomdroid/Icon-Packs")
-                }
+                ) { Text("GitHub") }
             }
         }
     }
@@ -260,6 +212,41 @@ private fun KitKatPackDashboard() {
                 }
             }
         )
+    }
+}
+
+private fun applyWallpaper(context: Context, resourceId: Int) {
+    try {
+        val manager = WallpaperManager.getInstance(context)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) manager.setResource(resourceId, WallpaperManager.FLAG_SYSTEM) else manager.setResource(resourceId)
+        Toast.makeText(context, "Wallpaper applied successfully", Toast.LENGTH_SHORT).show()
+    } catch (error: Exception) {
+        Toast.makeText(context, "Could not apply wallpaper: ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+    }
+}
+
+@Composable
+private fun WallpaperOption(title: String, subtitle: String, wallpaperId: Int, modifier: Modifier = Modifier, onApply: () -> Unit) {
+    Card(modifier = modifier, shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Image(painter = painterResource(wallpaperId), contentDescription = title, modifier = Modifier.fillMaxWidth().height(112.dp), contentScale = ContentScale.Crop)
+            Text(title, modifier = Modifier.padding(start = 10.dp, end = 10.dp), fontWeight = FontWeight.Bold)
+            Text(subtitle, modifier = Modifier.padding(horizontal = 10.dp), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            TextButton(onClick = onApply, modifier = Modifier.fillMaxWidth()) { Text("Apply") }
+        }
+    }
+}
+
+@Composable
+private fun WidgetRow(title: String, subtitle: String, onAdd: () -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(title, fontWeight = FontWeight.SemiBold, color = Color(0xFF212121))
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = Color(0xFF757575))
+            }
+            TextButton(onClick = onAdd) { Text("ADD") }
+        }
     }
 }
 

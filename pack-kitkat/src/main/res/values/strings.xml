@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Insomdroid Icon Pack</string>
+    <string name="app_name">HoloKat — KitKat Icon Pack</string>
+    <string name="kitkat_clock_widget_name">KitKat Analog Clock</string>
+    <string name="kitkat_clock_widget_description">Original Android KitKat clock face with live hour and minute hands</string>
 </resources>

@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -129,6 +130,7 @@ private fun loadKitKatIcons(context: Context): List<KitKatIcon> {
 private fun KitKatPackDashboard() {
     val context = LocalContext.current
     var selectedIcon by remember { mutableStateOf<KitKatIcon?>(null) }
+    var activeCategory by remember { mutableStateOf<String?>(null) }
     val kitKatIcons = remember(context) { loadKitKatIcons(context) }
     val calendarPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -140,60 +142,160 @@ private fun KitKatPackDashboard() {
         }
     }
 
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    BackHandler(enabled = activeCategory != null) {
+        activeCategory = null
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 18.dp, vertical = 18.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("HoloKat", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Color(0xFF212121))
-                    Text("Android 4.4.4", style = MaterialTheme.typography.bodySmall, color = Color(0xFF666666))
-                    Text("WALLPAPERS", style = MaterialTheme.typography.labelLarge, color = Color(0xFF0099CC), fontWeight = FontWeight.Bold)
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        WallpaperOption("KitKat", "Default", R.drawable.kitkat_wallpaper, Modifier.weight(1f)) { applyWallpaper(context, R.drawable.kitkat_wallpaper) }
-                        WallpaperOption("AOSP", "Classic", R.drawable.aosp_wallpaper, Modifier.weight(1f)) { applyWallpaper(context, R.drawable.aosp_wallpaper) }
+                if (activeCategory == null) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(
+                            "HoloKat",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF212121)
+                        )
+                        Text(
+                            "Android 4.4.4",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFF666666)
+                        )
+                        CategoryTile(
+                            title = "Icons",
+                            subtitle = "${kitKatIcons.size} KitKat application icons"
+                        ) { activeCategory = "Icons" }
+                        CategoryTile(
+                            title = "Widgets",
+                            subtitle = "Seven classic home-screen widgets"
+                        ) { activeCategory = "Widgets" }
+                        CategoryTile(
+                            title = "Wallpapers",
+                            subtitle = "Original KitKat and AOSP wallpapers"
+                        ) { activeCategory = "Wallpapers" }
                     }
-                    Text("WIDGETS", style = MaterialTheme.typography.labelLarge, color = Color(0xFF52616B), fontWeight = FontWeight.Bold)
+                } else {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        WidgetRow("Analog Clock", "Original KitKat clock face") { pinKitKatWidget(context, KitKatClockWidgetProvider::class.java, "KitKat Analog Clock") }
-                        WidgetRow("Digital Clock", "Time and date") { pinKitKatWidget(context, KitKatDigitalClockWidgetProvider::class.java, "KitKat Digital Clock") }
-                        WidgetRow("Calendar", "Upcoming events") {
-                            if (context.checkSelfPermission(Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
-                                pinKitKatWidget(context, KitKatCalendarWidgetProvider::class.java, "KitKat Calendar")
-                            } else {
-                                calendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+                        TextButton(
+                            onClick = { activeCategory = null },
+                            contentPadding = PaddingValues(horizontal = 0.dp, vertical = 4.dp)
+                        ) {
+                            Text("‹  BACK")
+                        }
+                        Text(
+                            activeCategory!!.uppercase(Locale.ROOT),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0099CC)
+                        )
+                    }
+                }
+            }
+
+            when (activeCategory) {
+                "Icons" -> {
+                    items(kitKatIcons.chunked(4)) { iconRow ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            iconRow.forEach { icon ->
+                                IconTile(
+                                    icon = icon,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    selectedIcon = icon
+                                }
+                            }
+                            repeat(4 - iconRow.size) {
+                                Spacer(modifier = Modifier.weight(1f))
                             }
                         }
-                        WidgetRow("Search", "Google web search") { pinKitKatWidget(context, KitKatSearchWidgetProvider::class.java, "KitKat Search") }
-                        WidgetRow("Music Player", "Media playback controls") {
-                            pinKitKatWidget(context, KitKatMusicWidgetProvider::class.java, "KitKat Music Player")
-                            try { context.startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")) } catch (_: Exception) { }
+                    }
+                }
+
+                "Widgets" -> {
+                    item {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            WidgetRow("Analog Clock", "Original KitKat clock face") {
+                                pinKitKatWidget(context, KitKatClockWidgetProvider::class.java, "KitKat Analog Clock")
+                            }
+                            WidgetRow("Digital Clock", "Transparent digital time and date") {
+                                pinKitKatWidget(context, KitKatDigitalClockWidgetProvider::class.java, "KitKat Digital Clock")
+                            }
+                            WidgetRow("Calendar", "Upcoming events") {
+                                if (context.checkSelfPermission(Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
+                                    pinKitKatWidget(context, KitKatCalendarWidgetProvider::class.java, "KitKat Calendar")
+                                } else {
+                                    calendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR)
+                                }
+                            }
+                            WidgetRow("Search", "Transparent Google search and voice search") {
+                                pinKitKatWidget(context, KitKatSearchWidgetProvider::class.java, "KitKat Search")
+                            }
+                            WidgetRow("Music Player", "Original Google Play Music controls") {
+                                pinKitKatWidget(context, KitKatMusicWidgetProvider::class.java, "KitKat Music Player")
+                                try {
+                                    context.startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"))
+                                } catch (_: Exception) {
+                                }
+                            }
+                            WidgetRow("Photo Gallery", "Choose a photo for the home screen") {
+                                pinKitKatWidget(context, KitKatGalleryWidgetProvider::class.java, "KitKat Photo Gallery")
+                            }
+                            WidgetRow("Power Control", "Classic system control shortcuts") {
+                                pinKitKatWidget(context, KitKatPowerWidgetProvider::class.java, "KitKat Power Control")
+                            }
                         }
-                        WidgetRow("Photo Gallery", "Open your photo collection") { pinKitKatWidget(context, KitKatGalleryWidgetProvider::class.java, "KitKat Photo Gallery") }
-                        WidgetRow("Power Control", "Shortcuts to system controls") { pinKitKatWidget(context, KitKatPowerWidgetProvider::class.java, "KitKat Power Control") }
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        SummaryTile(kitKatIcons.size.toString(), "Icons", Modifier.weight(1f))
-                        SummaryTile("4.4.4", "Android", Modifier.weight(1f))
+                }
+
+                "Wallpapers" -> {
+                    item {
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            WallpaperOption(
+                                "KitKat",
+                                "Default",
+                                R.drawable.kitkat_wallpaper,
+                                Modifier.weight(1f)
+                            ) {
+                                applyWallpaper(context, R.drawable.kitkat_wallpaper)
+                            }
+                            WallpaperOption(
+                                "AOSP",
+                                "Classic",
+                                R.drawable.aosp_wallpaper,
+                                Modifier.weight(1f)
+                            ) {
+                                applyWallpaper(context, R.drawable.aosp_wallpaper)
+                            }
+                        }
                     }
-                    Text("ICON PREVIEW", style = MaterialTheme.typography.labelLarge, color = Color(0xFF52616B), fontWeight = FontWeight.Bold)
                 }
             }
-            items(kitKatIcons.chunked(4)) { iconRow ->
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    iconRow.forEach { icon ->
-                        IconTile(icon = icon, modifier = Modifier.weight(1f), onClick = { selectedIcon = icon })
-                    }
-                    repeat(4 - iconRow.size) { Spacer(modifier = Modifier.weight(1f)) }
-                }
-            }
+
             item {
                 TextButton(
-                    onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/insomdroid/Icon-Packs"))) },
+                    onClick = {
+                        context.startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://github.com/insomdroid/Icon-Packs")
+                            )
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth()
-                ) { Text("GitHub") }
+                ) {
+                    Text("GitHub")
+                }
             }
         }
     }
@@ -224,6 +326,49 @@ private fun KitKatPackDashboard() {
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun CategoryTile(
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    title,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF222222)
+                )
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF666666)
+                )
+            }
+            Text(
+                "›",
+                color = Color(0xFF0099CC),
+                fontSize = 28.sp
+            )
+        }
     }
 }
 
@@ -302,36 +447,18 @@ private fun IconTile(
 ) {
     Card(
         modifier = modifier
-            .aspectRatio(0.82f)
+            .aspectRatio(1f)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(5.dp),
+        shape = RoundedCornerShape(4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(
+        Image(
+            painter = painterResource(icon.resourceId),
+            contentDescription = icon.name,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 5.dp, vertical = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Image(
-                painter = painterResource(icon.resourceId),
-                contentDescription = icon.name,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(5.dp),
-                contentScale = ContentScale.Fit
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = icon.name,
-                style = MaterialTheme.typography.labelSmall,
-                color = Color(0xFF303541),
-                maxLines = 2,
-                minLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+                .padding(7.dp),
+            contentScale = ContentScale.Fit
+        )
     }
 }

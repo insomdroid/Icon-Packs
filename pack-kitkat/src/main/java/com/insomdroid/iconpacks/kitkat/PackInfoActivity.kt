@@ -130,7 +130,7 @@ private fun KitKatPackDashboard() {
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             Text(
-                text = "INSOMDROID",
+                text = "HOLOKAT",
                 style = MaterialTheme.typography.labelLarge,
                 color = Color(0xFF687080),
                 fontWeight = FontWeight.Bold,
@@ -282,7 +282,7 @@ private fun KitKatPackDashboard() {
             }
 
             Text(
-                text = "INSOMDROID ICON PACKS",
+                text = "HOLOKAT ICON PACK",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),

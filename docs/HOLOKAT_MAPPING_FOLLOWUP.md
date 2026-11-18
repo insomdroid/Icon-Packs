@@ -38,3 +38,20 @@ The importer change triggers the combined release workflow. Check the regenerate
 Twelve component records were added for legacy Google-era artwork with matching public appfilter evidence: AdWords Express, Cloud Print, Currents, Google Goggles, Chromecast companion, Inbox, My Maps, Maps Navigation, Street View, Hangouts, and two Google+ activity aliases. Sources include [SysAdminDoc iOSIconPack](https://github.com/SysAdminDoc/iOSIconPack/blob/db0ccf25ff695a076eee16833fd868a1a454cda6/app/src/main/assets/appfilter.xml), [LineageOS theme template](https://github.com/LineageOS/android_packages_themes_Template/blob/master/theme/build/intermediates/assets/debug/icons/res/xml/appfilter.xml), [Candybar](https://github.com/zixpo/candybar/blob/0aa2f57789ef9e0af1a2edb5e646ac45ebe8ca26/app/src/main/assets/appfilter.xml), [SmartIconPack](https://github.com/Mr-XiaoLiang/SmartIconPack/blob/7e22e2d0eaf40172dbd65a0c06e08eeb3bc0017c/app/src/main/res/xml/appfilter.xml), [CircoIconPack](https://github.com/Mookiies/CircoIconPack/blob/b481af802201a662845c182a20961a898704521e/res/xml/appfilter.xml), and [GreatFreedom](https://github.com/elelinux/GreatFreedom/blob/959dd69b204936a83426e415c65191bc206153c9/assets/icons/res/xml/appfilter.xml).
 
 These historical components are intentionally retained as legacy aliases; they may only resolve on older APK versions or devices. Do not interpret an appfilter match as proof that the app is still distributed or installed today.
+
+
+## Fourth mapping pass
+
+Seven additional legacy component records were added after checking the archived artwork against historical public appfilter catalogues. The source catalogues include the [LineageOS/CyanogenMod theme template](https://github.com/LineageOS/android_packages_themes_Template/blob/master/theme/build/intermediates/assets/debug/icons/res/xml/appfilter.xml) and [Nicque appfilter catalogue](https://github.com/Nicque/appfilter-1/blob/master/appfilter.xml).
+
+| Artwork | Component | Evidence |
+|---|---|---|
+| G+ Messenger | `com.google.android.apps.plus/com.google.android.apps.circles.realtimechat.ConversationListActivity` | LineageOS template |
+| Places | `com.google.android.apps.maps/com.google.android.maps.PlacesActivity` | LineageOS template |
+| Movie Studio | `com.android.videoeditor/com.android.videoeditor.ProjectsActivity` | LineageOS template |
+| Voice Dialer | `com.android.voicedialer/com.android.voicedialer.VoiceDialerLauncherActivity` | LineageOS template |
+| Quickoffice | `com.qo.android.am3/com.qo.android.quickoffice.QuickofficeDispatcher` | LineageOS template |
+| Google Settings | `com.google.android.gms/com.google.android.gms.app.settings.GoogleSettingsActivity` | Nicque appfilter catalogue |
+| Currents | `com.google.android.apps.currents/com.google.apps.dots.android.app.activity.CurrentsStartActivity` | LineageOS template (historical package alias) |
+
+These component IDs are historical community-catalogue entries, not device-verified manifests. The importer only adds a record if the matching source artwork is present in the supplied archive. The next workflow report is authoritative for how many unique artworks were actually covered.

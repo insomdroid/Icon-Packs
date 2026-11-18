@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import com.insomdroid.iconpacks.kitkat.R
+import java.text.DateFormat
+import java.util.Date
 
 class KitKatDigitalClockWidgetProvider : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {

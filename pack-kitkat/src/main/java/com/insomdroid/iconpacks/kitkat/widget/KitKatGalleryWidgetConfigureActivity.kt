@@ -87,7 +87,7 @@ class KitKatGalleryWidgetConfigureActivity : Activity() {
 
             setResult(RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId))
         } else {
-            AppWidgetManager.getInstance(this).deleteAppWidgetId(appWidgetId)
+            setResult(RESULT_CANCELED)
         }
         finish()
     }

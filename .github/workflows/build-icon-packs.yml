@@ -5,7 +5,6 @@ on:
     branches:
       - main
     paths:
-      - 'core/**'
       - 'pack-kitkat/**'
       - 'scripts/import_kitkat_aosp_icons.py'
       - 'scripts/import_kitkat_archive_icons.py'

@@ -1,4 +1,8 @@
-plugins { id("com.android.application"); id("org.jetbrains.kotlin.android") }
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
+}
 
 val releaseStoreFile = System.getenv("KITKAT_RELEASE_STORE_FILE")
 val releaseStorePassword = System.getenv("KITKAT_RELEASE_STORE_PASSWORD")
@@ -19,8 +23,8 @@ android {
         applicationId = "com.insomdroid.iconpacks.kitkat"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
     }
 
     signingConfigs {
@@ -45,6 +49,10 @@ android {
         }
     }
 
+    buildFeatures {
+        compose = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -55,3 +63,12 @@ android {
     }
 }
 
+dependencies {
+    implementation(platform("androidx.compose:compose-bom:2025.11.00"))
+    implementation("androidx.activity:activity-compose:1.12.1")
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.material3:material3")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+}

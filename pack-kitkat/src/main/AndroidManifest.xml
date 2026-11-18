@@ -29,6 +29,35 @@
             <intent-filter><action android:name="com.actionlauncher.THEME" /></intent-filter>
         </activity>
 
+        <service android:name=".widget.KitKatMusicNotificationListener" android:label="@string/music_widget_name" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" android:exported="true">
+            <intent-filter><action android:name="android.service.notification.NotificationListenerService" /></intent-filter>
+        </service>
+
+        <receiver android:name=".widget.KitKatDigitalClockWidgetProvider" android:exported="true" android:label="@string/digital_clock_widget_name">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /><action android:name="android.intent.action.TIME_TICK" /><action android:name="android.intent.action.TIME_CHANGED" /><action android:name="android.intent.action.TIMEZONE_CHANGED" /><action android:name="android.intent.action.DATE_CHANGED" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/kitkat_digital_clock_widget_info" />
+        </receiver>
+
+        <receiver android:name=".widget.KitKatSearchWidgetProvider" android:exported="true" android:label="@string/search_widget_name">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/kitkat_search_widget_info" />
+        </receiver>
+
+        <receiver android:name=".widget.KitKatMusicWidgetProvider" android:exported="true" android:label="@string/music_widget_name">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/kitkat_music_widget_info" />
+        </receiver>
+
+        <receiver android:name=".widget.KitKatGalleryWidgetProvider" android:exported="true" android:label="@string/gallery_widget_name">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/kitkat_gallery_widget_info" />
+        </receiver>
+
+        <receiver android:name=".widget.KitKatPowerWidgetProvider" android:exported="true" android:label="@string/power_widget_name">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/kitkat_power_widget_info" />
+        </receiver>
+
         <receiver
             android:name=".widget.KitKatClockWidgetProvider"
             android:exported="true"

@@ -84,8 +84,8 @@ class KitKatMusicWidgetProvider : AppWidgetProvider() {
                         ?: metadata?.getBitmap(android.media.MediaMetadata.METADATA_KEY_ART)
                     if (album != null) views.setImageViewBitmap(R.id.music_widget_art, album)
                 } catch (_: SecurityException) {
-                    title = "Allow music access"
-                    artist = "Enable HoloKat in Notification Access"
+                    title = "Notification access required"
+                    artist = "Enable HoloKat in system notification access settings"
                 } catch (_: Exception) {
                 }
             }

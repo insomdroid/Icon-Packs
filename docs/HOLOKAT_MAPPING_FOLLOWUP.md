@@ -13,6 +13,21 @@ Six component records for five archived artwork identities were added to `EXTRA_
 
 These are cross-catalogue corroborated component strings, not official APK-manifest certification. Community appfilter databases can retain stale activity aliases. Device/APK verification remains necessary before claiming every alias works across all versions and OEMs.
 
-The remaining 132 report entries are intentionally retained without a guessed component. System services, input methods, widgets, TV-only surfaces, retired products, generic labels and feature sub-screens are not mapped to unrelated modern apps.
+## Second mapping pass
 
-The importer change triggers the combined release workflow. The build and new report must be checked before declaring the mapping change complete.
+Six additional component records covering three more artwork identities were added:
+
+| Artwork | Component | Corroborating public catalogues |
+|---|---|---|
+| Netflix (archive filename is misspelled `Netfilx.png`) | `com.netflix.mediaclient/com.netflix.mediaclient.ui.launch.UIWebViewActivity` | [CrapCons](https://github.com/the-dagger/CrapCons-IconPack/blob/master/app/src/main/res/xml/appfilter.xml), [MaterialOS](https://github.com/materialos/android-icon-pack/blob/ed0b35adffc74e500680f70db6e344deaca358d8/app/src/main/assets/appfilter.xml), [CoreBuildsApps](https://github.com/brevityA/CoreBuildsApps/blob/f7c29360919ee0a802ad0e511fbcefb1353e832d/app/src/main/assets/appfilter.xml) |
+| Netflix | `com.netflix.mediaclient/com.netflix.mediaclient.UIWebViewActivity` | [CrapCons](https://github.com/the-dagger/CrapCons-IconPack/blob/master/app/src/main/res/xml/appfilter.xml), [Nicque appfilter](https://github.com/Nicque/appfilter-1/blob/master/appfilter.xml) |
+| Twitter | `com.twitter.android/com.twitter.android.StartActivity` | [MaterialIconPackTemplate](https://github.com/architjn/MaterialIconPackTemplate/blob/9e96add46e9b9fc199771c27c1192035a92fe183/app/src/main/assets/appfilter.xml), [Launcher Theme Template](https://github.com/haxzamatic/Launcher-Theme-Template/blob/ff4a898c8c63d5320ac61e4f7961fcfd54d05c40/assets/appfilter.xml) |
+| Twitter | `com.twitter.android/com.twitter.android.LoginActivity` | [NanoIconPack](https://github.com/by-syk/NanoIconPack/blob/856fb33ad544aa595a60897f83c7c3a95e17ebee/out/appfilter_originalwish.xml), [Launcher Theme Template](https://github.com/haxzamatic/Launcher-Theme-Template/blob/ff4a898c8c63d5320ac61e4f7961fcfd54d05c40/assets/appfilter.xml) |
+| YouTube Studio | `com.google.android.apps.youtube.creator/.main.MainActivity` | [GoogleIcons](https://github.com/amirzaidi/GoogleIcons/blob/f346215f3556b6cfc7cac93238a92b3238b007ea/app/src/main/res/xml/appfilter.xml), [win95-mode](https://github.com/sindriax/win95-mode/blob/10cd4e466168b6a0226fab07d144a554de66f262/app/src/main/res/xml/appfilter.xml) |
+| YouTube Studio | `com.google.android.apps.youtube.creator/com.google.android.apps.youtube.creator.activities.SplashActivity` | [win95-mode](https://github.com/sindriax/win95-mode/blob/10cd4e466168b6a0226fab07d144a554de66f262/app/src/main/res/xml/appfilter.xml), [monotone-icons](https://github.com/gaurav712/monotone-icons/blob/08bbd04c8c52045938d953e0a21184dd70a70ff9/app/src/main/res/xml/appfilter.xml) |
+
+The six strings are catalogue-corroborated, not official APK-manifest certification. Launcher Activity aliases may vary by installed app version. Actual device/APK verification is still required.
+
+The remaining artwork is retained without guessed mappings. Many are platform features, input methods, widgets, TV-only surfaces, retired products, generic labels, or feature sub-screens rather than standalone launcher apps.
+
+The importer change triggers the combined release workflow. Check the regenerated report and release build before considering this pass complete.

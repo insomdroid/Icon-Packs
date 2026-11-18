@@ -2,6 +2,7 @@ package com.insomdroid.iconpacks.kitkat
 
 import android.app.WallpaperManager
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -53,6 +54,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.xmlpull.v1.XmlPullParser
+import java.util.Locale
 
 class PackInfoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,49 +77,49 @@ class PackInfoActivity : ComponentActivity() {
 
 private data class KitKatIcon(
     val name: String,
-    val resourceId: Int,
-    val description: String
+    val resourceId: Int
 )
 
-private val kitKatIcons = listOf(
-    KitKatIcon("Apps", R.drawable.apps, "Ikon umum aplikasi"),
-    KitKatIcon("Browser", R.drawable.browser, "Browser bawaan Android"),
-    KitKatIcon("Calculator", R.drawable.calculator, "Kalkulator"),
-    KitKatIcon("Calendar", R.drawable.calendar, "Kalender"),
-    KitKatIcon("Camera", R.drawable.camera, "Kamera"),
-    KitKatIcon("Chrome", R.drawable.chrome, "Google Chrome"),
-    KitKatIcon("Clock", R.drawable.clock, "Jam"),
-    KitKatIcon("Downloads", R.drawable.downloads, "Unduhan dan pengelola berkas"),
-    KitKatIcon("Drive", R.drawable.drive, "Google Drive"),
-    KitKatIcon("Email", R.drawable.mail, "Email AOSP"),
-    KitKatIcon("Gallery", R.drawable.gallery, "Galeri AOSP"),
-    KitKatIcon("Gmail", R.drawable.gmail, "Gmail"),
-    KitKatIcon("Google+", R.drawable.google_plus, "Google Plus"),
-    KitKatIcon("Google Search", R.drawable.google_search, "Google Search"),
-    KitKatIcon("Google Settings", R.drawable.google_settings, "Pengaturan layanan Google"),
-    KitKatIcon("Hangouts", R.drawable.hangouts, "Google Hangouts"),
-    KitKatIcon("Keep", R.drawable.keep, "Google Keep"),
-    KitKatIcon("Maps", R.drawable.maps, "Google Maps"),
-    KitKatIcon("News & Weather", R.drawable.news_weather, "Google News & Weather"),
-    KitKatIcon("Newsstand", R.drawable.newsstand, "Google Play Newsstand"),
-    KitKatIcon("People", R.drawable.contacts, "Kontak Android"),
-    KitKatIcon("Phone", R.drawable.phone, "Telepon"),
-    KitKatIcon("Photos", R.drawable.photos, "Google Photos"),
-    KitKatIcon("Play Books", R.drawable.play_books, "Google Play Books"),
-    KitKatIcon("Play Games", R.drawable.play_games, "Google Play Games"),
-    KitKatIcon("Play Movies", R.drawable.play_movies, "Google Play Movies"),
-    KitKatIcon("Play Music", R.drawable.play_music, "Google Play Music"),
-    KitKatIcon("Quickoffice", R.drawable.quickoffice, "Quickoffice"),
-    KitKatIcon("Settings", R.drawable.settings, "Pengaturan Android"),
-    KitKatIcon("Voice Search", R.drawable.voice_search, "Google Voice Search"),
-    KitKatIcon("Wallet", R.drawable.wallet, "Google Wallet"),
-    KitKatIcon("YouTube", R.drawable.youtube, "YouTube")
-)
+private fun loadKitKatIcons(context: Context): List<KitKatIcon> {
+    val parser = context.resources.getXml(R.xml.drawable)
+    val iconsByResource = linkedMapOf<Int, KitKatIcon>()
+
+    try {
+        while (parser.eventType != XmlPullParser.END_DOCUMENT) {
+            if (parser.eventType == XmlPullParser.START_TAG && parser.name == "item") {
+                val drawableName = parser.getAttributeValue(null, "drawable")
+                    ?: parser.getAttributeValue(null, "name")
+
+                if (!drawableName.isNullOrBlank()) {
+                    val resourceId = context.resources.getIdentifier(
+                        drawableName,
+                        "drawable",
+                        context.packageName
+                    )
+
+                    if (resourceId != 0 && !iconsByResource.containsKey(resourceId)) {
+                        val displayName = drawableName
+                            .split('_')
+                            .joinToString(" ") { part ->
+                                part.replaceFirstChar { character -> character.uppercase() }
+                            }
+                        iconsByResource[resourceId] = KitKatIcon(displayName, resourceId)
+                    }
+                }
+            }
+            parser.next()
+        }
+    } finally {
+        parser.close()
+    }
+
+    return iconsByResource.values.sortedBy { it.name.lowercase(Locale.ROOT) }
+}
 
 @Composable
 private fun KitKatPackDashboard() {
     val context = LocalContext.current
-    var selectedIcon by remember { mutableStateOf<KitKatIcon?>(null) }
+    var selectedIcon by remember { mutableStateOf<KitKatIcon?>(null) }\n    val kitKatIcons = remember(context) { loadKitKatIcons(context) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -138,7 +141,7 @@ private fun KitKatPackDashboard() {
             )
 
             Text(
-                text = "KitKat Icon Pack",
+                text = "HoloKat Icon Pack",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF171923)
@@ -159,9 +162,9 @@ private fun KitKatPackDashboard() {
                         } else {
                             manager.setResource(R.drawable.kitkat_wallpaper)
                         }
-                        Toast.makeText(context, "Wallpaper KitKat berhasil diterapkan", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "KitKat wallpaper applied successfully", Toast.LENGTH_SHORT).show()
                     } catch (error: Exception) {
-                        Toast.makeText(context, "Gagal menerapkan wallpaper: ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "Could not apply wallpaper: ${error.localizedMessage}", Toast.LENGTH_LONG).show()
                     }
                 }
             )
@@ -175,9 +178,9 @@ private fun KitKatPackDashboard() {
                     modifier = Modifier.padding(18.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Jam analog KitKat", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("KitKat Analog Clock", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text(
-                        "Widget jam analog dengan wajah dan jarum asli KitKat. Tambahkan ke home screen melalui pemilih widget Android.",
+                        "An analog clock featuring the original KitKat dial and hands. Add it to your home screen using the Android widget picker.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color(0xFF687080)
                     )
@@ -193,7 +196,7 @@ private fun KitKatPackDashboard() {
                                         null
                                     )
                                 } else {
-                                    Toast.makeText(context, "Buka daftar Widget dari home screen lalu pilih KitKat Analog Clock.", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, "Open the home screen widget picker and select KitKat Analog Clock.", Toast.LENGTH_LONG).show()
                                 }
                             } catch (error: Exception) {
                                 Toast.makeText(context, "Buka daftar Widget dari home screen lalu pilih KitKat Analog Clock.", Toast.LENGTH_LONG).show()
@@ -201,7 +204,7 @@ private fun KitKatPackDashboard() {
                         },
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                     ) {
-                        Text("Tambah widget jam")
+                        Text("Add clock widget")
                     }
                 }
             }
@@ -224,13 +227,13 @@ private fun KitKatPackDashboard() {
 
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "Jelajahi ikon",
+                    text = "Explore icons",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF171923)
                 )
                 Text(
-                    text = "Ketuk ikon untuk melihat artwork dalam ukuran lebih besar.",
+                    text = "Tap any icon to preview the artwork at a larger size.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFF687080)
                 )
@@ -264,17 +267,17 @@ private fun KitKatPackDashboard() {
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
-                        text = "Tentang koleksi",
+                        text = "About this collection",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Koleksi ini mempertahankan seluruh ikon asli KitKat, termasuk aplikasi yang sudah dihentikan. Pemetaan launcher juga mencakup aplikasi penerus ketika nama atau fungsinya berubah.",
+                        text = "This collection preserves original KitKat icons, including artwork for discontinued apps. Launcher mappings also cover successor apps when names or functions have changed.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color(0xFF687080)
                     )
                     Text(
-                        text = "Wallpaper dan artwork berasal dari arsip Android Time Machine versi 4.4.4.",
+                        text = "The wallpaper and original artwork are sourced from the Android Time Machine Android 4.4.4 archive.",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFF687080)
                     )

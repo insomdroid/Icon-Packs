@@ -22,6 +22,7 @@
         android:textColor="#FF737373"
         android:textSize="16sp" />
     <ImageView
+        android:id="@+id/search_widget_voice_action"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:contentDescription="@string/search_widget_name"

@@ -91,6 +91,7 @@ class KitKatMusicWidgetProvider : AppWidgetProvider() {
 
             views.setTextViewText(R.id.music_widget_title, title)
             views.setTextViewText(R.id.music_widget_artist, artist)
+            views.setImageViewResource(R.id.music_widget_play, if (playing) R.drawable.kitkat_music_pause else R.drawable.kitkat_music_play)
             attach(context, views, R.id.music_widget_previous, ACTION_PREVIOUS, id * 10 + 1)
             attach(context, views, R.id.music_widget_play, if (playing) ACTION_PAUSE else ACTION_PLAY, id * 10 + 2)
             attach(context, views, R.id.music_widget_next, ACTION_NEXT, id * 10 + 3)

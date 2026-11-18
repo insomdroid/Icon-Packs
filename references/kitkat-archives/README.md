@@ -18,3 +18,8 @@ Do not install old APKs on your phone. Upload the files here as archive material
 - Files in this folder are source material only. They are not automatically included in any APK.
 
 The icon import process will check package metadata, extract launcher icon image resources without redrawing them, record source provenance, and calculate SHA-256 hashes to count unique images. Redistribution and licensing will be reviewed before including extracted artwork in a release.
+
+
+## Current committed source inventory
+
+The folder currently contains two uploaded ZIP archives (`Icons jb 1.zip` and `icons jb2.zip`) and the Figma community icon-pack source. Both ZIPs are read directly by the Holokat importer; extracted reference directories are not treated as the complete source inventory. The importer keeps original artwork and reports which assets were mapped or left unmapped.

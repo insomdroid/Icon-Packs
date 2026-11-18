@@ -421,13 +421,28 @@ def main() -> None:
 
     images: dict[str, tuple[bytes, str]] = {}
     hashes: set[str] = set()
+    archive_inventory: list[dict[str, object]] = []
     for archive in ARCHIVES:
+        archive_images = 0
         with zipfile.ZipFile(archive) as zf:
             for info in zf.infolist():
                 if info.is_dir() or Path(info.filename).suffix.lower() not in IMAGE_EXTENSIONS:
                     continue
+                # Ignore oversized, non-icon UI artwork only after inventory. All
+                # supported image types are retained as source; mapping decides use.
                 data = zf.read(info)
+                try:
+                    from PIL import Image
+                    import io
+                    with Image.open(io.BytesIO(data)) as image:
+                        width, height = image.size
+                        fmt = image.format or Path(info.filename).suffix.upper().lstrip(".")
+                except Exception:
+                    continue
+                if width < 48 or height < 48 or width > 4096 or height > 4096:
+                    continue
                 digest = hashlib.sha256(data).hexdigest()
+                archive_images += 1
                 if digest in hashes:
                     continue
                 hashes.add(digest)
@@ -438,6 +453,10 @@ def main() -> None:
                     name = f"{base}_{suffix}"
                     suffix += 1
                 images[name] = (data, info.filename)
+        archive_inventory.append({
+            "archive": archive.name,
+            "image_entries": archive_images,
+        })
 
     if not images:
         raise SystemExit("No supported image files found in Holokat archives.")
@@ -459,63 +478,47 @@ def main() -> None:
     )
 
     artwork_by_label: dict[str, str] = {}
-    artwork_by_label_and_path: dict[str, str] = {}
     artwork_by_original_stem: dict[str, str] = {}
     for resource, (_, original_path) in images.items():
         original_stem = Path(original_path).stem
         label = normalize(original_stem)
         artwork_by_label.setdefault(label, resource)
-        artwork_by_label_and_path[label] = resource
-        artwork_by_original_stem[original_stem.casefold()] = resource
+        artwork_by_original_stem.setdefault(original_stem.casefold(), resource)
 
-    old_filter = APPFILTER_XML
-    appfilter = ET.parse(APPFILTER_XML).getroot() if APPFILTER_XML.is_file() else ET.Element("resources")
+    old_root = ET.parse(APPFILTER_XML).getroot() if APPFILTER_XML.is_file() else ET.Element("resources")
+    appfilter = ET.Element("resources")
     matched_components: set[str] = set()
     matched_artwork: Counter[str] = Counter()
     matched_labels: dict[str, set[str]] = defaultdict(set)
     unmatched_labels: set[str] = set()
 
-    if old_filter.is_file():
-        old_root = ET.parse(old_filter).getroot()
-        for item in old_root.findall("item"):
-            component = item.attrib.get("component")
-            label = item.attrib.get("name", "")
-            if not component or component in matched_components:
-                continue
-
-            normalized = normalize(label)
-            resource = artwork_by_label.get(normalized)
-            if resource is None:
-                resource = semantic_artwork(label, artwork_by_label)
-
-            if resource is None:
-                unmatched_labels.add(label)
-                matched_components.add(component)
-                continue
-
-            existing_item = next(
-                (entry for entry in appfilter.findall("item")
-                 if entry.attrib.get("component") == component),
-                None,
-            )
-            if existing_item is not None:
-                existing_item.set("drawable", resource)
-            else:
-                ET.SubElement(appfilter, "item", {
-                    "component": component,
-                    "drawable": resource,
-                    "name": label,
-                })
-            matched_components.add(component)
+    for item in old_root.findall("item"):
+        component = item.attrib.get("component")
+        label = item.attrib.get("name", "")
+        if not component or component in matched_components:
+            continue
+        normalized = normalize(label)
+        resource = artwork_by_label.get(normalized)
+        if resource is None:
+            resource = semantic_artwork(label, artwork_by_label)
+        if resource is not None:
+            ET.SubElement(appfilter, "item", {
+                "component": component,
+                "drawable": resource,
+                "name": label,
+            })
             matched_artwork[resource] += 1
             matched_labels[resource].add(label)
+        else:
+            # Keep prior mapping: it may point to a purpose-built vector or AOSP icon.
+            ET.SubElement(appfilter, "item", dict(item.attrib))
+            unmatched_labels.add(label)
+        matched_components.add(component)
 
     for component, label, artwork in EXTRA_COMPONENTS:
         if component in matched_components:
             continue
-        resource = artwork_by_original_stem.get(artwork.casefold())
-        if resource is None:
-            resource = artwork_by_label.get(normalize(artwork))
+        resource = artwork_by_original_stem.get(artwork.casefold()) or artwork_by_label.get(normalize(artwork))
         if resource is None:
             continue
         ET.SubElement(appfilter, "item", {
@@ -527,49 +530,33 @@ def main() -> None:
         matched_artwork[resource] += 1
         matched_labels[resource].add(label)
 
-    # Extend mappings using the current Lawnicons app-only component catalogue.
-    # Only components with an exact/semantic match to an existing Jelly Bean
-    # archive filename are added; no generic or guessed artwork is assigned.
     upstream_url = (
         "https://raw.githubusercontent.com/LawnchairLauncher/lawnicons/"
-        "develop/app/assets/appfilter.xml"
+        "cd91ff0bd00ff0a6c9d606d1c326b451b6563506/app/assets/appfilter.xml"
     )
-    try:
-        request = urllib.request.Request(
-            upstream_url,
-            headers={"User-Agent": "Insomdroid-Icon-Pack-Builder"},
-        )
-        with urllib.request.urlopen(request, timeout=45) as response:
-            upstream_root = ET.fromstring(response.read())
-        upstream_added = 0
-        existing_components = {
-            item.attrib.get("component") for item in appfilter.findall("item")
-        }
-        for item in upstream_root.findall("item"):
-            component = item.attrib.get("component", "").strip()
-            if not component or component in existing_components:
-                continue
-            label = item.attrib.get("name", "").strip()
-            if not label:
-                label = item.attrib.get("drawable", "").strip()
-            resource = artwork_by_label.get(normalize(label))
-            if resource is None:
-                resource = semantic_artwork(label, artwork_by_label)
-            if resource is None:
-                continue
-            ET.SubElement(appfilter, "item", {
-                "component": component,
-                "drawable": resource,
-                "name": label or Path(component.split("/", 1)[0]).name,
-            })
-            existing_components.add(component)
-            matched_components.add(component)
-            matched_artwork[resource] += 1
-            matched_labels[resource].add(label or component.split("/", 1)[0])
-            upstream_added += 1
-        print(f"Added {upstream_added} verified app components from Lawnicons catalogue.")
-    except Exception as exc:
-        raise SystemExit(f"Unable to update app mappings from Lawnicons catalogue: {exc}")
+    request = urllib.request.Request(
+        upstream_url, headers={"User-Agent": "Insomdroid-Icon-Pack-Builder"}
+    )
+    with urllib.request.urlopen(request, timeout=45) as response:
+        upstream_root = ET.fromstring(response.read())
+    upstream_added = 0
+    for item in upstream_root.findall("item"):
+        component = item.attrib.get("component", "").strip()
+        if not component or component in matched_components:
+            continue
+        label = item.attrib.get("name", "").strip() or item.attrib.get("drawable", "").strip()
+        resource = artwork_by_label.get(normalize(label)) or semantic_artwork(label, artwork_by_label)
+        if resource is None:
+            continue
+        ET.SubElement(appfilter, "item", {
+            "component": component,
+            "drawable": resource,
+            "name": label or component.split("/", 1)[0],
+        })
+        matched_components.add(component)
+        matched_artwork[resource] += 1
+        matched_labels[resource].add(label)
+        upstream_added += 1
 
     ET.indent(appfilter, space="    ")
     APPFILTER_XML.write_text(
@@ -578,24 +565,39 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    # Human- and machine-readable audit report retained as a CI artifact.
+    report_dir = ROOT / "build/holokat-import-report"
+    report_dir.mkdir(parents=True, exist_ok=True)
     unused_assets = [
-        (resource, Path(original_path).stem)
-        for resource, (_, original_path) in images.items()
+        {"resource": resource, "source": original, "mapped": False}
+        for resource, (_, original) in images.items()
         if resource not in matched_artwork
     ]
-    print("Unmapped Jelly Bean artwork filenames:")
-    for resource, original_stem in unused_assets:
-        print(f"  {resource} <- {original_stem}")
-    print(f"Jelly Bean imported {len(images)} unique image assets into the combined icon pack.")
-    print(f"Generated {len(appfilter.findall('item'))} unique launcher component mappings.")
-    print(f"Artwork used by mappings: {len(matched_artwork)} / {len(images)}.")
-    print(f"Unmatched app labels: {len(unmatched_labels)}.")
-    for resource, count in sorted(matched_artwork.items(), key=lambda entry: (-entry[1], entry[0])):
-        labels = ", ".join(sorted(matched_labels[resource]))
-        print(f"  {resource}: {count} components [{labels}]")
-    if unmatched_labels:
-        print("Unmatched labels: " + " | ".join(sorted(unmatched_labels)))
-    print("Jelly Bean archive artwork is retained without redrawing or recoloring.")
+    report = {
+        "archives": archive_inventory,
+        "unique_archive_images": len(images),
+        "mapped_artworks": len(matched_artwork),
+        "launcher_component_mappings": len(appfilter.findall("item")),
+        "new_pinned_lawnicons_mappings": upstream_added,
+        "unmapped_artworks": unused_assets,
+        "mapped_artworks_detail": [
+            {"resource": resource, "components": count, "labels": sorted(matched_labels[resource])}
+            for resource, count in sorted(matched_artwork.items())
+        ],
+    }
+    (report_dir / "report.json").write_text(
+        __import__("json").dumps(report, indent=2), encoding="utf-8"
+    )
+    with (report_dir / "unmapped-artwork.txt").open("w", encoding="utf-8") as stream:
+        for item in unused_assets:
+            stream.write(f'{item["resource"]} <- {item["source"]}\n')
+
+    print(f"Jelly Bean archive inventory: {archive_inventory}")
+    print(f"Imported {len(images)} unique archive images.")
+    print(f"Mapped {len(matched_artwork)} distinct archive artworks to {len(matched_components)} components.")
+    print(f"Added {upstream_added} app components from pinned Lawnicons mapping.")
+    print(f"Unmapped artwork report: {report_dir / 'unmapped-artwork.txt'}")
+    print("Unmapped source artwork is retained in resources for future manual mapping." )
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
-# KitKat Icon Pack — Icon Inventory
+# KitKat / Holokat Icon Pack — Icon Inventory
 
-## Current implementation
+## Active deliverable
+
 
 KitKat remains the only active deliverable. The CI importer downloads eleven verified AOSP launcher icons: nine original Android 4.4.4 assets plus Clock and Gallery from the same AOSP tag. Phone is imported separately from AOSP Android 4.3.1 because the Nexus 5 Android 4.4.4 image uses Google Phone. All are placed in density-specific resource folders. The default XML artwork remains as fallback for all other mapped apps.
 
@@ -10,6 +11,30 @@ KitKat remains the only active deliverable. The CI importer downloads eleven ver
 - **Verified AOSP artwork:** Messages, Settings, Camera, Calendar, Calculator, Mail, Browser, Downloads, Music, Clock, and Gallery are sourced from AOSP Android 4.4.4. Phone is sourced from AOSP Android 4.3.1. See `third_party/aosp-android-4.4.4/README.md`.
 - **Additional public-domain artwork:** Google+ is included from Wikimedia Commons; it is not AOSP artwork and is not mapped to an app component yet.
 - **Remaining artwork:** other icons are temporary; third-party icons still need historical, app-specific sources. Do not label community artwork as official Android artwork.
+
+
+## Jelly Bean ZIP archive integration
+
+Both user-provided ZIP archives are imported directly by `scripts/import_holokat_icons.py`:
+
+- `references/kitkat-archives/Icons jb 1.zip`
+- `references/kitkat-archives/icons jb2.zip`
+
+The importer extracts supported raster images at 48 px or larger, retains the original image bytes, de-duplicates identical images by SHA-256, registers each unique asset in `drawable.xml`, maps exact and known semantic app labels, then extends component mappings using a pinned Lawnicons catalogue. Unmatched assets are intentionally retained and listed in the GitHub Actions report rather than discarded or guessed onto unrelated apps.
+
+The workflow uploads `holokat-archive-mapping-report` with:
+- per-archive image-entry counts
+- total unique imported images
+- artwork-to-component mapping counts
+- all unmapped source filenames for later manual review
+
+## Figma artwork integration
+
+The committed source is `references/kitkat-archives/App & Brand Icons Pack (Community).fig`. It is rendered by `scripts/export_nothink_figma.mjs` and imported by `scripts/import_nothink_figma.py` into `pack-kitkat/src/main/res`. The importer uses exact unique app identity matches against the existing appfilter, stores distinct monochrome artwork once, and generates package-specific wrappers and monochrome icon metadata.
+
+The CI job must process Figma artwork after the ZIP archive import so both sources share the combined pack. The generated report includes rendered node count, mapped apps, unique artwork count, component mapping count, and unmatched node names.
+
+## Existing source mapping
 
 ## Artwork coverage checklist
 
@@ -101,4 +126,5 @@ The eleven Android 4.4.4 PNGs come from AOSP repositories that mark the correspo
 - **Third-party:** X, Threads, Reddit, TikTok, LinkedIn, Discord, LINE, Viber, WeChat, Outlook, Proton Mail, Zoom, Meet, Teams, Signal, Deezer, Tidal, VLC, MX Player, Netflix, Prime Video, Disney+, Twitch, Notion, Trello, Todoist, OneDrive, Dropbox, MEGA, Adobe Acrobat, Canva.
 - **Indonesia:** Shopee, Tokopedia, Lazada, Blibli, Bukalapak, Gojek, Grab, DANA, OVO, GoPay, Jenius, Livin' by Mandiri, BRImo, BCA mobile.
 - **Games:** Minecraft, Roblox, PUBG Mobile, Mobile Legends, Pokémon GO, Steam.
+
 

@@ -60,7 +60,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--exports", type=Path, default=Path("build/nothink-figma-export"))
     parser.add_argument("--mapping", type=Path, required=True)
-    parser.add_argument("--res", type=Path, default=Path("pack-nothing/src/main/res"))
+    parser.add_argument("--res", type=Path, default=Path("pack-kitkat/src/main/res"))
     parser.add_argument("--minimum", type=int, default=1)
     args = parser.parse_args()
 
@@ -158,7 +158,7 @@ def main() -> int:
         "unmatched_nodes": unmatched,
         "imported": imported,
     }
-    report_dir = Path("build/nothink-figma-report")
+    report_dir = Path("build/kitkat-figma-report")
     report_dir.mkdir(parents=True, exist_ok=True)
     (report_dir / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"NOTHINK_FIGMA_MAPPED_APPS={len(imported)}")

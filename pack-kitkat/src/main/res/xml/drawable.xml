@@ -50,4 +50,7 @@
   <item drawable="kitkat_search_icon" name="kitkat_search_icon" />
   <item drawable="kitkat_voice_search" name="kitkat_voice_search" />
   <item drawable="kitkat_digital_clock_preview" name="kitkat_digital_clock_preview" />
+  <item drawable="kitkat_clock_dial" name="kitkat_clock_dial" />
+  <item drawable="kitkat_clock_hour" name="kitkat_clock_hour" />
+  <item drawable="kitkat_clock_minute" name="kitkat_clock_minute" />
 </resources>

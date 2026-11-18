@@ -242,6 +242,19 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    # Register all widget artwork and wallpapers in the drawable catalogue.
+    drawable_root = ET.parse(DRAWABLES_XML).getroot() if DRAWABLES_XML.is_file() else ET.Element("resources")
+    existing_names = {item.attrib.get("name") for item in drawable_root.findall("item")}
+    for resource in list(WIDGET_ASSETS) + list(WALLPAPERS) + ["kitkat_clock_dial", "kitkat_clock_hour", "kitkat_clock_minute"]:
+        if resource not in existing_names:
+            ET.SubElement(drawable_root, "item", {"drawable": resource, "name": resource})
+    ET.indent(drawable_root, space="  ")
+    DRAWABLES_XML.write_text(
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        + ET.tostring(drawable_root, encoding="unicode") + "\n",
+        encoding="utf-8",
+    )
+
     # Register newly imported source icons for launchers that enumerate the
     # drawable catalogue. Existing mappings and unrelated artwork are retained.
     drawable_root = (

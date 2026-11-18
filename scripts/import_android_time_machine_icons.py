@@ -23,6 +23,7 @@ SOURCE_BASE = (
     f"{SOURCE_COMMIT}/versions/4.4.4/assets"
 )
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+JPEG_SIGNATURE = b"\xff\xd8\xff"
 
 # Android Time Machine 4.4.4 application artwork only.
 # Resource name -> exact original asset filename.
@@ -61,36 +62,43 @@ ICONS = {
     "youtube": "youtube.png",
 }
 
+WALLPAPER_FILENAME = "aosp-wallpaper.jpg"
+WALLPAPER_RESOURCE = "kitkat_wallpaper"
+
 # Labels in appfilter.xml -> original KitKat artwork resource.
 LABEL_RULES = (
     (("googleplus", "google+"), "google_plus"),
+    (("google news", "googlenews", "news"), "news_weather"),
+    (("newsstand", "playnewsstand", "magazines"), "newsstand"),
     (("googlesearch", "search"), "google_search"),
-    (("googlesettings",), "google_settings"),
+    (("googlesettings", "google settings"), "google_settings"),
     (("hangouts", "talk"), "hangouts"),
     (("keep", "notes"), "keep"),
     (("newsweather", "weather"), "news_weather"),
-    (("newsstand", "magazines"), "newsstand"),
     (("photos",), "photos"),
     (("playbooks", "books"), "play_books"),
     (("playgames", "games"), "play_games"),
-    (("playmovies", "movies"), "play_movies"),
-    (("playmusic",), "play_music"),
-    (("quickoffice",), "quickoffice"),
-    (("voicesearch", "voice search"), "voice_search"),
-    (("wallet",), "wallet"),
+    (("playmovies", "movies", "google tv", "googletv"), "play_movies"),
+    (("playmusic", "youtube music", "youtubemusic"), "play_music"),
+    (("quickoffice", "google docs", "googledocs", "google sheets", "googlesheets", "google slides", "googleslides"), "quickoffice"),
+    (("voicesearch", "voice search", "google assistant"), "voice_search"),
+    (("wallet", "google wallet"), "wallet"),
     (("chrome",), "chrome"),
     (("youtube",), "youtube"),
     (("calculator", "calcu"), "calculator"),
     (("calendar",), "calendar"),
     (("camera",), "camera"),
     (("clock", "alarmclock", "deskclock"), "clock"),
-    (("download",), "downloads"),
+    (("download", "files", "file manager", "filemanager", "documentsui"), "downloads"),
     (("browser", "webbrowser"), "browser"),
     (("gmail",), "gmail"),
     (("email", "mail", "outlook"), "mail"),
     (("drive",), "drive"),
-    (("gallery", "photos", "photo"), "gallery"),
+    (("google photos", "googlephotos"), "photos"),
+    (("gallery", "aosp gallery"), "gallery"),
     (("maps", "map", "navigation"), "maps"),
+    (("google drive", "googledrive"), "drive"),
+    (("google keep", "googlekeep"), "keep"),
     (("contacts", "contact", "people"), "contacts"),
     (("phone", "dialer", "calling", "call"), "phone"),
     (("settings", "setting", "configuration"), "settings"),
@@ -143,6 +151,18 @@ def main() -> None:
         destination = destination_dir / f"{resource}.png"
         destination.write_bytes(data)
         imported.append((resource, filename, len(data), hashlib.sha256(data).hexdigest()))
+
+    # Include the official Android 4.4.4 wallpaper in the pack app preview.
+    wallpaper_url = f"{SOURCE_BASE}/{WALLPAPER_FILENAME}"
+    wallpaper_request = urllib.request.Request(
+        wallpaper_url, headers={"User-Agent": "Insomdroid-KitKat-Icon-Importer/1.0"}
+    )
+    with urllib.request.urlopen(wallpaper_request, timeout=45) as response:
+        wallpaper_data = response.read()
+    if not wallpaper_data.startswith(JPEG_SIGNATURE):
+        raise ValueError(f"Source is not a JPEG wallpaper: {wallpaper_url}")
+    (destination_dir / f"{WALLPAPER_RESOURCE}.jpg").write_bytes(wallpaper_data)
+    print(f"WALLPAPER {WALLPAPER_RESOURCE} <- {WALLPAPER_FILENAME} ({len(wallpaper_data)} bytes)")
 
     # Register newly imported source icons for launchers that enumerate the
     # drawable catalogue. Existing mappings and unrelated artwork are retained.

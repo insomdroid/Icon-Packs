@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/kitkat_power_widget_background"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:padding="8dp">
+    <ImageButton
+        android:id="@+id/power_wifi"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/power_wifi"
+        android:src="@drawable/kitkat_power_wifi_on" />
+    <ImageButton
+        android:id="@+id/power_bluetooth"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/power_bluetooth"
+        android:src="@drawable/kitkat_power_bluetooth_on" />
+    <ImageButton
+        android:id="@+id/power_location"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/power_location"
+        android:src="@drawable/kitkat_power_gps_on" />
+    <ImageButton
+        android:id="@+id/power_sync"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/power_sync"
+        android:src="@drawable/kitkat_power_sync_on" />
+    <ImageButton
+        android:id="@+id/power_brightness"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/power_brightness"
+        android:src="@drawable/kitkat_power_brightness_full" />
+</LinearLayout>

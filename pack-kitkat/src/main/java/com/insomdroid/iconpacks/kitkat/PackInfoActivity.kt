@@ -1,12 +1,18 @@
 package com.insomdroid.iconpacks.kitkat
 
+import android.app.WallpaperManager
+import android.content.ComponentName
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +28,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -107,6 +116,7 @@ private val kitKatIcons = listOf(
 
 @Composable
 private fun KitKatPackDashboard() {
+    val context = LocalContext.current
     var selectedIcon by remember { mutableStateOf<KitKatIcon?>(null) }
 
     Surface(
@@ -141,7 +151,61 @@ private fun KitKatPackDashboard() {
                 color = Color(0xFF687080)
             )
 
-            WallpaperHero()
+            WallpaperHero(
+                onApply = {
+                    try {
+                        val manager = WallpaperManager.getInstance(context)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            manager.setResource(R.drawable.kitkat_wallpaper, WallpaperManager.FLAG_SYSTEM)
+                        } else {
+                            manager.setResource(R.drawable.kitkat_wallpaper)
+                        }
+                        Toast.makeText(context, "Wallpaper KitKat berhasil diterapkan", Toast.LENGTH_SHORT).show()
+                    } catch (error: Exception) {
+                        Toast.makeText(context, "Gagal menerapkan wallpaper: ${error.localizedMessage}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Column(
+                    modifier = Modifier.padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Jam analog KitKat", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Widget jam analog dengan wajah dan jarum asli KitKat. Tambahkan ke home screen melalui pemilih widget Android.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF687080)
+                    )
+                    Button(
+                        onClick = {
+                            try {
+                                val pinIntentSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                                    android.appwidget.AppWidgetManager.getInstance(context).isRequestPinAppWidgetSupported
+                                if (pinIntentSupported) {
+                                    android.appwidget.AppWidgetManager.getInstance(context).requestPinAppWidget(
+                                        ComponentName(context, com.insomdroid.iconpacks.kitkat.widget.KitKatClockWidgetProvider::class.java),
+                                        null,
+                                        null
+                                    )
+                                } else {
+                                    Toast.makeText(context, "Buka daftar Widget dari home screen lalu pilih KitKat Analog Clock.", Toast.LENGTH_LONG).show()
+                                }
+                            } catch (error: Exception) {
+                                Toast.makeText(context, "Buka daftar Widget dari home screen lalu pilih KitKat Analog Clock.", Toast.LENGTH_LONG).show()
+                            }
+                        },
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+                    ) {
+                        Text("Tambah widget jam")
+                    }
+                }
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -264,7 +328,7 @@ private fun KitKatPackDashboard() {
 }
 
 @Composable
-private fun WallpaperHero() {
+private fun WallpaperHero(onApply: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -305,6 +369,13 @@ private fun WallpaperHero() {
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
+            Button(
+                onClick = onApply,
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5))
+            ) {
+                Text("Terapkan wallpaper")
+            }
         }
     }
 }

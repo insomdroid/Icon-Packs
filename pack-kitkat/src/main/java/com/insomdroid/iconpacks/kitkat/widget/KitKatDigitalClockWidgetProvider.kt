@@ -6,14 +6,11 @@ import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import com.insomdroid.iconpacks.kitkat.R
-import java.text.DateFormat
-import java.util.Date
 
 class KitKatDigitalClockWidgetProvider : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         ids.forEach { id ->
             val views = RemoteViews(context.packageName, R.layout.kitkat_digital_clock_widget)
-            views.setTextViewText(R.id.digital_clock_time, DateFormat.getTimeInstance(DateFormat.SHORT).format(Date()))
             views.setTextViewText(R.id.digital_clock_date, DateFormat.getDateInstance(DateFormat.FULL).format(Date()))
             manager.updateAppWidget(id, views)
         }

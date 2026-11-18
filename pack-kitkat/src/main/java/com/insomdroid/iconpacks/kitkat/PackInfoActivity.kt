@@ -132,119 +132,75 @@ private fun KitKatPackDashboard() {
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             item {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(18.dp)
-                ) {
-            Text(
-                text = "HOLOKAT",
-                style = MaterialTheme.typography.labelLarge,
-                color = Color(0xFF687080),
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.sp
-            )
-
-            Text(
-                text = "HoloKat Icon Pack",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF171923)
-            )
-
-            Text(
-                text = "Android 4.4.4 • Original artwork collection",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF687080)
-            )
-
-            WallpaperHero(
-                onApply = {
-                    try {
-                        val manager = WallpaperManager.getInstance(context)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            manager.setResource(R.drawable.kitkat_wallpaper, WallpaperManager.FLAG_SYSTEM)
-                        } else {
-                            manager.setResource(R.drawable.kitkat_wallpaper)
-                        }
-                        Toast.makeText(context, "KitKat wallpaper applied successfully", Toast.LENGTH_SHORT).show()
-                    } catch (error: Exception) {
-                        Toast.makeText(context, "Could not apply wallpaper: ${error.localizedMessage}", Toast.LENGTH_LONG).show()
-                    }
-                }
-            )
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
-            ) {
-                Column(
-                    modifier = Modifier.padding(18.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text("KitKat Analog Clock", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
                     Text(
-                        "An analog clock featuring the original KitKat dial and hands. Add it to your home screen using the Android widget picker.",
+                        text = "HOLOKAT",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = Color(0xFF687080),
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp
+                    )
+                    Text(
+                        text = "HoloKat Icon Pack",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF171923)
+                    )
+                    Text(
+                        text = "Android 4.4.4 • Original artwork collection",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color(0xFF687080)
                     )
-                    Button(
-                        onClick = {
+                    WallpaperChooser(
+                        onApply = { wallpaperId ->
                             try {
-                                val pinIntentSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-                                    android.appwidget.AppWidgetManager.getInstance(context).isRequestPinAppWidgetSupported
-                                if (pinIntentSupported) {
-                                    android.appwidget.AppWidgetManager.getInstance(context).requestPinAppWidget(
-                                        ComponentName(context, com.insomdroid.iconpacks.kitkat.widget.KitKatClockWidgetProvider::class.java),
-                                        null,
-                                        null
-                                    )
+                                val manager = WallpaperManager.getInstance(context)
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                    manager.setResource(wallpaperId, WallpaperManager.FLAG_SYSTEM)
                                 } else {
-                                    Toast.makeText(context, "Open the home screen widget picker and select KitKat Analog Clock.", Toast.LENGTH_LONG).show()
+                                    manager.setResource(wallpaperId)
                                 }
+                                Toast.makeText(context, "Wallpaper applied successfully", Toast.LENGTH_SHORT).show()
                             } catch (error: Exception) {
-                                Toast.makeText(context, "Open the home screen widget picker and select KitKat Analog Clock.", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, "Could not apply wallpaper: ${error.localizedMessage}", Toast.LENGTH_LONG).show()
                             }
-                        },
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
-                    ) {
-                        Text("Add clock widget")
-                    }
+                        }
+                    )
+                    FeatureSection(
+                        title = "Widgets",
+                        description = "Add classic Android widgets to your home screen.",
+                        entries = listOf(
+                            "Analog Clock" to "kitkat_clock",
+                            "Digital Clock" to "kitkat_digital_clock",
+                            "Search" to "kitkat_search",
+                            "Music Player" to "kitkat_music",
+                            "Photo Gallery" to "kitkat_gallery",
+                            "Power Control" to "kitkat_power"
+                        ),
+                        onOpen = { name ->
+                            when (name) {
+                                "Analog Clock" -> pinWidget(context, KitKatClockWidgetProvider::class.java)
+                                "Digital Clock" -> pinWidget(context, KitKatDigitalClockWidgetProvider::class.java)
+                                "Search" -> pinWidget(context, KitKatSearchWidgetProvider::class.java)
+                                "Music Player" -> pinWidget(context, KitKatMusicWidgetProvider::class.java)
+                                "Photo Gallery" -> pinWidget(context, KitKatGalleryWidgetProvider::class.java)
+                                "Power Control" -> pinWidget(context, KitKatPowerWidgetProvider::class.java)
+                            }
+                        }
+                    )
+                    SummaryTile(
+                        value = kitKatIcons.size.toString(),
+                        label = "Icons",
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text(
+                        text = "Icon Preview",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF171923)
+                    )
                 }
             }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                SummaryTile(
-                    value = kitKatIcons.size.toString(),
-                    label = "Icons",
-                    modifier = Modifier.weight(1f)
-                )
-                SummaryTile(
-                    value = "4.4.4",
-                    label = "Android KitKat",
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = "Explore icons",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF171923)
-                )
-                Text(
-                    text = "Tap any icon to preview the artwork at a larger size.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF687080)
-                )
-            }
-
-                }
-            }
-
             items(kitKatIcons.chunked(4)) { iconRow ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -262,47 +218,13 @@ private fun KitKatPackDashboard() {
                     }
                 }
             }
-
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                TextButton(
+                    onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/insomdroid/Icon-Packs"))) },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(
-                        modifier = Modifier.padding(18.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = "About this collection",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "This collection preserves original KitKat icons, including artwork for discontinued apps. Launcher mappings also cover successor apps when names or functions have changed.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF687080)
-                    )
-                    Text(
-                        text = "The wallpaper and original artwork are sourced from the Android Time Machine Android 4.4.4 archive.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF687080)
-                    )
+                    Text("GitHub · insomdroid/Icon-Packs")
                 }
-            }
-
-                }
-            }
-
-            item {
-                Text(
-                    text = "HOLOKAT ICON PACK",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF9299A5)
-                )
             }
         }
     }

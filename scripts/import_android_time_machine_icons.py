@@ -62,8 +62,30 @@ ICONS = {
     "youtube": "youtube.png",
 }
 
-WALLPAPER_FILENAME = "kk-default_wallpaper.jpg"
-WALLPAPER_RESOURCE = "kitkat_wallpaper"
+WALLPAPERS = {
+    "kitkat_wallpaper": "kk-default_wallpaper.jpg",
+    "aosp_wallpaper": "aosp-wallpaper.jpg",
+}
+
+WIDGET_ASSETS = {
+    "kitkat_music_background": "music-appwidget_bg.png",
+    "kitkat_music_unknown": "music-albumart_mp_unknown.png",
+    "kitkat_music_previous": "music-ic_media_previous.png",
+    "kitkat_music_play": "music-ic_media_play.png",
+    "kitkat_music_pause": "music-ic_media_pause.png",
+    "kitkat_music_next": "music-ic_media_next.png",
+    "kitkat_gallery_preview": "gallery-widget_preview.png",
+    "kitkat_gallery_border": "gallery-appwidget_photo_border.png",
+    "kitkat_power_background": "widget-power-bg.png",
+    "kitkat_power_wifi_on": "power-wifi-on.png",
+    "kitkat_power_bluetooth_on": "power-bluetooth-on.png",
+    "kitkat_power_gps_on": "power-gps-on.png",
+    "kitkat_power_sync_on": "power-sync-on.png",
+    "kitkat_power_brightness_full": "power-brightness-full.png",
+    "kitkat_search_icon": "google-search.png",
+    "kitkat_voice_search": "kd-ic_voice_search.png",
+    "kitkat_digital_clock_preview": "jbclock-appwidget_digital_clock_preview.png",
+}
 
 CLOCK_ASSETS = {
     "kitkat_clock_dial": "appwidget_clock_dial.png",
@@ -162,17 +184,18 @@ def main() -> None:
         destination.write_bytes(data)
         imported.append((resource, filename, len(data), hashlib.sha256(data).hexdigest()))
 
-    # Include the official Android 4.4.4 wallpaper in the pack app preview.
-    wallpaper_url = f"{SOURCE_BASE}/{WALLPAPER_FILENAME}"
-    wallpaper_request = urllib.request.Request(
-        wallpaper_url, headers={"User-Agent": "Insomdroid-KitKat-Icon-Importer/1.0"}
-    )
-    with urllib.request.urlopen(wallpaper_request, timeout=45) as response:
-        wallpaper_data = response.read()
-    if not wallpaper_data.startswith(JPEG_SIGNATURE):
-        raise ValueError(f"Source is not a JPEG wallpaper: {wallpaper_url}")
-    (destination_dir / f"{WALLPAPER_RESOURCE}.jpg").write_bytes(wallpaper_data)
-    print(f"WALLPAPER {WALLPAPER_RESOURCE} <- {WALLPAPER_FILENAME} ({len(wallpaper_data)} bytes)")
+    # Preserve both original Android 4.4.4 wallpapers as separate choices.
+    for resource, filename in WALLPAPERS.items():
+        wallpaper_url = f"{SOURCE_BASE}/{filename}"
+        wallpaper_request = urllib.request.Request(
+            wallpaper_url, headers={"User-Agent": "Insomdroid-KitKat-Icon-Importer/1.0"}
+        )
+        with urllib.request.urlopen(wallpaper_request, timeout=45) as response:
+            wallpaper_data = response.read()
+        if not wallpaper_data.startswith(JPEG_SIGNATURE):
+            raise ValueError(f"Source is not a JPEG wallpaper: {wallpaper_url}")
+        (destination_dir / f"{resource}.jpg").write_bytes(wallpaper_data)
+        print(f"WALLPAPER {resource} <- {filename} ({len(wallpaper_data)} bytes)")
 
     # Import original KitKat clock artwork and clock typefaces for the live widget.
     clock_drawables = RES / "drawable-nodpi"
@@ -192,6 +215,19 @@ def main() -> None:
         target = clock_font_dir / f"{resource}.ttf" if filename.endswith(".ttf") else clock_drawables / f"{resource}.png"
         target.write_bytes(asset_data)
         print(f"CLOCK_ASSET {resource} <- {filename} ({len(asset_data)} bytes)")
+
+    # Import original artwork used by Android 4.4.4 home-screen widgets.
+    for resource, filename in WIDGET_ASSETS.items():
+        request = urllib.request.Request(
+            f"{SOURCE_BASE}/{filename}",
+            headers={"User-Agent": "Insomdroid-KitKat-Icon-Importer/1.0"},
+        )
+        with urllib.request.urlopen(request, timeout=45) as response:
+            asset_data = response.read()
+        if not asset_data.startswith(PNG_SIGNATURE):
+            raise ValueError(f"Widget artwork is not a PNG: {filename}")
+        (destination_dir / f"{resource}.png").write_bytes(asset_data)
+        print(f"WIDGET_ASSET {resource} <- {filename} ({len(asset_data)} bytes)")
 
     # Register newly imported source icons for launchers that enumerate the
     # drawable catalogue. Existing mappings and unrelated artwork are retained.

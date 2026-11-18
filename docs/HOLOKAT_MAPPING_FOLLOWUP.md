@@ -98,3 +98,14 @@ Two further legacy launcher components were corroborated in the historical CrapC
 | Hangouts Dialer | `com.google.android.apps.hangoutsdialer/com.google.android.apps.hangoutsdialer.app.LaunchActivity` | [CrapCons appfilter](https://github.com/the-dagger/CrapCons-IconPack/blob/master/app/src/main/res/xml/appfilter.xml) |
 
 The Analytics profile-picker component from the previous pass is retained as a historical alias. Both Analytics activity IDs are catalogue-backed. These entries are not device-manifest verification; the next CI report will show the distinct artwork count actually covered.
+
+
+## Eighth mapping pass
+
+Google Admin was added using the package/activity pair exposed by the public icon metadata catalogue:
+
+| Artwork | Component | Evidence |
+|---|---|---|
+| Admin | `com.google.android.apps.enterprise.cpanel/com.google.android.apps.enterprise.cpanel.activities.EntryPointActivity` | [IconPusher Admin package metadata](https://iconpusher.com/package/com.google.android.apps.enterprise.cpanel) |
+
+The activity is a historical component candidate. It remains subject to verification against an actual target APK; the build report will confirm whether the archive artwork was newly mapped.

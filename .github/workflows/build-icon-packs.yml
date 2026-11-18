@@ -10,7 +10,7 @@ on:
       - 'pack-kitkat/**'
       - 'scripts/import_kitkat_aosp_icons.py'
       - 'scripts/import_kitkat_archive_icons.py'
-      - '.github/workflows/build-nothink.yml'
+      - '.github/workflows/build-icon-packs.yml'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
       - 'gradle/**'
@@ -26,7 +26,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build One Combined Release APK
+    name: Build HoloKat Release APK
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -68,7 +68,7 @@ jobs:
       - name: Merge Jelly Bean archive artwork
         run: python3 scripts/import_holokat_icons.py
 
-      - name: Upload Holokat archive mapping report
+      - name: Upload HoloKat artwork mapping report
         uses: actions/upload-artifact@v4
         with:
           name: holokat-archive-mapping-report
@@ -80,7 +80,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          KEYSTORE_PATH="$RUNNER_TEMP/combined-icon-pack-${GITHUB_RUN_ID}.jks"
+          KEYSTORE_PATH="$RUNNER_TEMP/holokat-${GITHUB_RUN_ID}.jks"
           STORE_PASSWORD="$(openssl rand -hex 24)"
           KEY_PASSWORD="$(openssl rand -hex 24)"
           keytool -genkeypair -v \
@@ -88,19 +88,19 @@ jobs:
             -storetype JKS \
             -storepass "$STORE_PASSWORD" \
             -keypass "$KEY_PASSWORD" \
-            -alias combined-icon-pack \
+            -alias holokat \
             -keyalg RSA \
             -keysize 2048 \
             -validity 2 \
-            -dname "CN=Insomdroid Combined Icon Pack Temporary Signing"
+            -dname "CN=Insomdroid HoloKat Temporary Signing"
           {
             echo "KITKAT_RELEASE_STORE_FILE=$KEYSTORE_PATH"
             echo "KITKAT_RELEASE_STORE_PASSWORD=$STORE_PASSWORD"
-            echo "KITKAT_RELEASE_KEY_ALIAS=combined-icon-pack"
+            echo "KITKAT_RELEASE_KEY_ALIAS=holokat"
             echo "KITKAT_RELEASE_KEY_PASSWORD=$KEY_PASSWORD"
           } >> "$GITHUB_ENV"
 
-      - name: Build optimized release APK
+      - name: Build HoloKat release APK
         run: gradle --no-daemon :pack-kitkat:assembleRelease
 
       - name: Verify APK and report size
@@ -112,11 +112,11 @@ jobs:
           ls -lh "$APK"
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | head -n 1
 
-      - name: Upload the single combined release APK
+      - name: Upload HoloKat release APK
         uses: actions/upload-artifact@v4
         with:
-          name: insomdroid-combined-icon-pack-release
+          name: holokat-release-apk
           path: pack-kitkat/build/outputs/apk/release/pack-kitkat-release.apk
           if-no-files-found: error
-          retention-days: 1
+          retention-days: 14
           compression-level: 0

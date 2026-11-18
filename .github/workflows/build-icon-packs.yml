@@ -8,6 +8,7 @@ on:
       - 'pack-kitkat/**'
       - 'scripts/import_kitkat_aosp_icons.py'
       - 'scripts/import_kitkat_archive_icons.py'
+      - 'scripts/import_android_time_machine_icons.py'
       - '.github/workflows/build-icon-packs.yml'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
@@ -65,6 +66,9 @@ jobs:
 
       - name: Merge Jelly Bean archive artwork
         run: python3 scripts/import_holokat_icons.py
+
+      - name: Restore original Android 4.4.4 application icons
+        run: python3 scripts/import_android_time_machine_icons.py
 
       - name: Upload HoloKat artwork mapping report
         uses: actions/upload-artifact@v4

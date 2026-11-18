@@ -134,20 +134,48 @@ def main() -> int:
                 component_map[component] = (f"icon_{package_drawable}", label)
         imported.append({"figma_name": label, "package": package, "drawable": package_drawable, "components": len(items), "artwork_sha256": digest})
 
-    appfilter = ET.Element("resources")
+    # Merge into the existing Holokat catalog; never replace the existing
+    # 2,074+ component mappings or drawable index with only Figma entries.
+    appfilter_path = xml_dir / "appfilter.xml"
+    appfilter = ET.parse(appfilter_path).getroot() if appfilter_path.is_file() else ET.Element("resources")
+    existing_components = {
+        item.get("component", "") for item in appfilter.findall("item")
+        if item.get("component")
+    }
+    figma_added_components = 0
     for component, (drawable, _) in sorted(component_map.items()):
+        if component in existing_components:
+            continue
         ET.SubElement(appfilter, "item", {"component": component, "drawable": drawable})
-    xml_write(appfilter, xml_dir / "appfilter.xml")
+        existing_components.add(component)
+        figma_added_components += 1
+    xml_write(appfilter, appfilter_path)
 
-    drawable_index = ET.Element("resources")
+    drawable_index_path = xml_dir / "drawable.xml"
+    drawable_index = (
+        ET.parse(drawable_index_path).getroot()
+        if drawable_index_path.is_file()
+        else ET.Element("resources")
+    )
+    existing_drawables = {
+        item.get("drawable", "").removeprefix("@drawable/")
+        for item in drawable_index.findall("item")
+    }
     for package, drawable in sorted(package_map.items()):
-        ET.SubElement(drawable_index, "item", {"drawable": f"icon_{drawable}"})
-    xml_write(drawable_index, xml_dir / "drawable.xml")
+        icon_drawable = f"icon_{drawable}"
+        if icon_drawable not in existing_drawables:
+            ET.SubElement(drawable_index, "item", {"drawable": icon_drawable})
+            existing_drawables.add(icon_drawable)
+    xml_write(drawable_index, drawable_index_path)
 
-    themed = ET.Element("icons")
+    themed_path = xml_dir / "grayscale_icon_map.xml"
+    themed = ET.parse(themed_path).getroot() if themed_path.is_file() else ET.Element("icons")
+    existing_packages = {icon.get("package", "") for icon in themed.findall("icon")}
     for package, drawable in sorted(package_map.items()):
-        ET.SubElement(themed, "icon", {"package": package, "drawable": f"@drawable/{drawable}"})
-    xml_write(themed, xml_dir / "grayscale_icon_map.xml")
+        if package not in existing_packages:
+            ET.SubElement(themed, "icon", {"package": package, "drawable": f"@drawable/{drawable}"})
+            existing_packages.add(package)
+    xml_write(themed, themed_path)
 
     report = {
         "source": manifest.get("source"),

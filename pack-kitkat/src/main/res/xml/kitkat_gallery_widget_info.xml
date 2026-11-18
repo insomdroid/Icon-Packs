@@ -3,6 +3,7 @@
     android:minWidth="110dp"
     android:minHeight="110dp"
     android:initialLayout="@layout/kitkat_gallery_widget"
+    android:configure="com.insomdroid.iconpacks.kitkat.widget.KitKatGalleryWidgetConfigureActivity"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:description="@string/gallery_widget_description" />

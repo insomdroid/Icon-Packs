@@ -468,6 +468,9 @@ EXTRA_COMPONENTS = [
     ("ComponentInfo{com.google.chromeremotedesktop/org.chromium.chromoting.Chromoting}", "Chrome Remote Desktop", "Remote Desktop"),
     ("ComponentInfo{com.motorola.cameraone/com.motorola.camera.Camera}", "Motorola Camera One", "Camera One"),
     ("ComponentInfo{com.google.android.tv.remote/com.google.android.tv.remote.RemoteActivity}", "Android TV Remote", "Android TV"),
+    ("ComponentInfo{com.google.android.apps.freighter/com.google.android.apps.nbu.freighter.splash.SplashActivity}", "Google Datally", "Datally"),
+    ("ComponentInfo{com.google.samples.apps.cardboarddemo/com.google.vr.cardboard.paperscope.carton.Home2D}", "Google Cardboard", "Cardboard Camera"),
+    ("ComponentInfo{com.google.samples.apps.cardboarddemo/com.google.vr.cardboard.paperscope.carton.Home2Dv2}", "Google Cardboard", "Cardboard Camera"),
 
 ]
 

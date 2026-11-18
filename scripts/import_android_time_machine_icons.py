@@ -68,8 +68,8 @@ WALLPAPER_RESOURCE = "kitkat_wallpaper"
 # Labels in appfilter.xml -> original KitKat artwork resource.
 LABEL_RULES = (
     (("googleplus", "google+"), "google_plus"),
-    (("google news", "googlenews", "news"), "news_weather"),
     (("newsstand", "playnewsstand", "magazines"), "newsstand"),
+    (("google news", "googlenews", "news"), "news_weather"),
     (("googlesearch", "search"), "google_search"),
     (("googlesettings", "google settings"), "google_settings"),
     (("hangouts", "talk"), "hangouts"),

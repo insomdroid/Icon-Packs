@@ -3,21 +3,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FF303030"
-    android:padding="8dp">
+    android:padding="4dp">
     <ImageView
+        android:id="@+id/gallery_widget_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@string/gallery_widget_name"
-        android:scaleType="centerInside"
+        android:scaleType="centerCrop"
         android:src="@drawable/kitkat_gallery_preview" />
     <TextView
         android:id="@+id/gallery_widget_open"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#66000000"
-        android:gravity="center"
-        android:text="@string/gallery_widget_open"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:background="#CC202124"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="6dp"
+        android:text="@string/gallery_widget_change"
         android:textColor="#FFFFFFFF"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:textSize="11sp" />
 </FrameLayout>

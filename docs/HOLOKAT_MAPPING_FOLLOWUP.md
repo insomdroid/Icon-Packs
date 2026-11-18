@@ -31,3 +31,10 @@ The six strings are catalogue-corroborated, not official APK-manifest certificat
 The remaining artwork is retained without guessed mappings. Many are platform features, input methods, widgets, TV-only surfaces, retired products, generic labels, or feature sub-screens rather than standalone launcher apps.
 
 The importer change triggers the combined release workflow. Check the regenerated report and release build before considering this pass complete.
+
+
+## Third mapping pass
+
+Twelve component records were added for legacy Google-era artwork with matching public appfilter evidence: AdWords Express, Cloud Print, Currents, Google Goggles, Chromecast companion, Inbox, My Maps, Maps Navigation, Street View, Hangouts, and two Google+ activity aliases. Sources include [SysAdminDoc iOSIconPack](https://github.com/SysAdminDoc/iOSIconPack/blob/db0ccf25ff695a076eee16833fd868a1a454cda6/app/src/main/assets/appfilter.xml), [LineageOS theme template](https://github.com/LineageOS/android_packages_themes_Template/blob/master/theme/build/intermediates/assets/debug/icons/res/xml/appfilter.xml), [Candybar](https://github.com/zixpo/candybar/blob/0aa2f57789ef9e0af1a2edb5e646ac45ebe8ca26/app/src/main/assets/appfilter.xml), [SmartIconPack](https://github.com/Mr-XiaoLiang/SmartIconPack/blob/7e22e2d0eaf40172dbd65a0c06e08eeb3bc0017c/app/src/main/res/xml/appfilter.xml), [CircoIconPack](https://github.com/Mookiies/CircoIconPack/blob/b481af802201a662845c182a20961a898704521e/res/xml/appfilter.xml), and [GreatFreedom](https://github.com/elelinux/GreatFreedom/blob/959dd69b204936a83426e415c65191bc206153c9/assets/icons/res/xml/appfilter.xml).
+
+These historical components are intentionally retained as legacy aliases; they may only resolve on older APK versions or devices. Do not interpret an appfilter match as proof that the app is still distributed or installed today.

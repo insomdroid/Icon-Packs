@@ -9,9 +9,7 @@ import android.graphics.Canvas
 import android.graphics.Matrix
 import android.widget.RemoteViews
 import com.insomdroid.iconpacks.kitkat.R
-import java.text.DateFormat
 import java.util.Calendar
-import java.util.Locale
 
 class KitKatClockWidgetProvider : AppWidgetProvider() {
 
@@ -59,10 +57,6 @@ class KitKatClockWidgetProvider : AppWidgetProvider() {
             views.setImageViewBitmap(
                 R.id.clock_minute,
                 rotatedHand(context, R.drawable.kitkat_clock_minute, minute * 6f)
-            )
-            views.setTextViewText(
-                R.id.clock_digital,
-                DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault()).format(now.time)
             )
             manager.updateAppWidget(appWidgetId, views)
         }

@@ -65,6 +65,16 @@ ICONS = {
 WALLPAPER_FILENAME = "aosp-wallpaper.jpg"
 WALLPAPER_RESOURCE = "kitkat_wallpaper"
 
+CLOCK_ASSETS = {
+    "kitkat_clock_dial": "appwidget_clock_dial.png",
+    "kitkat_clock_hour": "appwidget_clock_hour.png",
+    "kitkat_clock_minute": "appwidget_clock_minute.png",
+    "kitkat_clock_font": "AndroidClock.ttf",
+    "kitkat_clock_mono_bold": "AndroidClockMono-Bold.ttf",
+    "kitkat_clock_mono_light": "AndroidClockMono-Light.ttf",
+    "kitkat_clock_mono_thin": "AndroidClockMono-Thin.ttf",
+}
+
 # Labels in appfilter.xml -> original KitKat artwork resource.
 LABEL_RULES = (
     (("googleplus", "google+"), "google_plus"),
@@ -163,6 +173,25 @@ def main() -> None:
         raise ValueError(f"Source is not a JPEG wallpaper: {wallpaper_url}")
     (destination_dir / f"{WALLPAPER_RESOURCE}.jpg").write_bytes(wallpaper_data)
     print(f"WALLPAPER {WALLPAPER_RESOURCE} <- {WALLPAPER_FILENAME} ({len(wallpaper_data)} bytes)")
+
+    # Import original KitKat clock artwork and clock typefaces for the live widget.
+    clock_drawables = RES / "drawable-nodpi"
+    clock_font_dir = RES / "font"
+    clock_font_dir.mkdir(parents=True, exist_ok=True)
+    for resource, filename in CLOCK_ASSETS.items():
+        request = urllib.request.Request(
+            f"{SOURCE_BASE}/{filename}",
+            headers={"User-Agent": "Insomdroid-KitKat-Icon-Importer/1.0"},
+        )
+        with urllib.request.urlopen(request, timeout=45) as response:
+            asset_data = response.read()
+        if filename.endswith(".png") and not asset_data.startswith(PNG_SIGNATURE):
+            raise ValueError(f"Clock artwork is not a PNG: {filename}")
+        if filename.endswith(".ttf") and not asset_data.startswith(b"\x00\x01\x00\x00"):
+            raise ValueError(f"Clock typeface is not a TrueType font: {filename}")
+        target = clock_font_dir / f"{resource}.ttf" if filename.endswith(".ttf") else clock_drawables / f"{resource}.png"
+        target.write_bytes(asset_data)
+        print(f"CLOCK_ASSET {resource} <- {filename} ({len(asset_data)} bytes)")
 
     # Register newly imported source icons for launchers that enumerate the
     # drawable catalogue. Existing mappings and unrelated artwork are retained.

@@ -55,3 +55,22 @@ Seven additional legacy component records were added after checking the archived
 | Currents | `com.google.android.apps.currents/com.google.apps.dots.android.app.activity.CurrentsStartActivity` | LineageOS template (historical package alias) |
 
 These component IDs are historical community-catalogue entries, not device-verified manifests. The importer only adds a record if the matching source artwork is present in the supplied archive. The next workflow report is authoritative for how many unique artworks were actually covered.
+
+
+## Fifth mapping pass
+
+Seven historical component entries were added for archive assets that are genuine app/settings launch surfaces and have corroborating public appfilter records:
+
+| Artwork | Component | Evidence |
+|---|---|---|
+| Flash Player | `com.adobe.flashplayer/com.adobe.flashplayer.SettingsManager` | [LineageOS template](https://github.com/LineageOS/android_packages_themes_Template/blob/master/theme/build/intermediates/assets/debug/icons/res/xml/appfilter.xml), [Nicque catalogue](https://github.com/Nicque/appfilter-1/blob/master/appfilter.xml) |
+| Picasa | `com.dreamstep.wPicasaWeb/com.dreamstep.wPicasaWeb.MainNavigationActivity` | [LineageOS template](https://github.com/LineageOS/android_packages_themes_Template/blob/master/theme/build/intermediates/assets/debug/icons/res/xml/appfilter.xml) |
+| Android Market | `com.android.vending/com.android.vending.AssetBrowserActivity` | [Nicque catalogue](https://github.com/Nicque/appfilter-1/blob/master/appfilter.xml), [LineageOS template](https://github.com/LineageOS/android_packages_themes_Template/blob/master/theme/build/intermediates/assets/debug/icons/res/xml/appfilter.xml) |
+| SIM Toolkit | `com.android.stk/com.android.stk.StkLauncherActivity` | [Nicque catalogue](https://github.com/Nicque/appfilter-1/blob/master/appfilter.xml), [LineageOS template](https://github.com/LineageOS/android_packages_themes_Template/blob/master/theme/build/intermediates/assets/debug/icons/res/xml/appfilter.xml) |
+| Google Keyboard | `com.google.android.inputmethod.latin/com.android.inputmethod.latin.setup.SetupActivity` | [Nicque catalogue](https://github.com/Nicque/appfilter-1/blob/master/appfilter.xml) |
+| Google Pinyin Input | `com.google.android.inputmethod.pinyin/com.google.android.apps.inputmethod.libs.framework.core.LauncherActivity` | [LineageOS template](https://github.com/LineageOS/android_packages_themes_Template/blob/master/theme/build/intermediates/assets/debug/icons/res/xml/appfilter.xml) |
+| Google Pinyin Keyboard Settings | `com.google.android.inputmethod.pinyin/com.google.android.apps.inputmethod.preference.SettingsActivity` | [LineageOS template](https://github.com/LineageOS/android_packages_themes_Template/blob/master/theme/build/intermediates/assets/debug/icons/res/xml/appfilter.xml) |
+
+These are historical catalogue-backed IDs, not claims that these apps are currently installed or that the same activities exist in modern releases. The importer skips components already claimed by an earlier mapping. The build report from the fifth-pass workflow is the authority for how many distinct artwork resources this pass actually adds.
+
+The other remaining artwork is not automatically an app icon. Names such as platform capabilities, input methods, widgets, TV/Wear system surfaces, and feature-specific artwork must be classified before mapping. An icon can remain available in the drawable picker without having a launcher component.

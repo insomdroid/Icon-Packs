@@ -69,6 +69,16 @@ ASSETS = {
         "res/drawable-hdpi/app_music.png",
         "drawable-hdpi",
     ),
+    "clock": (
+        "platform_packages_apps_deskclock",
+        "res/mipmap-xxhdpi/ic_launcher_alarmclock.png",
+        "drawable-xxhdpi",
+    ),
+    "gallery": (
+        "platform_packages_apps_gallery2",
+        "res/mipmap-xhdpi/ic_launcher_gallery.png",
+        "drawable-xhdpi",
+    ),
 }
 
 
@@ -92,12 +102,29 @@ def download(url: str) -> bytes:
     raise RuntimeError(f"Unable to download verified AOSP icon: {url}: {last_error}")
 
 
+EXTRA_ASSETS = {
+    # The AOSP Phone app was removed from the 4.4.4 Nexus 5 image; retain its
+    # immediately preceding Jelly Bean AOSP artwork rather than using Google Dialer art.
+    "phone": (
+        "aosp-mirror-neo/platform_packages_apps_phone",
+        "android-4.3_r1.1",
+        "res/mipmap-xhdpi/ic_launcher_phone.png",
+        "drawable-xhdpi",
+    ),
+}
+
+
 def main() -> int:
     imported = []
-    for drawable, (repository, source_path, destination_density) in ASSETS.items():
+    sources = {
+        **{name: ("aosp-mirror/" + repository, AOSP_TAG, path, density)
+           for name, (repository, path, density) in ASSETS.items()},
+        **EXTRA_ASSETS,
+    }
+    for drawable, (repository, source_tag, source_path, destination_density) in sources.items():
         url = (
-            f"https://raw.githubusercontent.com/aosp-mirror/{repository}/"
-            f"{AOSP_TAG}/{source_path}"
+            f"https://raw.githubusercontent.com/{repository}/"
+            f"{source_tag}/{source_path}"
         )
         data = download(url)
         destination_dir = RESOURCE_ROOT / destination_density

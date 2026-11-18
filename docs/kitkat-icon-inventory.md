@@ -2,25 +2,26 @@
 
 ## Current implementation
 
-KitKat remains the only active deliverable. The CI importer now downloads nine verified Android 4.4.4 AOSP launcher icons from the `android-4.4.4_r2` source tag and places them in density-specific resource folders. The default XML artwork remains as fallback for all other mapped apps.
+KitKat remains the only active deliverable. The CI importer downloads eleven verified AOSP launcher icons: nine original Android 4.4.4 assets plus Clock and Gallery from the same AOSP tag. Phone is imported separately from AOSP Android 4.3.1 because the Nexus 5 Android 4.4.4 image uses Google Phone. All are placed in density-specific resource folders. The default XML artwork remains as fallback for all other mapped apps.
 
 - **App mappings:** 2,074 unique component mappings adapted from Lawnicons.
 - **Mapping source:** `LawnchairLauncher/lawnicons`, `app/assets/appfilter.xml`, branch `develop`, commit `cd91ff0bd00ff0a6c9d606d1c326b451b6563506`.
 - **Build:** `gradle --no-daemon :pack-kitkat:assembleRelease`.
-- **Verified artwork:** Messages, Settings, Camera, Calendar, Calculator, Mail, Browser, Downloads, and Music are sourced from AOSP Android 4.4.4. See `third_party/aosp-android-4.4.4/README.md`.
+- **Verified AOSP artwork:** Messages, Settings, Camera, Calendar, Calculator, Mail, Browser, Downloads, Music, Clock, and Gallery are sourced from AOSP Android 4.4.4. Phone is sourced from AOSP Android 4.3.1. See `third_party/aosp-android-4.4.4/README.md`.
+- **Additional public-domain artwork:** Google+ is included from Wikimedia Commons; it is not AOSP artwork and is not mapped to an app component yet.
 - **Remaining artwork:** other icons are temporary; third-party icons still need historical, app-specific sources. Do not label community artwork as official Android artwork.
 
 ## Artwork coverage checklist
 
-- [ ] phone
+- [x] phone — original AOSP Android 4.3.1 icon
 - [x] music — original AOSP Android 4.4.4 icon
 - [ ] contacts — icon asset is not present in the pinned AOSP source tree
 - [x] messages — original AOSP Android 4.4.4 icon
 - [x] calendar — original AOSP Android 4.4.4 icon
-- [ ] clock
+- [x] clock — original AOSP Android 4.4.4 icon
 - [x] calculator — original AOSP Android 4.4.4 icon
 - [x] camera — original AOSP Android 4.4.4 icon
-- [ ] gallery
+- [x] gallery — original AOSP Android 4.4.4 icon
 - [x] settings — original AOSP Android 4.4.4 icon
 - [ ] files
 - [x] downloads — original AOSP Android 4.4.4 icon
@@ -82,7 +83,7 @@ KitKat remains the only active deliverable. The CI importer now downloads nine v
 
 ## Asset licensing and provenance
 
-The nine imported PNGs come from AOSP repositories that mark the corresponding modules `MODULE_LICENSE_APACHE2`; their source repository names, resource paths, and attribution are listed in `third_party/aosp-android-4.4.4/README.md`. The shared Apache License 2.0 text is included at `third_party/lawnicons/LICENSE`. Remaining community artwork must be clearly distinguished from official Android assets.
+The eleven imported AOSP PNGs come from AOSP repositories that mark the corresponding modules `MODULE_LICENSE_APACHE2`; their source repository names, resource paths, and attribution are listed in `third_party/aosp-android-4.4.4/README.md`. The shared Apache License 2.0 text is included at `third_party/lawnicons/LICENSE`. Phone is explicitly sourced from the Android 4.3.1 AOSP tag; Clock and Gallery use Android 4.4.4 AOSP resources. The Google+ PNG is public domain from Wikimedia Commons and is not covered by Apache-2.0. Remaining community artwork must be clearly distinguished from official Android assets.
 
 ## Mapping adaptation notes
 

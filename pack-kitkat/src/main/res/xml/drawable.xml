@@ -32,4 +32,5 @@
   <item drawable="skype" name="skype" />
   <item drawable="pinterest" name="pinterest" />
   <item drawable="hangouts" name="hangouts" />
+  <item drawable="google_plus" name="google_plus" />
 </resources>

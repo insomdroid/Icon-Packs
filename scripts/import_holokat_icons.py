@@ -406,6 +406,17 @@ EXTRA_COMPONENTS = [
     ("ComponentInfo{com.google.android.deskclock/com.android.deskclock.DeskClock}", "Google Clock", "Clock"),
     ("ComponentInfo{com.android.deskclock/com.android.deskclock.DeskClockTabActivity}", "AOSP Clock", "Clock"),
     ("ComponentInfo{com.samsung.android.app.clockpack/com.sec.android.app.clockpackage.ClockPackage}", "Samsung Clock", "Clock ALT"),
+
+    # Historical Jelly Bean artwork with launcher components corroborated by
+    # multiple independent public icon-pack appfilter catalogues. These are
+    # explicit component IDs, not package-name guesses derived from artwork.
+    ("ComponentInfo{com.amazon.mShop.android.shopping/com.amazon.mShop.home.HomeActivity}", "Amazon", "Amazon"),
+    ("ComponentInfo{com.sec.android.app.samsungapps/com.sec.android.app.samsungapps.SamsungAppsMainActivity}", "Galaxy Store", "Galaxy Store"),
+    ("ComponentInfo{com.google.android.apps.adm/com.google.android.apps.adm.MainActivity}", "Find My Device", "Find My Device"),
+    ("ComponentInfo{com.google.android.apps.adm/com.google.android.apps.adm.activities.MainActivity}", "Find My Device", "Find My Device"),
+    ("ComponentInfo{com.google.android.apps.cultural/com.google.android.apps.cultural.web.WebViewActivity}", "Arts & Culture", "Arts & Culture"),
+    ("ComponentInfo{com.google.android.apps.youtube.creator/com.google.android.apps.youtube.creator.activities.SplashActivity}", "YouTube Creator Studio", "YouTube Creator Studio"),
+
 ]
 
 

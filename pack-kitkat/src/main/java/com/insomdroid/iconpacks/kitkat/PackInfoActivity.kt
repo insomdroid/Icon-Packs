@@ -199,7 +199,7 @@ private fun KitKatPackDashboard() {
                                     Toast.makeText(context, "Open the home screen widget picker and select KitKat Analog Clock.", Toast.LENGTH_LONG).show()
                                 }
                             } catch (error: Exception) {
-                                Toast.makeText(context, "Buka daftar Widget dari home screen lalu pilih KitKat Analog Clock.", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, "Open the home screen widget picker and select KitKat Analog Clock.", Toast.LENGTH_LONG).show()
                             }
                         },
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
@@ -214,8 +214,8 @@ private fun KitKatPackDashboard() {
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 SummaryTile(
-                    value = "32",
-                    label = "Ikon klasik",
+                    value = kitKatIcons.size.toString(),
+                    label = "Icons",
                     modifier = Modifier.weight(1f)
                 )
                 SummaryTile(
@@ -300,7 +300,7 @@ private fun KitKatPackDashboard() {
             onDismissRequest = { selectedIcon = null },
             confirmButton = {
                 TextButton(onClick = { selectedIcon = null }) {
-                    Text("Tutup")
+                    Text("Close")
                 }
             },
             title = {
@@ -319,7 +319,7 @@ private fun KitKatPackDashboard() {
                         contentScale = ContentScale.Fit
                     )
                     Text(
-                        text = icon.description,
+                        text = "Original HoloKat artwork",
                         color = Color(0xFF687080),
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -339,7 +339,7 @@ private fun WallpaperHero(onApply: () -> Unit) {
     ) {
         Image(
             painter = painterResource(R.drawable.kitkat_wallpaper),
-            contentDescription = "Wallpaper resmi Android KitKat 4.4.4",
+            contentDescription = "Official Android KitKat 4.4 wallpaper",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )

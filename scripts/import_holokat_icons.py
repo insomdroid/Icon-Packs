@@ -455,10 +455,20 @@ EXTRA_COMPONENTS = [
     ("ComponentInfo{com.google.android.inputmethod.pinyin/com.google.android.apps.inputmethod.preference.SettingsActivity}", "Google Pinyin Keyboard Settings", "Pinyin Keyboard"),
     # Further Jelly Bean-era Google apps corroborated by public historical appfilter catalogues.
     ("ComponentInfo{com.google.android.apps.giant/com.google.android.apps.giant.activity.ProfilePickerActivity}", "Google Analytics", "Analytics"),
-    ("ComponentInfo{com.google.android.apps.plus/com.google.android.apps.plus.pho}", "Google+ Photos", "G+ Photos"),
+    ("ComponentInfo{com.google.android.apps.plus/com.google.android.apps.plus.phone.ConversationListActivity}", "Google+ Photos", "G+ Photos"),
     ("ComponentInfo{com.google.android.apps.giant/com.google.android.apps.giant.activity.AnalyticsLaunchActivity}", "Google Analytics", "Analytics"),
     ("ComponentInfo{com.google.android.apps.hangoutsdialer/com.google.android.apps.hangoutsdialer.app.LaunchActivity}", "Hangouts Dialer", "Hangouts Dialer"),
-    ("ComponentInfo{com.google.android.apps.enterprise.cpanel/com.google.android.apps.enterprise.cpanel.activities.EntryPointActivity}", "Google Admin", "Admin"),
+
+    # Additional archive app artwork mapped in one batch from exact historical
+    # launcher component records found in independent public appfilter catalogues.
+    ("ComponentInfo{com.google.android.apps.offers/com.google.android.apps.offers.puzo.ui.home.HomeActivity}", "Google Offers", "Offers"),
+    ("ComponentInfo{com.google.android.apps.vega/com.google.android.apps.vega.VegaMainActivity}", "Google My Business", "My Business"),
+    ("ComponentInfo{com.google.samples.apps.cardboarddemo/com.google.research.airbender.paperscope.android.launcher.Launcher2D}", "Google Cardboard", "Cardboard Camera"),
+    ("ComponentInfo{com.google.android.apps.travel.onthego/com.google.android.apps.travel.onthego.activities.MainActivity}", "Google Trips", "Trips"),
+    ("ComponentInfo{com.google.chromeremotedesktop/org.chromium.chromoting.Chromoting}", "Chrome Remote Desktop", "Remote Desktop"),
+    ("ComponentInfo{com.motorola.cameraone/com.motorola.camera.Camera}", "Motorola Camera One", "Camera One"),
+    ("ComponentInfo{com.google.android.tv.remote/com.google.android.tv.remote.RemoteActivity}", "Android TV Remote", "Android TV"),
+
 ]
 
 

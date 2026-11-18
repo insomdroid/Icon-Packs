@@ -7,7 +7,7 @@ This repository maintains two independently installable Android icon packs.
 HoloKat combines original Android 4.4 KitKat artwork with the supplied Jelly Bean archive artwork.
 
 - Module: `pack-kitkat`
-- Application ID: `com.insomdroid.iconpacks.kitkat`
+- Application ID: `com.insomdroid.holokat`
 - Build: [HoloKat release workflow](https://github.com/insomdroid/Icon-Packs/actions/workflows/build-icon-packs.yml)
 - Artwork mapping audit: [HoloKat audit workflow](https://github.com/insomdroid/Icon-Packs/actions/workflows/audit-holokat.yml)
 - Source attribution: [HoloKat attribution](docs/HOLOKAT_ATTRIBUTION.md)

@@ -182,6 +182,23 @@ PACKAGE_RULES = (
     ("com.android.chrome", "chrome"),
     ("com.android.mms", "hangouts"),
     ("com.android.music", "play_music"),
+    ("com.google.android.googlecamera", "camera"),
+    ("com.google.android.apps.cameralite", "camera"),
+    ("com.google.android.apps.mapslite", "maps"),
+    ("com.google.android.apps.messaging", "hangouts"),
+    ("com.google.android.calendar", "calendar"),
+    ("com.google.android.calculator", "calculator"),
+    ("com.google.android.contacts", "contacts"),
+    ("com.google.android.deskclock", "clock"),
+    ("com.google.android.dialer", "phone"),
+    ("com.google.android.documentsui", "downloads"),
+    ("com.google.android.go.documentsui", "downloads"),
+    ("com.android.camera", "camera"),
+    ("com.android.email", "mail"),
+    ("com.android.incallui", "phone"),
+    ("com.android.messaging", "hangouts"),
+    ("com.android.pri.calculator", "calculator"),
+    ("com.android.diales", "phone"),
 )
 
 

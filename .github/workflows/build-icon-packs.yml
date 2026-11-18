@@ -11,8 +11,6 @@ on:
       - 'scripts/import_kitkat_aosp_icons.py'
       - 'scripts/import_kitkat_archive_icons.py'
       - 'scripts/import_holokat_icons.py'
-      - 'scripts/import_nothink_figma.py'
-      - 'scripts/export_nothink_figma.mjs'
       - 'references/kitkat-archives/**'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'

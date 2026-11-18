@@ -409,60 +409,101 @@ EXTRA_COMPONENTS = [
 ]
 
 
+def iter_archive_images(payload: bytes, source_path: str, depth: int = 0):
+    """Walk ZIP/APK/JAR containers by file signature, not filename extension."""
+    import io
+    from PIL import Image
+
+    if depth > 5:
+        return
+    try:
+        with zipfile.ZipFile(io.BytesIO(payload)) as container:
+            for info in container.infolist():
+                if info.is_dir():
+                    continue
+                try:
+                    data = container.read(info)
+                except (OSError, RuntimeError, zipfile.BadZipFile):
+                    continue
+                member_path = f"{source_path}!/{info.filename}"
+                # APK, XAPK, JAR and nested ZIPs are all ZIP containers.
+                if data.startswith((b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08")):
+                    yield from iter_archive_images(data, member_path, depth + 1)
+                    continue
+                if Path(info.filename).suffix.lower() not in IMAGE_EXTENSIONS:
+                    continue
+                try:
+                    with Image.open(io.BytesIO(data)) as image:
+                        width, height = image.size
+                        image.verify()
+                except Exception:
+                    continue
+                if width < 48 or height < 48 or width > 4096 or height > 4096:
+                    continue
+                yield member_path, data, width, height
+    except zipfile.BadZipFile:
+        return
+
+
 def main() -> None:
     missing = [str(path) for path in ARCHIVES if not path.is_file()]
     if missing:
         raise SystemExit("Missing Holokat source archive(s): " + ", ".join(missing))
 
     DRAWABLE_DIR.mkdir(parents=True, exist_ok=True)
-    for old in DRAWABLE_DIR.iterdir():
-        if old.is_file():
-            old.unlink()
-
     images: dict[str, tuple[bytes, str]] = {}
     hashes: set[str] = set()
     archive_inventory: list[dict[str, object]] = []
     for archive in ARCHIVES:
+        archive_bytes = archive.read_bytes()
+        with zipfile.ZipFile(archive) as outer:
+            top_entries = [
+                {"path": info.filename, "size": info.file_size}
+                for info in outer.infolist() if not info.is_dir()
+            ]
         archive_images = 0
-        with zipfile.ZipFile(archive) as zf:
-            for info in zf.infolist():
-                if info.is_dir() or Path(info.filename).suffix.lower() not in IMAGE_EXTENSIONS:
-                    continue
-                # Ignore oversized, non-icon UI artwork only after inventory. All
-                # supported image types are retained as source; mapping decides use.
-                data = zf.read(info)
-                try:
-                    from PIL import Image
-                    import io
-                    with Image.open(io.BytesIO(data)) as image:
-                        width, height = image.size
-                        fmt = image.format or Path(info.filename).suffix.upper().lstrip(".")
-                except Exception:
-                    continue
-                if width < 48 or height < 48 or width > 4096 or height > 4096:
-                    continue
-                digest = hashlib.sha256(data).hexdigest()
-                archive_images += 1
-                if digest in hashes:
-                    continue
-                hashes.add(digest)
-                base = "jb_" + resource_name(Path(info.filename).name)
-                name = base
-                suffix = 2
-                while name in images:
-                    name = f"{base}_{suffix}"
-                    suffix += 1
-                images[name] = (data, info.filename)
+        nested_containers = 0
+        for original_path, data, width, height in iter_archive_images(archive_bytes, archive.name):
+            archive_images += 1
+            digest = hashlib.sha256(data).hexdigest()
+            if digest in hashes:
+                continue
+            hashes.add(digest)
+            member_name = original_path.split("!/")[-1]
+            base = "jb_" + resource_name(Path(member_name).name)
+            name = base
+            suffix = 2
+            while name in images:
+                name = f"{base}_{suffix}"
+                suffix += 1
+            images[name] = (data, original_path)
+        # Count APK/ZIP containers at the outer level for an audit trail.
+        nested_containers = sum(
+            1 for entry in top_entries
+            if Path(entry["path"]).suffix.lower() in {".apk", ".zip", ".xapk", ".jar"}
+        )
         archive_inventory.append({
             "archive": archive.name,
-            "image_entries": archive_images,
+            "top_level_entries": len(top_entries),
+            "top_level_entry_sample": top_entries[:80],
+            "nested_container_entries": nested_containers,
+            "supported_image_entries": archive_images,
         })
 
+    report_dir = ROOT / "build/holokat-import-report"
+    report_dir.mkdir(parents=True, exist_ok=True)
     if not images:
-        raise SystemExit("No supported image files found in Holokat archives.")
+        (report_dir / "archive-inventory.json").write_text(
+            __import__("json").dumps(archive_inventory, indent=2), encoding="utf-8"
+        )
+        raise SystemExit(
+            "No supported raster artwork found. Inspect archive-inventory.json; "
+            "the ZIP entries may be encrypted, unsupported, or non-image sources."
+        )
 
     for name, (data, original_path) in images.items():
-        extension = Path(original_path).suffix.lower()
+        member_name = original_path.split("!/")[-1]
+        extension = Path(member_name).suffix.lower()
         (DRAWABLE_DIR / f"{name}{extension}").write_bytes(data)
 
     drawable_root = ET.parse(DRAWABLE_XML).getroot() if DRAWABLE_XML.is_file() else ET.Element("resources")
@@ -480,7 +521,7 @@ def main() -> None:
     artwork_by_label: dict[str, str] = {}
     artwork_by_original_stem: dict[str, str] = {}
     for resource, (_, original_path) in images.items():
-        original_stem = Path(original_path).stem
+        original_stem = Path(original_path.split("!/")[-1]).stem
         label = normalize(original_stem)
         artwork_by_label.setdefault(label, resource)
         artwork_by_original_stem.setdefault(original_stem.casefold(), resource)
@@ -503,14 +544,11 @@ def main() -> None:
             resource = semantic_artwork(label, artwork_by_label)
         if resource is not None:
             ET.SubElement(appfilter, "item", {
-                "component": component,
-                "drawable": resource,
-                "name": label,
+                "component": component, "drawable": resource, "name": label,
             })
             matched_artwork[resource] += 1
             matched_labels[resource].add(label)
         else:
-            # Keep prior mapping: it may point to a purpose-built vector or AOSP icon.
             ET.SubElement(appfilter, "item", dict(item.attrib))
             unmatched_labels.add(label)
         matched_components.add(component)
@@ -522,9 +560,7 @@ def main() -> None:
         if resource is None:
             continue
         ET.SubElement(appfilter, "item", {
-            "component": component,
-            "drawable": resource,
-            "name": label,
+            "component": component, "drawable": resource, "name": label,
         })
         matched_components.add(component)
         matched_artwork[resource] += 1
@@ -565,9 +601,6 @@ def main() -> None:
         encoding="utf-8",
     )
 
-    # Human- and machine-readable audit report retained as a CI artifact.
-    report_dir = ROOT / "build/holokat-import-report"
-    report_dir.mkdir(parents=True, exist_ok=True)
     unused_assets = [
         {"resource": resource, "source": original, "mapped": False}
         for resource, (_, original) in images.items()
@@ -596,8 +629,7 @@ def main() -> None:
     print(f"Imported {len(images)} unique archive images.")
     print(f"Mapped {len(matched_artwork)} distinct archive artworks to {len(matched_components)} components.")
     print(f"Added {upstream_added} app components from pinned Lawnicons mapping.")
-    print(f"Unmapped artwork report: {report_dir / 'unmapped-artwork.txt'}")
-    print("Unmapped source artwork is retained in resources for future manual mapping." )
+    print(f"Unmapped source artwork report: {report_dir / 'unmapped-artwork.txt'}")
 
 
 if __name__ == "__main__":

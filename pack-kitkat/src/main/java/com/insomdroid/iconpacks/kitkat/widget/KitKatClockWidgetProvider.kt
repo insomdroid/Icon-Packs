@@ -7,7 +7,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
-import android.os.Build
 import android.widget.RemoteViews
 import com.insomdroid.iconpacks.kitkat.R
 import java.text.DateFormat

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/calendar_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFFFF"
+    android:orientation="vertical"
+    android:padding="8dp">
+    <TextView
+        android:id="@+id/calendar_widget_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FF33B5E5"
+        android:padding="8dp"
+        android:text="@string/calendar_title"
+        android:textColor="#FFFFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+    <TextView
+        android:id="@+id/calendar_event_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:text="@string/calendar_empty"
+        android:textColor="#FF333333"
+        android:textSize="12sp" />
+    <TextView
+        android:id="@+id/calendar_event_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:textColor="#FF333333"
+        android:textSize="12sp" />
+    <TextView
+        android:id="@+id/calendar_event_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:textColor="#FF333333"
+        android:textSize="12sp" />
+    <TextView
+        android:id="@+id/calendar_event_4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:textColor="#FF333333"
+        android:textSize="12sp" />
+</LinearLayout>
